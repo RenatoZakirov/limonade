@@ -243,5 +243,5 @@ class ImageEditor
             imagedestroy($this->paddedImage);
         }
     }
+    
 }
-

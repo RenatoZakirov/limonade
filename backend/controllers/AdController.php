@@ -63,6 +63,7 @@ class AdController {
         }
 
         // Отправить результат
+        header('Content-Type: application/json');
         echo json_encode($result);
     }
 
@@ -92,8 +93,93 @@ class AdController {
         return $photoName ? $filePath . $photoName . '.jpg' : null;
     }
 
+    // Найти все активные обьявления одного пользователя
+    public function findAdsByUser() {
+        // Получить тело запроса (например, JSON с hash_num)
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        // Проверка наличия hash_num
+        if (!isset($data['hash_num'])) {
+            http_response_code(400);
+            echo json_encode(["message" => "Не указан пароль"]);
+            return;
+        }
+
+        // Поиск пользователя по hash_num
+        $user = R::findOne('users', 'hash_num = ?', [$data['hash_num']]);
+
+        // Проверка, существует ли пользователь и активен ли он
+        if (!$user || $user->status != 1) {
+            http_response_code(400);
+            echo json_encode(["message" => "Пользователь не найден или неактивен"]);
+            return;
+        }
+
+        // Обновление даты последнего визита
+        $user->last_visit = date('d.m.Y H:i:s');
+        R::store($user);
+
+        // Фиксированное количество объявлений на странице
+        $perPage = 10;
+
+        // Получить номер страницы из запроса
+        $page = isset($_GET['page']) ? $_GET['page'] : '1';
+
+        // Проверка на валидность номера страницы
+        if (!ctype_digit($page) || intval($page) < 1) {
+            http_response_code(400); // Bad Request
+            echo json_encode(["message" => "Invalid page number"]);
+            return;
+        }
+
+        $page = intval($page); // Преобразование в целое число после проверки
+
+        // Рассчитать смещение для выборки
+        $offset = ($page - 1) * $perPage;
+
+        // Запрос на выборку объявлений пользователя со статусом 1 (активные)
+        $query = 'WHERE user_id = ? AND status = 1 ORDER BY created_at DESC LIMIT ? OFFSET ?';
+        $ads = R::findAll('ads', $query, [$user->id, $perPage, $offset]);
+
+        // Проверка, найдены ли объявления
+        if (empty($ads)) {
+            http_response_code(404); // Not Found
+            echo json_encode(["message" => "Объявления не найдены"]);
+            return;
+        }
+
+        // Путь к шаблонному изображению
+        $defaultPhotoUrl = $this->getPhotoUrl('grey.jpg');
+
+        // Подготовить результаты
+        $result = [];
+        foreach ($ads as $ad) {
+            $adData = R::exportAll([$ad])[0];
+            // Если нет обложки, использовать шаблонное изображение
+            $adData['cover_photo'] = $adData['cover_photo'] ? $this->getPhotoUrl($adData['cover_photo']) : $defaultPhotoUrl;
+            $result[] = $adData;
+        }
+
+        // Отправить результат
+        header('Content-Type: application/json');
+        echo json_encode($result);
+    }
+
     // Получить одно объявление по ID
     public function getAd($id) {
+        // Проверяем заголовки запроса
+        $isJsonRequest = false;
+        if (isset($_SERVER['HTTP_ACCEPT'])) {
+            $isJsonRequest = strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
+        }
+
+        // Если запрос не JSON, отправляем базовую HTML-страницу
+        if (!$isJsonRequest) {
+            header('Content-Type: text/html');
+            readfile(__DIR__ . '/../frontend/index.html');
+            return;
+        }
+
         // Загрузить объявление по ID
         $ad = R::load('ads', $id);
         
@@ -121,7 +207,8 @@ class AdController {
             $ad->viewed += 1;
             R::store($ad); // Сохранить изменения в базе данных
 
-            // Отправить данные объявления в формате JSON
+            // Отправить результат
+            header('Content-Type: application/json');
             echo json_encode($adData);
         } else {
             // Если объявление не найдено или статус не равен 1, вернуть ошибку 404
@@ -132,12 +219,6 @@ class AdController {
 
     // Создать новое объявление
     public function createAd() {
-        // echo json_encode(["message" => "создать новое обьявление"]); die;
-
-        // Получение данных JSON из тела запроса
-        // $json_data = $_POST['data'] ?? null;
-        // $data = json_decode($json_data, true);
-
         // Собираем данные из POST как массив $data
         $data = [
             'hash_num' => $_POST['hash_num'] ?? null,
@@ -146,13 +227,6 @@ class AdController {
             'category' => $_POST['category'] ?? null,
             'contact' => $_POST['contact'] ?? null
         ];
-
-        // Проверка корректности данных
-        // if ($data === null) {
-        //     http_response_code(400);
-        //     echo json_encode(["message" => "Неверный формат данных"]);
-        //     return;
-        // }
 
         // Проверка наличия всех необходимых полей
         if (
@@ -225,11 +299,6 @@ class AdController {
             
             // Определяем количество файлов для обработки (максимум 3)
             $fileCount = $isMultiple ? min(3, count($_FILES['photos']['name'])) : 1;
-            
-            // Приведение массива $_FILES['photos'] к унифицированному виду для удобства обработки
-            for ($i = 0; $i < $fileCount; $i++) {
-
-            }
 
             // Обрабатываем каждый файл
             for ($i = 0; $i < $fileCount; $i++) {
@@ -244,40 +313,6 @@ class AdController {
                 }
             }
 
-            // // Приведение массива $_FILES['photos'] к унифицированному виду для удобства обработки
-            // for ($i = 0; $i < $fileCount; $i++) {
-                // // Получаем данные о файле (для одного файла используем прямой доступ, для нескольких — через индекс $i)
-                // $tmpName = $isMultiple ? $_FILES['photos']['tmp_name'][$i] : $_FILES['photos']['tmp_name'];
-                // $name = $isMultiple ? $_FILES['photos']['name'][$i] : $_FILES['photos']['name'];
-                // $error = $isMultiple ? $_FILES['photos']['error'][$i] : $_FILES['photos']['error'];
-                // $size = $isMultiple ? $_FILES['photos']['size'][$i] : $_FILES['photos']['size'];
-                
-                // // Проверка на наличие ошибок при загрузке файла
-                // if ($error !== UPLOAD_ERR_OK) {
-                //     http_response_code(400);
-                //     echo json_encode(["message" => 'Ошибка при загрузке файла, порядковый номер файла: ' . $i + 1]);
-                //     return;
-                // }
-
-                // // Проверяем, является ли файл изображением
-                // $imageInfo = getimagesize($tmpName);
-                // if ($imageInfo === false) {
-                //     http_response_code(400);
-                //     echo json_encode(["message" => 'Файл не является фото, порядковый номер файла: ' . $i + 1]);
-                //     return;
-                // }
-
-                // // Формируем массив с информацией о каждом изображении
-                // $photos[] = [
-                //     'tmp_name' => $tmpName,
-                //     'name' => $name,
-                //     'size' => $size,
-                //     'type' => $imageInfo['mime'],  // Тип файла (MIME)
-                //     'width' => $imageInfo[0],      // Ширина изображения
-                //     'height' => $imageInfo[1]      // Высота изображения
-                // ];
-            // }
-
             // Разрешенные типы изображений
             $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
             // Максимальный размер файла (5 MB)
@@ -286,32 +321,6 @@ class AdController {
             $minResolution = [600, 450];
             // Путь к папке для сохранения изображений
             $filePath = 'uploads/images/';
-
-            // // Функция для удаления сохранённых фото
-            // function deleteSavedPhotos($savedPhotos) {
-            //     foreach ($savedPhotos as $photoPath) {
-            //         if (file_exists($photoPath)) {
-            //             // error_log("файл найден. путь файла: $photoPath");
-            //             unlink($photoPath);
-            //         }
-            //     }
-            // }
-
-            // // Функция для обработки фотографий
-            // function processPhoto($imageEditor, $filePath, &$adPhotos, &$savedPhotos, $key) {
-            //     $photoName = $imageEditor->generateUniqueName(); // Генерация уникального имени файла
-            //     $imageEditor->createImage();                    // Создание изображения
-            //     $imageEditor->resizeToFit();                    // Изменение размера изображения
-
-            //     if ($imageEditor->orientation == 'h') {
-            //         $imageEditor->saveOriginal($filePath . $photoName . '.jpg'); // Сохраняем оригинал горизонтального изображения
-            //     } else {
-            //         $imageEditor->createPaddedImage();                           // Создаем изображение с добавлением полей
-            //         $imageEditor->savePadded($filePath . $photoName . '.jpg');   // Сохраняем изображение с полями
-            //     }
-            //     $adPhotos[$key] = $photoName; // Добавляем имя файла в массив
-            //     $savedPhotos[] = $filePath . $photoName . '.jpg'; // Сохраняем путь к файлу
-            // }
 
             // Массив для хранения имен фотографий объявления
             $adPhotos = [];
@@ -402,6 +411,7 @@ class AdController {
         R::store($ad); // Сохраняем объявление в базе данных
 
         // Возвращаем ответ с ID нового объявления
+        header('Content-Type: application/json');
         echo json_encode(["id" => $ad->id, "message" => "Объявление создано"]);
     }
 
@@ -512,6 +522,7 @@ class AdController {
                 R::store($ad);
 
                 // Ответ в формате JSON
+                header('Content-Type: application/json');
                 echo json_encode(["message" => "Объявление было успешно удалено"]);
             } else {
                 // Если объявление не принадлежит пользователю, вернуть ошибку 403
@@ -535,30 +546,4 @@ class AdController {
         }
     }
 
-    // Найти все активные обьявления одного пользователя
-    public function findAdsByUser() {
-        // Получить тело запроса (например, JSON с hash_num)
-        $data = json_decode(file_get_contents("php://input"), true);
-
-        // Проверка наличия hash_num
-        if (!isset($data['hash_num'])) {
-            http_response_code(400);
-            echo json_encode(["message" => "Не указан пароль"]);
-            return;
-        }
-
-        // Поиск пользователя по hash_num
-        $user = R::findOne('users', 'hash_num = ?', [$data['hash_num']]);
-
-        // Проверка, существует ли пользователь и активен ли он
-        if (!$user || $user->status != 1) {
-            http_response_code(400);
-            echo json_encode(["message" => "Пользователь не найден или неактивен"]);
-            return;
-        }
-
-        // Обновление даты последнего визита
-        $user->last_visit = date('d.m.Y H:i:s');
-        R::store($user);
-    }
 }
