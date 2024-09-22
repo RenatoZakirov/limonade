@@ -26,7 +26,7 @@ class AdController {
         $category = isset($_GET['category']) ? $_GET['category'] : null;
 
         // Базовый запрос для выборки объявлений
-        $query = 'ORDER BY created_at DESC LIMIT ? OFFSET ?';
+        $query = 'WHERE status = 1 ORDER BY created_at DESC LIMIT ? OFFSET ?';
         $params = [$perPage, $offset];
 
         if ($category) {
@@ -51,7 +51,7 @@ class AdController {
         }
 
         // Путь к шаблонному изображению
-        $defaultPhotoUrl = $this->getPhotoUrl('grey.jpg');
+        $defaultPhotoUrl = $this->getPhotoUrl('templates/grey.jpg');
 
         // Подготовить результаты
         $result = [];
@@ -71,7 +71,7 @@ class AdController {
     private function findAdsByCategory($category, $perPage, $offset) {
         while (strlen($category) > 0) {
             // Выполняем запрос с текущей категорией
-            $query = 'WHERE category = ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
+            $query = 'WHERE status = 1 AND category = ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
             $ads = R::findAll('ads', $query, [$category, $perPage, $offset]);
 
             // Если объявления найдены, возвращаем их
@@ -138,7 +138,7 @@ class AdController {
         $offset = ($page - 1) * $perPage;
 
         // Запрос на выборку объявлений пользователя со статусом 1 (активные)
-        $query = 'WHERE user_id = ? AND status = 1 ORDER BY created_at DESC LIMIT ? OFFSET ?';
+        $query = 'WHERE status = 1 AND user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
         $ads = R::findAll('ads', $query, [$user->id, $perPage, $offset]);
 
         // Проверка, найдены ли объявления
@@ -149,7 +149,7 @@ class AdController {
         }
 
         // Путь к шаблонному изображению
-        $defaultPhotoUrl = $this->getPhotoUrl('grey.jpg');
+        $defaultPhotoUrl = $this->getPhotoUrl('templates/grey.jpg');
 
         // Подготовить результаты
         $result = [];
@@ -176,7 +176,7 @@ class AdController {
         // Если запрос не JSON, отправляем базовую HTML-страницу
         if (!$isJsonRequest) {
             header('Content-Type: text/html');
-            readfile(__DIR__ . '/../frontend/index.html');
+            readfile(__DIR__ . '/../../frontend/index.html');
             return;
         }
 
@@ -504,12 +504,8 @@ class AdController {
         $ad = R::load('ads', $id);
 
         // Проверка, существует ли объявление
-        if ($ad->id) {
-            if ($ad->status == 0) {
-                // Если объявление уже удалено, вернуть ошибку 404
-                http_response_code(404);
-                echo json_encode(["message" => "Объявление не найдено"]);
-            } elseif ($ad->user_id == $user->id) {
+        if ($ad->id && $ad->status == 1) {
+            if ($ad->user_id == $user->id) {
                 // Удалить связанные фотографии, если они существуют
                 $this->deletePhotoIfExists($ad->cover_photo);
                 $this->deletePhotoIfExists($ad->photo_1);
