@@ -1,0 +1,5 @@
+/backend/config/
+/backend/logs/
+/backend/libraries/redbeanphp
+/backend/uploads/
+/.htaccess
