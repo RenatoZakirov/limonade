@@ -51,7 +51,7 @@ class AdController {
         }
 
         // Путь к шаблонному изображению
-        $defaultPhotoUrl = $this->getPhotoUrl('templates/grey.jpg');
+        $defaultPhotoUrl = $this->getPhotoUrl('templates/grey');
 
         // Подготовить результаты
         $result = [];
@@ -89,7 +89,7 @@ class AdController {
 
     // Получить полный путь к фото, если оно существует
     private function getPhotoUrl($photoName) {
-        $filePath = 'uploads/images/';
+        $filePath = 'backend/uploads/images/';
         return $photoName ? $filePath . $photoName . '.jpg' : null;
     }
 
@@ -99,14 +99,14 @@ class AdController {
         $data = json_decode(file_get_contents("php://input"), true);
 
         // Проверка наличия hash_num
-        if (!isset($data['hash_num'])) {
+        if (!isset($data['password'])) {
             http_response_code(400);
             echo json_encode(["message" => "Не указан пароль"]);
             return;
         }
 
         // Поиск пользователя по hash_num
-        $user = R::findOne('users', 'hash_num = ?', [$data['hash_num']]);
+        $user = R::findOne('users', 'hash_num = ?', [$data['password']]);
 
         // Проверка, существует ли пользователь и активен ли он
         if (!$user || $user->status != 1) {
@@ -149,7 +149,7 @@ class AdController {
         }
 
         // Путь к шаблонному изображению
-        $defaultPhotoUrl = $this->getPhotoUrl('templates/grey.jpg');
+        $defaultPhotoUrl = $this->getPhotoUrl('templates/grey');
 
         // Подготовить результаты
         $result = [];
@@ -221,7 +221,7 @@ class AdController {
     public function createAd() {
         // Собираем данные из POST как массив $data
         $data = [
-            'hash_num' => $_POST['hash_num'] ?? null,
+            'hash_num' => $_POST['password'] ?? null,
             'title' => $_POST['title'] ?? null,
             'description' => $_POST['description'] ?? null,
             'category' => $_POST['category'] ?? null,
@@ -480,14 +480,14 @@ class AdController {
         $data = json_decode(file_get_contents("php://input"), true);
 
         // Проверка наличия hash_num
-        if (!isset($data['hash_num'])) {
+        if (!isset($data['password'])) {
             http_response_code(400);
             echo json_encode(["message" => "Не указан пароль"]);
             return;
         }
 
         // Поиск пользователя по hash_num
-        $user = R::findOne('users', 'hash_num = ?', [$data['hash_num']]);
+        $user = R::findOne('users', 'hash_num = ?', [$data['password']]);
 
         // Проверка, существует ли пользователь и активен ли он
         if (!$user || $user->status != 1) {

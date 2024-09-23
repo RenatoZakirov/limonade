@@ -62,7 +62,7 @@ class Router {
                 http_response_code(405);
                 echo json_encode(["message" => "Method Not Allowed"]);
             }
-        } elseif (count($this->pathParts) === 3 && $this->pathParts[2] === 'hash_num'
+        } elseif (count($this->pathParts) === 3 && $this->pathParts[2] === 'auth'
             && $this->requestMethod === 'POST') {
             // Обработка запросов к коллекции объявлений по пользователю (по hash_num)
             $controller->findAdsByUser();

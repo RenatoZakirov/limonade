@@ -3,449 +3,559 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
+	<title>Объявления</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<style>
+		.description-text {
+			display: -webkit-box;
+			-webkit-line-clamp: 2; /* Количество строк */
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			max-height: 3em; /* Высота для двух строк текста */
+		}
+
+	</style>
 </head>
 <body>
+	<div id="app">
+		<div class="d-none d-md-block">
+			<div class="d-flex justify-content-center p-4 fs-3" >
+				Этот сайт поддерживается только на мобильных устройствах...
+			</div>
+        </div>
 
-	<div class="container">
+		<div class="d-block d-md-none">
+			<br><br><br>
+			<div class="container">
 
-		<nav class="navbar bg-body-tertiary fixed-top shadow-sm">
-			<div class="container-fluid">
-				<a class="navbar-brand" href="#">LIMONADE.PRO</a>
-				<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-				  <button type="button" class="btn btn-warning">RU</button>
-				  <button type="button" class="btn btn-outline-warning">EN</button>
-				  <button type="button" class="btn btn-outline-warning">VN</button>
-				</div>
-				<!-- <button class="btn btn-sm btn-outline-secondary shadow-sm" type="button">
-				  ENG
-				</button> -->
-				<button class="btn btn-sm btn-primary shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-				  Меню
-				</button>
-				<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-					<div class="offcanvas-header">
-						<h5 class="offcanvas-title" id="offcanvasNavbarLabel">Меню</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-					</div>
-					<div class="offcanvas-body">
-
-						<div class="accordion" id="accordionExample">
-						  <div class="accordion-item">
-						    <h2 class="accordion-header">
-						      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-						        Фильтровать поиск
-						      </button>
-						    </h2>
-						    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
-								<div class="accordion-body">
-
-									<label class="form-label">Выберите категорию</label>
-									<select class="form-select form-select-sm mb-3" aria-label="Small select example">
-									  <option value="1" selected>Свежие</option>
-									  <option value="2">Жильё</option>
-									  <option value="3">Транспорт</option>
-									  <option value="4">Услуги</option>
-									  <option value="5">Товары</option>
-									  <option value="6">Работа</option>
-									</select>
-
-									<label class="form-label">Выберите подкатегорию</label>
-									<select class="form-select form-select-sm mb-3" aria-label="Small select example">
-									  <option value="1" selected>Аренда</option>
-									  <option value="2" disabled>Продажа</option>
-									</select>
-
-									<label class="form-label">Выберите тип жилья</label>
-									<select class="form-select form-select-sm mb-3" aria-label="Small select example">
-									  <option value="1" selected>Не выбрано</option>
-									  <option value="2">Другое</option>
-									  <option value="3">Кровать</option>
-									  <option value="4">Комната</option>
-									  <option value="5">Квартира</option>
-									  <option value="6">Дом</option>
-									</select>
-
-									<!-- <label class="form-label">Выберите тип транспорта</label>
-									<select class="form-select form-select-sm mb-3" aria-label="Small select example">
-										<option value="1" selected>Не выбрано</option>
-										<option value="2">Другое</option>
-										<option value="3">Велосипед</option>
-										<option value="4">Мопед</option>
-										<option value="5">Мотоцикл</option>
-										<option value="6">Автомобиль</option>
-									</select>
-
-									<label class="form-label">Выберите тип услуги</label>
-									<select class="form-select form-select-sm mb-3" aria-label="Small select example">
-										<option value="1" selected>Не выбрано</option>
-										<option value="2">Другое</option>
-										<option value="3">Транспорт, грузоперевозки, визараны</option>
-										<option value="4">Документы, визы, билеты</option>
-										<option value="5">Мобильная связь, интернет, IT</option>
-										<option value="6">Обмен валюты, переводы, банковские карты</option>
-									</select>
-
-									<label class="form-label">Выберите тип товара</label>
-									<select class="form-select form-select-sm mb-3" aria-label="Small select example">
-										<option value="1" selected>Не выбрано</option>
-										<option value="2">Другое</option>
-										<option value="3">Электроника</option>
-										<option value="4">Мебель</option>
-										<option value="5">Бытовые товары</option>
-										<option value="6">Одежда</option>
-										<option value="7">еда</option>
-										<option value="8">детские товары</option>
-										<option value="9">животные</option>
-										<option value="10">хобби и отдых</option>
-										<option value="11">автозапчасти</option>
-										<option value="12">красота и здоровье</option>
-										<option value="13">растения</option>
-										<option value="14">товары для бизнеса</option>
-									</select> -->
-
-									<div class="btn btn-sm btn-primary mb-2 shadow-sm">Искать</div>
-
-								</div>
-						    </div>
-						  </div>
-						  <div class="accordion-item">
-						    <h2 class="accordion-header">
-						      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-						        Мои обьявления
-						      </button>
-						    </h2>
-						    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-						      <div class="accordion-body">
-						        <div class="container">
-						        	<div class="row mb-3">
-						        		<label class="form-label">Создать новое обьявление</label>
-						        		<div class="form-text">
-										  Обьявление будет размещено бесплатно на 10 дней. Опубликованное обьявление нельзя отредактировать, только удалить и создать новое.<br> Для создания обьявления вам необходимо будет войти в телеграм.
-										</div>
-						        	</div>
-						        	<div class="btn btn-sm btn-primary mb-2 shadow-sm">Создать</div>
-
-						        	<hr class="divider">
-
-									<div class="row mb-3">
-										<label class="form-label">Найти все мои обьявления</label>
-										<div class="col-4">
-											<label for="inputPassword5" class="form-label">Пароль<span class="text text-danger">*</span></label>
-										</div>
-										<div class="col-8">
-											<input type="password" id="inputPassword5" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
-										</div>
-										<div id="passwordHelpBlock" class="form-text">
-										  Необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте <a href="#" class="link-primary">t.me/limonade_pro_bot</a>
+				<nav class="navbar bg-body-tertiary fixed-top shadow-sm">
+					<div class="container-fluid">
+						<button @click="loadAdsList(1)" class=" btn btn-sm btn-success">LIMONADE.PRO</button>
+						<button type="button" class="btn btn-sm btn-warning shadow-sm">NHA TRANG</button>
+						<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+						  <button type="button" class="btn btn-sm btn-warning">RU</button>
+						  <button type="button" class="btn btn-sm btn-outline-warning">EN</button>
+						  <!-- <button type="button" class="btn btn-outline-warning">VN</button> -->
+						</div>
+						<button class="btn btn-sm btn-primary shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+						  Меню
+						</button>
+						<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+							<div class="offcanvas-header">
+								<h5 class="offcanvas-title" id="offcanvasNavbarLabel">Меню</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+							</div>
+							<div class="offcanvas-body">
+		
+								<div class="accordion" id="accordionExample">
+								  <div class="accordion-item">
+									<h2 class="accordion-header">
+									  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+										Фильтровать поиск
+									  </button>
+									</h2>
+									<div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+										<div class="accordion-body">
+		
+											<label class="form-label">Выберите категорию</label>
+											<select class="form-select form-select-sm mb-3" aria-label="Small select example">
+											  <option value="1" selected>Свежие</option>
+											  <option value="2">Жильё</option>
+											  <option value="3">Транспорт</option>
+											  <option value="4">Услуги</option>
+											  <option value="5">Товары</option>
+											  <option value="6">Работа</option>
+											</select>
+		
+											<label class="form-label">Выберите подкатегорию</label>
+											<select class="form-select form-select-sm mb-3" aria-label="Small select example">
+											  <option value="1" selected>Аренда</option>
+											  <option value="2" disabled>Продажа</option>
+											</select>
+		
+											<label class="form-label">Выберите тип жилья</label>
+											<select class="form-select form-select-sm mb-3" aria-label="Small select example">
+											  <option value="1" selected>Не выбрано</option>
+											  <option value="2">Другое</option>
+											  <option value="3">Кровать</option>
+											  <option value="4">Комната</option>
+											  <option value="5">Квартира</option>
+											  <option value="6">Дом</option>
+											</select>
+		
+											<!-- <label class="form-label">Выберите тип транспорта</label>
+											<select class="form-select form-select-sm mb-3" aria-label="Small select example">
+												<option value="1" selected>Не выбрано</option>
+												<option value="2">Другое</option>
+												<option value="3">Велосипед</option>
+												<option value="4">Мопед</option>
+												<option value="5">Мотоцикл</option>
+												<option value="6">Автомобиль</option>
+											</select>
+		
+											<label class="form-label">Выберите тип услуги</label>
+											<select class="form-select form-select-sm mb-3" aria-label="Small select example">
+												<option value="1" selected>Не выбрано</option>
+												<option value="2">Другое</option>
+												<option value="3">Транспорт, грузоперевозки, визараны</option>
+												<option value="4">Документы, визы, билеты</option>
+												<option value="5">Мобильная связь, интернет, IT</option>
+												<option value="6">Обмен валюты, переводы, банковские карты</option>
+											</select>
+		
+											<label class="form-label">Выберите тип товара</label>
+											<select class="form-select form-select-sm mb-3" aria-label="Small select example">
+												<option value="1" selected>Не выбрано</option>
+												<option value="2">Другое</option>
+												<option value="3">Электроника</option>
+												<option value="4">Мебель</option>
+												<option value="5">Бытовые товары</option>
+												<option value="6">Одежда</option>
+												<option value="7">еда</option>
+												<option value="8">детские товары</option>
+												<option value="9">животные</option>
+												<option value="10">хобби и отдых</option>
+												<option value="11">автозапчасти</option>
+												<option value="12">красота и здоровье</option>
+												<option value="13">растения</option>
+												<option value="14">товары для бизнеса</option>
+											</select> -->
+		
+											<div class="btn btn-sm btn-primary mb-2 shadow-sm">Искать</div>
+		
 										</div>
 									</div>
-							    	<button class="btn btn-sm btn-primary mb-2 shadow-sm" disabled>Искать</button>
-						    	</div>
-						      </div>
-						    </div>
-						  </div>
-						  <div class="accordion-item">
-						    <h2 class="accordion-header">
-						      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-						        Почитать о нас
-						      </button>
-						    </h2>
-						    <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-						      <div class="accordion-body">
-						        <strong>Lorem ipsum, dolor sit,</strong> amet consectetur adipisicing elit. Fugiat vitae aliquam fugit cupiditate laboriosam placeat id, praesentium facere ea ipsam minima eaque, neque dolorum quibusdam ullam consectetur magnam libero soluta <code>aperiam quis itaque</code> sed. Possimus animi voluptas commodi vero aut reiciendis dignissimos in ipsum tempora. Omnis sunt ea vel, distinctio.
-						      </div>
-						    </div>
-						  </div>
-						</div>
-
-					</div>
-				</div>
-			</div>
-		</nav>
-
-		<br><br><br>
-
-		<div class="row mb-3">
-			<div class="col">
-				<div class="card shadow-sm">
-				  <div class="row g-0">
-				    <div class="col-5">
-				      <img src="apartments/apt_11.jpg" class="img-fluid rounded-start" alt="...">
-				    </div>
-				    <div class="col-7">
-				      <div class="card-body">
-				        <h5 class="card-title">Card title</h5>
-				        <p class="card-text">This is a wider card with supporting text below...</p>
-				        <p class="card-text"><small class="text-body-secondary">Создано 12.08.2024</small></p>
-				        <div class="btn btn-sm btn-primary shadow-sm">Посмотреть</div>
-				      </div>
-				    </div>
-				  </div>
-				</div>
-			</div>
-		</div>
-
-		<div class="row mb-3">
-			<div class="col">
-				<div class="card shadow-sm">
-				  <div class="row g-0">
-				    <div class="col-5">
-				      <img src="apartments/apt_12.jpg" class="img-fluid rounded-start" alt="...">
-				    </div>
-				    <div class="col-7">
-				      <div class="card-body">
-				        <h5 class="card-title">Card title</h5>
-				        <p class="card-text">This is a wider card with supporting text below...</p>
-				        <p class="card-text"><small class="text-body-secondary">Создано 12.08.2024</small></p>
-				        <div class="btn btn-sm btn-primary shadow-sm">Посмотреть</div>
-				      </div>
-				    </div>
-				  </div>
-				</div>
-			</div>
-		</div>
-
-		<div class="row mb-3">
-			<div class="col">
-				<div class="card shadow-sm">
-				  <div class="row g-0">
-				    <div class="col-5">
-				      <img src="apartments/apt_4.jpg" class="img-fluid rounded-start" alt="...">
-				    </div>
-				    <div class="col-7">
-				      <div class="card-body">
-				        <h5 class="card-title">Студия, 3.5 млн...</h5>
-				        <p class="card-text">Аренда, юг, 1 комн. кв., студия, 3.5 млн., 35 м2...</p>
-				        <p class="card-text"><small class="text-body-secondary">Создано 12.08.2024</small></p>
-				        <div class="btn btn-sm btn-primary shadow-sm">Посмотреть</div>
-				      </div>
-				    </div>
-				  </div>
-				</div>
-			</div>
-		</div>
-
-		<div class="row mb-3">
-			<div class="col">
-				<div class="card shadow-sm">
-				  <div class="row g-0">
-				    <div class="col-5">
-				      <img src="apartments/apt_15.jpg" class="img-fluid rounded-start" alt="...">
-				    </div>
-				    <div class="col-7">
-				      <div class="card-body">
-				        <h5 class="card-title">Card title</h5>
-				        <p class="card-text">This is a wider card with supporting text below...</p>
-				        <p class="card-text"><small class="text-body-secondary">Создано 12.08.2024</small></p>
-				        <div class="btn btn-sm btn-primary shadow-sm">Посмотреть</div>
-				      </div>
-				    </div>
-				  </div>
-				</div>
-			</div>
-		</div>
-
-		<!-- <div class="row mb-3">
-			<div class="col">
-				<div class="card shadow-sm">
-				  <div class="card-body">
-				    <h5 class="card-title">Card title very long text</h5>
-				    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's example text to...</p>
-				    <div class="row">
-				    	<div class="col-5">
-				    		<p class="card-text"><small class="text-body-secondary">Обновл 12.08.2024</small></p>
-				    	</div>
-				    	<div class="col-7">
-				    		<div class="btn btn-sm btn-primary shadow-sm">Посмотреть</div>
-				    	</div>
-				    </div>
-				  </div>
-				</div>
-			</div>
-		</div> -->
-
-		<div class="row mb-3">
-			<div class="col">
-				<div class="btn btn-sm btn-primary shadow-sm">Показать еще...</div>
-			</div>
-		</div>
-
-		<div class="row mb-3">
-			<div class="col">
-				<div class="card shadow-sm">
-				  <div class="card-body">
-				  	<h5 class="card-title">Создать новое обьявление</h5>
-				  	<h6 class="card-subtitle mb-2 text-body-secondary">
-						Обьявление будет размещено бесплатно на 10 дней. Опубликованное обьявление нельзя отредактировать, только удалить и создать новое.
-					</h6>
-					<div class="form-text mb-3">
-					  "Фото", "Категории" не обязательно к заполнению, но это поможет вашему обьявлению выделиться и его будут быстрее находить.
-					</div>
-				    
-				    <div class="mb-3">
-					  <label for="formFileSm" class="form-label">Заглавное фото</label>
-					  <input class="form-control form-control-sm shadow-sm" id="formFileSm" type="file">
-					</div>
-					<div class="btn btn-sm btn-primary mb-3 shadow-sm">Добавить еще фото</div>
-				
-				    <div class="mb-3">
-					  <label for="exampleFormControlInput1" class="form-label">Название<span class="text text-danger">*</span></label>
-					  <input type="text" class="form-control form-control-sm shadow-sm" id="exampleFormControlInput1" placeholder="Студия, 3.5 млн...">
-					</div>
-
-					<div class="mb-3">
-						<select class="form-select form-select-sm shadow-sm" aria-label="Small select example">
-						  <option selected>Выберите категорию</option>
-						  <option value="1">Жильё</option>
-						  <option value="2">Транспорт</option>
-						  <option value="3">Услуги</option>
-						  <option value="3">Товары</option>
-						  <option value="3">Работа</option>
-						</select>
-					</div>
-
-					<div class="mb-3">
-					  <label for="exampleFormControlTextarea1" class="form-label">Описание<span class="text text-danger">*</span></label>
-					  <textarea class="form-control form-select-sm shadow-sm" id="exampleFormControlTextarea1" rows="3" placeholder="Аренда, юг, 1 комн. кв., студия, 3.5 млн., 35 м2. Большая двухспальная кровать. Полностью меблированная. Отдельно вода, свет, уборка..."></textarea>
-					</div>
-
-					<div class="mb-3">
-					  <label for="exampleFormControlInput1" class="form-label">Контакт<span class="text text-danger">*</span></label>
-					  <input type="text" class="form-control form-control-sm shadow-sm" id="exampleFormControlInput1" placeholder="Николай, телеграм #nikolay_bro">
-					</div>
-					
-					<div class="row mb-3">
-						<div class="col-4">
-							<label for="inputPassword5" class="form-label">Пароль<span class="text text-danger">*</span></label>
-						</div>
-						<div class="col-8">
-							<input type="password" id="inputPassword5" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
-						</div>
-						<div id="passwordHelpBlock" class="form-text">
-						  Зайдите в телеграм бота <a href="#" class="link-primary">t.me/limonade_pro_bot</a>, нажмите "старт", получите ваш ID номер, введите его сюда в качестве пароля.
-						</div>
-					</div>
-				    <button class="btn btn-sm btn-success shadow-sm" disabled>Опубликовать обьявление</button>
-
-				  </div>
-				</div>
-			</div>
-		</div>
-
-
-		<div class="row mb-3">
-			<div class="col">
-				<div class="card shadow-sm">
-					<img src="apartments/apt_1.jpg" class="card-img-top mb-1" alt="...">
-					<img src="apartments/apt_3.jpg" class="mb-1" alt="...">
-					<img src="apartments/apt_7.jpg" class="" alt="...">
-					<div class="card-body">
-						<h5 class="card-title">Студия, 3.5 млн</h5>
-						<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-							Аренда
-						</div>
-						<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-							Квартира
-						</div>
-						<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-							2 спальных места
-						</div>
-						<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-							от 1 месяца
-						</div>
-						<p class="card-text">Аренда, юг, 1 комн. кв., студия, 3.5 млн., 35 м2. Большая двухспальная кровать. Полностью меблированная. Отдельно вода, свет, уборка.</p>
-						<h6 class="card-subtitle mb-3 text-body-secondary">
-							Николай, телеграм #nikolay_bro
-						</h6>
-
-						<div class="row">
-					    	<div class="col-6">
-					    		<p class="card-text"><small class="text-body-secondary">Создано 12.08.2024</small></p>
-					    	</div>
-					    	<div class="col-6">
-					    		<div class="btn btn-sm btn-primary shadow-sm">Назад к списку</div>
-					    	</div>
-				    	</div>
-					</div>
-					<div class="card-footer">
-						<div class="row mb-3">
-							<div class="col-4">
-								<label for="inputPassword5" class="form-label">Пароль</label>
-							</div>
-							<div class="col-8">
-								<input type="password" id="inputPassword5" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
-							</div>
-							<div id="passwordHelpBlock" class="form-text">
-							  Для удаления необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте <a href="#" class="link-primary">t.me/limonade_pro_bot</a>
-							</div>
-						</div>
-				    	<button class="btn btn-sm btn-danger mb-2 shadow-sm" disabled>Удалить обьявление</button>
-					</div>
-
-				</div>
-			</div>
-		</div>
-
-		<div class="row mb-3">
-			<div class="col">
-				<div class="card shadow-sm">
-					
-					<div class="card-body">
-						<h5 class="card-title">Студия, 3.5 млн</h5>
-						<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-							Аренда
-						</div>
-						<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-							Квартира
-						</div>
-						<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-							2 спальных места
-						</div>
-						<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-							от 1 месяца
-						</div>
-						<p class="card-text">Аренда, юг, 1 комн. кв., студия, 3.5 млн., 35 м2. Большая двухспальная кровать. Полностью меблированная. Отдельно вода, свет, уборка.</p>
-						<h6 class="card-subtitle mb-3 text-body-secondary">
-							Николай, телеграм #nikolay_bro
-						</h6>
-
-						<div class="row">
-					    	<div class="col-6">
-					    		<p class="card-text"><small class="text-body-secondary">Создано 12.08.2024</small></p>
-					    	</div>
-					    	<div class="col-6">
-					    		<div class="btn btn-sm btn-primary shadow-sm">Назад к списку</div>
-					    	</div>
-				    	</div>
-					</div>
-					<!-- <div class="card-footer">
-						<div class="row mb-3">
-							<div class="col-4">
-								<label for="inputPassword5" class="form-label">Пароль</label>
-							</div>
-							<div class="col-8">
-								<input type="password" id="inputPassword5" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
-							</div>
-							<div id="passwordHelpBlock" class="form-text">
-							  Для удаления необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте <a href="#" class="link-primary">t.me/limonade_pro_bot</a>
-							</div>
-						</div>
-				    	<div class="btn btn-sm btn-danger mb-2 shadow-sm">Удалить обьявление</div>
-					</div> -->
-
-				</div>
-			</div>
-		</div>
+								  </div>
+								  <div class="accordion-item">
+									<h2 class="accordion-header">
+									  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+										Мои обьявления
+									  </button>
+									</h2>
+									<div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+									  <div class="accordion-body">
+										<div class="container">
+											<div class="row mb-3">
+												<label class="form-label">Создать новое обьявление</label>
+												<div class="form-text">
+												  Обьявление будет размещено бесплатно на 10 дней. Опубликованное обьявление нельзя отредактировать, только удалить и создать новое.<br> Для создания обьявления вам необходимо будет войти в телеграм.
+												</div>
+											</div>
+											<div @click="showScreen('create')" class="btn btn-sm btn-primary mb-2 shadow-sm">Создать</div>
 		
+											<hr class="divider">
+		
+											<div class="row mb-3">
+												<label class="form-label">Найти все мои обьявления</label>
+												<div class="col-4">
+													<label for="inputPassword1" class="form-label">Пароль<span class="text text-danger">*</span></label>
+												</div>
+												<div class="col-8">
+													<input v-model="authPassword" type="password" id="inputPassword1" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+												</div>
+												<div id="passwordHelpBlock" class="form-text">
+												  Необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте <a href="#" class="link-primary">t.me/limonade_pro_bot</a>
+												</div>
+											</div>
+											<button @click="loadUserAds()" class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="authPassword.length < 5">Искать</button>
+										</div>
+									  </div>
+									</div>
+								  </div>
+								  <div class="accordion-item">
+									<h2 class="accordion-header">
+									  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+										Почитать о нас
+									  </button>
+									</h2>
+									<div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+									  <div class="accordion-body">
+										<strong>Lorem ipsum, dolor sit,</strong> amet consectetur adipisicing elit. Fugiat vitae aliquam fugit cupiditate laboriosam placeat id, praesentium facere ea ipsam minima eaque, neque dolorum quibusdam ullam consectetur magnam libero soluta <code>aperiam quis itaque</code> sed. Possimus animi voluptas commodi vero aut reiciendis dignissimos in ipsum tempora. Omnis sunt ea vel, distinctio.
+									  </div>
+									</div>
+								  </div>
+								</div>
+		
+							</div>
+						</div>
+					</div>
+				</nav>
+		
+				<div v-if="isLoading">Загрузка объявлений...</div>
+				<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+				<div v-if="successMessage" class="alert alert-danger">{{ successMessage }}</div>
+			
+				<div v-if="showAdList" v-for="ad in adsList" :key="ad.id" class="row mb-3">
+					<div class="col">
+						<div class="card shadow-sm">
+							<div class="row g-0">
+								<div class="col-5">
+									<img :src="ad.cover_photo" class="img-fluid rounded-start" alt="image">
+								</div>
+								<div class="col-7">
+									<div class="card-body">
+										<h5 class="card-title text-truncate">{{ ad.title }}</h5>
+										<p class="card-text description-text">{{ ad.description }}</p>
+										<p class="card-text">
+											<small class="text-body-secondary text-truncate">
+												Создано {{ ad.created_at.split(' ')[0] }}
+											</small>
+										</p>
+										<div class="btn btn-sm btn-primary shadow-sm" @click="loadAdDetail(ad.id)">
+											Посмотреть
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 
+				<div v-if="!isLoading && showAdList" class="row mb-3">
+					<div v-if="currentPage > 1" class="col">
+						<div @click="currentPage = 1; loadAdsList(currentPage)" class="btn btn-sm btn-secondary shadow-sm">В начало</div>
+					</div>
+					<div v-if="adsList.length >= 10" class="col">
+						<div @click="nextPage()" class="btn btn-sm btn-primary shadow-sm">Показать еще...</div>
+					</div>
+				</div>
+			
+				<div v-if="showCreateAd" class="row mb-3">
+					<div class="col">
+						<div class="card shadow-sm">
+						<div class="card-body">
+							<h5 class="card-title">Создать новое обьявление</h5>
+							<h6 class="card-subtitle mb-2 text-body-secondary">
+								Обьявление будет размещено бесплатно на 10 дней. Опубликованное обьявление нельзя отредактировать, только удалить и создать новое.
+							</h6>
+							<div class="form-text mb-3">
+							"Фото" не обязательно к заполнению, но это поможет вашему обьявлению выделиться на фоне других.
+							</div>
+							
+							<div class="mb-3">
+								<label for="formFile1" class="form-label">Заглавное фото</label>
+								<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm" id="formFile1" type="file">
+							</div>
+
+							<div v-if="photoInputs[1]" class="mb-2">
+								<label for="formFile2" class="form-label">Фото 2</label>
+								<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm" id="formFile2" type="file">
+							</div>
+							
+							<div v-if="photoInputs[2]" class="mb-2">
+								<label for="formFile3" class="form-label">Фото 3</label>
+								<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm" id="formFile3" type="file">
+							</div>
+						
+							<div class="mb-3">
+							<label for="FormControlInput1" class="form-label">Название<span class="text text-danger">*</span></label>
+							<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput1" placeholder="Студия, 3.5 млн...">
+							</div>
+		
+							<div class="mb-3">
+								<label for="FormControlInput2" class="form-label">Категория<span class="text text-danger">*</span></label>
+								<select v-model="newAd.category" class="form-select form-select-sm shadow-sm" id="FormControlInput2" aria-label="Small select example">
+								<option selected>Выберите категорию</option>
+								<option value="1">Жильё</option>
+								<option value="2">Транспорт</option>
+								<option value="3">Услуги</option>
+								<option value="4">Товары</option>
+								<option value="5">Работа</option>
+								</select>
+							</div>
+		
+							<div class="mb-3">
+							<label for="FormControlTextarea1" class="form-label">Описание<span class="text text-danger">*</span></label>
+							<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm" id="FormControlTextarea1" rows="3" placeholder="Аренда, юг, 1 комн. кв., студия, 3.5 млн., 35 м2. Большая двухспальная кровать. Полностью меблированная. Отдельно вода, свет, уборка..."></textarea>
+							</div>
+		
+							<div class="mb-3">
+							<label for="FormControlInput3" class="form-label">Контакт<span class="text text-danger">*</span></label>
+							<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput3" placeholder="Николай, телеграм #nikolay_bro">
+							</div>
+							
+							<div class="row mb-3">
+								<div class="col-4">
+									<label for="inputPassword2" class="form-label">Пароль<span class="text text-danger">*</span></label>
+								</div>
+								<div class="col-8">
+									<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+								</div>
+								<div id="passwordHelpBlock" class="form-text">
+								Зайдите в телеграм бота <a href="#" class="link-primary">t.me/limonade_pro_bot</a>, нажмите "старт", получите ваш ID номер, введите его сюда в качестве пароля.
+								</div>
+							</div>
+							<button @click="createAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">Опубликовать обьявление</button>
+		
+						</div>
+						</div>
+					</div>
+				</div>
+
+				<div v-if="showAdDetail" class="row mb-3">
+					<div class="col">
+						<div class="card shadow-sm">
+							<img v-if="currentAd.photo_1" :src="currentAd.photo_1" class="card-img-top mb-1" alt="image">
+							<img v-if="currentAd.photo_2" :src="currentAd.photo_2" class="mb-1" alt="image">
+							<img v-if="currentAd.photo_3" :src="currentAd.photo_3" class="" alt="image">
+							<div class="card-body">
+								<h5 class="card-title">{{ currentAd.title }}</h5>
+								<div class="btn btn-sm btn-warning mb-1 shadow-sm">
+									Аренда
+								</div>
+								<!-- <div class="btn btn-sm btn-warning mb-1 shadow-sm">
+									Квартира
+								</div>
+								<div class="btn btn-sm btn-warning mb-1 shadow-sm">
+									2 спальных места
+								</div>
+								<div class="btn btn-sm btn-warning mb-1 shadow-sm">
+									от 1 месяца
+								</div> -->
+								<p class="card-text">{{ currentAd.description }}</p>
+								<h6 class="card-subtitle mb-3 text-body-secondary">
+									{{ currentAd.contact }}
+								</h6>
+		
+								<div class="row">
+									<div class="col-6">
+										<p class="card-text"><small class="text-body-secondary">Создано {{ currentAd.created_at.split(' ')[0] }}</small></p>
+									</div>
+									<div class="col-6">
+										<div class="btn btn-sm btn-primary shadow-sm" @click="returnToList()">Назад к списку</div>
+									</div>
+								</div>
+							</div>
+							<div v-if="isAdOwner" class="card-footer">
+								<div class="row mb-3">
+									<div class="col-4">
+										<label for="inputPassword3" class="form-label">Пароль</label>
+									</div>
+									<div class="col-8">
+										<input v-model="authPassword" type="password" id="inputPassword3" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+									</div>
+									<div id="passwordHelpBlock" class="form-text">
+									  Для удаления необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте <a href="#" class="link-primary">t.me/limonade_pro_bot</a>
+									</div>
+								</div>
+								<button @click="deleteAd()" class="btn btn-sm btn-danger mb-2 shadow-sm" :disabled="authPassword.length < 5">Удалить обьявление</button>
+							</div>
+		
+						</div>
+					</div>
+				</div>
+		
+			</div>
+		</div>
 	</div>
-
-
-
 
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+	<script>
+        const app = Vue.createApp({
+            data() {
+                return {
+					// отвечает за показ экрана со списком объявлений
+					showAdList: true,
+					// отвечает за показ экрана только с одним объявлением
+					showAdDetail: false,
+					// отвечает за показ экрана для создания нового объявления
+					showCreateAd: false,
+					// содержит массив объявлений
+                    adsList: [],
+					// содержит объект одного объявления
+                    currentAd: null,
+					// содержит объект нового объявления (ещё не созданного)
+					newAd: {
+						title: '',
+          				description: '',
+						contact: '',
+					},
+					// управляет видимостью полей для фото
+					photoInputs: [true, false, false], // скрываем фото 2 и фото 3
+					// содержит массив загруженных фото
+        			photos: [],
+					// показывает, что данные в процессе загрузки с сервера
+                    isLoading: false,
+					// содержит текст всплывающей подсказки в случае успеха
+					successMessage: null,
+					// содержит текст всплывающей подсказки в случае ошибки
+                    errorMessage: null,
+					// содержит номер текущей страницы с объявлениями
+					currentPage: 1,
+					// указывает, является ли пользователь создателем данного объявления
+					isAdOwner: false,
+					// содержит пароль для авторизации
+					authPassword: '',
+                };
+            },
+            mounted() {
+                // метод загрузки списка объявлений при первой загрузке или при обновлении страницы
+                this.loadAdsList(1);
+            },
+            methods: {
+				// метод выбора, какой экран показать в данный момент
+				showScreen(screen) {
+					this.showAdList = screen === 'list';
+					this.showAdDetail = screen === 'detail';
+					this.showCreateAd = screen === 'create';
+
+					// метод закрытия бокового меню
+					this.closeSidebar();
+				},
+                // метод загрузки с сервера списка объявлений
+                loadAdsList(currentPage = 1) {
+					this.isAdOwner = false;
+					this.showScreen('list');
+                    this.isLoading = true;
+                    axios.get(`api/ads?page=${currentPage}`)
+                        .then(response => {
+							// console.log(response.data);
+                            this.adsList = response.data;
+							// Плавная прокрутка вверх страницы после загрузки объявлений
+							window.scrollTo({top: 0, behavior: 'smooth'});
+                        })
+                        .catch(() => {
+                            this.errorMessage = 'Не удалось загрузить объявления';
+                        })
+                        .finally(() => {
+                            this.isLoading = false;
+                        });
+                },
+                // метод загрузки с сервера одного объявления по ID
+                loadAdDetail(id) {
+					// console.log('id равна: ' + id);
+					this.showScreen('detail');
+                    this.isLoading = true;
+                    axios.get(`api/ads/${id}`)
+                        .then(response => {
+							console.log(response.data);
+                            this.currentAd = response.data;
+                        })
+                        .catch(() => {
+                            this.errorMessage = 'Не удалось загрузить объявление';
+                        })
+                        .finally(() => {
+                            this.isLoading = false;
+                        });
+                },
+				// метод, возвращающий пользователя от просмотра одного объявления назад к списку уже загруженных объявлений
+				returnToList() {
+					this.showScreen('list');
+					this.currentAd = null;
+				},
+				// метод, который прибавляет одну страницу для пагинации и вызывает метод загрузки с сервера списка объявлений
+				nextPage() {
+					this.currentPage += 1; // Увеличиваем номер страницы
+					this.loadAdsList(this.currentPage); // Загружаем следующую страницу
+				},
+				// метод загрузки с сервера только списка своих собственных объявлений
+				loadUserAds() {
+					this.showScreen('list');
+					this.isLoading = true;
+                    axios.post('api/ads/auth', { password: this.authPassword })
+                        .then(response => {
+							console.log(response.data);
+                            this.adsList = response.data;
+							this.isAdOwner = true;
+							this.authPassword = '';
+                        })
+                        .catch(() => {
+                            this.errorMessage = 'Не удалось загрузить объявления';
+                        })
+                        .finally(() => {
+                            this.isLoading = false;
+                        });
+				},
+				// метод создания нового объявления (и отправка его на сервер)
+				createAd() {
+					// сначала проверяем обязательные поля
+					if (!this.newAd.title || !this.newAd.description || !this.newAd.contact || !this.newAd.category) {
+						this.errorMessage = 'Пожалуйста, заполните все обязательные поля.';
+						return;
+					}
+
+					// проверяем, введен ли пароль
+					if (!this.authPassword) {
+						this.errorMessage = 'Пожалуйста, введите пароль.';
+						return;
+					}
+
+					// проверяем наличие фотографий (максимум 3)
+					if (this.photos.length > 3) {
+						this.errorMessage = 'Максимум можно загрузить 3 фотографии.';
+						return;
+					}
+
+					// формируем объект FormData для отправки данных на сервер
+					const formData = new FormData();
+					formData.append('title', this.newAd.title);
+					formData.append('description', this.newAd.description);
+					formData.append('contact', this.newAd.contact);
+					formData.append('category', this.newAd.category);
+					formData.append('password', this.authPassword);
+
+					// добавляем фотографии в FormData
+					for (let i = 0; i < this.photos.length; i++) {
+						formData.append('photos[]', this.photos[i]);
+					}
+
+					// отправляем данные на сервер
+					this.isLoading = true;
+					axios.post('api/ads', formData, {
+						headers: {
+							'Content-Type': 'multipart/form-data'
+						}
+					})
+					.then(response => {
+						console.log(response.data);
+						this.successMessage = 'Объявление успешно создано!';
+						this.newAd = { title: '', description: '', contact: '', category: '' }; // очищаем форму
+						this.authPassword = ''; // очищаем пароль
+						this.photos = []; // очищаем поле с фото
+						this.showScreen('list');
+					})
+					.catch(error => {
+						this.errorMessage = 'Не удалось создать обьявление';
+						console.error(error);
+					})
+					.finally(() => {
+						this.isLoading = false;
+					});
+				},
+				// метод обработки изменения файла в поле загрузки, обновляющий массив с фото
+				handleFileChange(event, index) {
+					// сохраняем выбранное фото в массиве
+					const file = event.target.files[0];
+					if (file) {
+						this.photos[index] = file; // сохраняем файл
+						if (index < this.photoInputs.length - 1) {
+							this.photoInputs[index + 1] = true; // показываем следующее поле
+						}
+					}
+				},
+				// метод удаления существующего объявления
+				deleteAd() {
+
+				},
+				// метод закрытия бокового меню и возврата на базовый экран
+				closeSidebar() {
+					const offcanvasElement = document.getElementById('offcanvasNavbar');
+					const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);
+					if (bsOffcanvas) {
+						bsOffcanvas.hide(); // Скрыть offcanvas
+					}
+				},
+            }
+        });
+
+        app.mount('#app');
+    </script>
+
 </body>
 </html>
