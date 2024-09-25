@@ -6,6 +6,9 @@
 	<title>Объявления</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 	<style>
+		[v-cloak] {
+			display: none;
+		}
 		.description-text {
 			display: -webkit-box;
 			-webkit-line-clamp: 2; /* Количество строк */
@@ -14,36 +17,48 @@
 			text-overflow: ellipsis;
 			max-height: 3em; /* Высота для двух строк текста */
 		}
-
+		.big-top-margin {
+			margin-top: 56px;
+		}
 	</style>
 </head>
 <body>
-	<div id="app">
+	<div id="app" v-cloak>
 		<div class="d-none d-md-block">
 			<div class="d-flex justify-content-center p-4 fs-3" >
-				Этот сайт поддерживается только на мобильных устройствах...
+				Этот сайт работает только на мобильных устройствах...<br>
+				This site only works on mobile devices...
 			</div>
         </div>
 
-		<div class="d-block d-md-none">
-			<br><br><br>
+		<div class="d-block d-md-none big-top-margin">
+
 			<div class="container">
 
 				<nav class="navbar bg-body-tertiary fixed-top shadow-sm">
 					<div class="container-fluid">
 						<button @click="loadAdsList(1)" class=" btn btn-sm btn-success">LIMONADE.PRO</button>
-						<button type="button" class="btn btn-sm btn-warning shadow-sm">NHA TRANG</button>
+						<button type="button" class="btn btn-sm btn-warning shadow-sm">
+							<!-- НЯ ЧАНГ -->
+							{{ getTranslation('navbar_1') }}
+						</button>
 						<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-						  <button type="button" class="btn btn-sm btn-warning">RU</button>
-						  <button type="button" class="btn btn-sm btn-outline-warning">EN</button>
-						  <!-- <button type="button" class="btn btn-outline-warning">VN</button> -->
+							<button @click="setLanguage('RU')" type="button" 
+									:class="['btn', 'btn-sm', currentLanguage === 'RU' ? 'btn-warning' : 'btn-outline-warning']">RU</button>
+							<button @click="setLanguage('EN')" type="button" 
+									:class="['btn', 'btn-sm', currentLanguage === 'EN' ? 'btn-warning' : 'btn-outline-warning']">EN</button>
+							<!-- <button type="button" class="btn btn-outline-warning">VN</button> -->
 						</div>
 						<button class="btn btn-sm btn-primary shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-						  Меню
+							<!-- Меню -->
+							{{ getTranslation('navbar_2') }}
 						</button>
 						<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
 							<div class="offcanvas-header">
-								<h5 class="offcanvas-title" id="offcanvasNavbarLabel">Меню</h5>
+								<h5 class="offcanvas-title" id="offcanvasNavbarLabel">
+									<!-- Меню -->
+									{{ getTranslation('navbar_2') }}
+								</h5>
 								<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 							</div>
 							<div class="offcanvas-body">
@@ -52,77 +67,53 @@
 								  <div class="accordion-item">
 									<h2 class="accordion-header">
 									  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-										Фильтровать поиск
+										<!-- Фильтровать поиск -->
+										{{ getTranslation('menu_get_list_1') }}
 									  </button>
 									</h2>
 									<div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
 										<div class="accordion-body">
 		
-											<label class="form-label">Выберите категорию</label>
-											<select class="form-select form-select-sm mb-3" aria-label="Small select example">
-											  <option value="1" selected>Свежие</option>
-											  <option value="2">Жильё</option>
-											  <option value="3">Транспорт</option>
-											  <option value="4">Услуги</option>
-											  <option value="5">Товары</option>
-											  <option value="6">Работа</option>
+											<!-- Выбор головной категории -->
+											<label for="categorySelect" class="form-label">
+												<!-- Выберите категорию -->
+												{{ getTranslation('menu_get_list_2') }}
+											<span class="text text-danger">*</span>
+											</label>
+											<select v-model="selectedMainCategory" @change="loadSubcategories('main')"
+												class="form-select form-select-sm mb-3 shadow-sm" id="categorySelect" aria-label="Small select example">
+												<option value="">
+													Не выбрано
+												</option>
+												<option v-for="(cat, key) in categories" :key="key" :value="key">{{ key }}</option>
 											</select>
-		
-											<label class="form-label">Выберите подкатегорию</label>
-											<select class="form-select form-select-sm mb-3" aria-label="Small select example">
-											  <option value="1" selected>Аренда</option>
-											  <option value="2" disabled>Продажа</option>
+											
+											<!-- Выбор подкатегории 1 -->
+											<!-- <label for="subcategory1Select" class="form-label">Подкатегория</label> -->
+											<select v-if="selectedMainCategory && subcategories1" v-model="selectedSubcategory1" @change="loadSubcategories('sub1')"
+												class="form-select form-select-sm mb-3 shadow-sm" id="subcategory1Select" aria-label="Small select example">
+												<option value="">
+													<!-- Выберите подкатегорию -->
+													{{ getTranslation('menu_get_list_3') }}
+												</option>
+												<option v-for="(sub, key) in subcategories1" :key="key" :value="key">{{ key }}</option>
 											</select>
-		
-											<label class="form-label">Выберите тип жилья</label>
-											<select class="form-select form-select-sm mb-3" aria-label="Small select example">
-											  <option value="1" selected>Не выбрано</option>
-											  <option value="2">Другое</option>
-											  <option value="3">Кровать</option>
-											  <option value="4">Комната</option>
-											  <option value="5">Квартира</option>
-											  <option value="6">Дом</option>
+											
+											<!-- Выбор подкатегории 2 -->
+											<!-- <label for="subcategory2Select" class="form-label">Подкатегория</label> -->
+											<select v-if="selectedSubcategory1 && subcategories2" v-model="selectedSubcategory2"
+												class="form-select form-select-sm mb-3 shadow-sm" id="subcategory2Select" aria-label="Small select example">
+												<option value="">
+													<!-- Выберите подкатегорию -->
+													{{ getTranslation('menu_get_list_3') }}
+												</option>
+												<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
 											</select>
-		
-											<!-- <label class="form-label">Выберите тип транспорта</label>
-											<select class="form-select form-select-sm mb-3" aria-label="Small select example">
-												<option value="1" selected>Не выбрано</option>
-												<option value="2">Другое</option>
-												<option value="3">Велосипед</option>
-												<option value="4">Мопед</option>
-												<option value="5">Мотоцикл</option>
-												<option value="6">Автомобиль</option>
-											</select>
-		
-											<label class="form-label">Выберите тип услуги</label>
-											<select class="form-select form-select-sm mb-3" aria-label="Small select example">
-												<option value="1" selected>Не выбрано</option>
-												<option value="2">Другое</option>
-												<option value="3">Транспорт, грузоперевозки, визараны</option>
-												<option value="4">Документы, визы, билеты</option>
-												<option value="5">Мобильная связь, интернет, IT</option>
-												<option value="6">Обмен валюты, переводы, банковские карты</option>
-											</select>
-		
-											<label class="form-label">Выберите тип товара</label>
-											<select class="form-select form-select-sm mb-3" aria-label="Small select example">
-												<option value="1" selected>Не выбрано</option>
-												<option value="2">Другое</option>
-												<option value="3">Электроника</option>
-												<option value="4">Мебель</option>
-												<option value="5">Бытовые товары</option>
-												<option value="6">Одежда</option>
-												<option value="7">еда</option>
-												<option value="8">детские товары</option>
-												<option value="9">животные</option>
-												<option value="10">хобби и отдых</option>
-												<option value="11">автозапчасти</option>
-												<option value="12">красота и здоровье</option>
-												<option value="13">растения</option>
-												<option value="14">товары для бизнеса</option>
-											</select> -->
-		
-											<div class="btn btn-sm btn-primary mb-2 shadow-sm">Искать</div>
+										
+											<button class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="categoryCode.length < 1">
+												<!-- Искать -->
+												{{ getTranslation('menu_get_list_4') }}
+											</button>
 		
 										</div>
 									</div>
@@ -130,35 +121,57 @@
 								  <div class="accordion-item">
 									<h2 class="accordion-header">
 									  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-										Мои обьявления
+										<!-- Мои объявления -->
+										{{ getTranslation('menu_create_1') }}
 									  </button>
 									</h2>
 									<div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
 									  <div class="accordion-body">
 										<div class="container">
 											<div class="row mb-3">
-												<label class="form-label">Создать новое обьявление</label>
+												<label class="form-label">
+													<!-- Создать новое объявление -->
+													{{ getTranslation('menu_create_2') }}
+												</label>
 												<div class="form-text">
-												  Обьявление будет размещено бесплатно на 10 дней. Опубликованное обьявление нельзя отредактировать, только удалить и создать новое.<br> Для создания обьявления вам необходимо будет войти в телеграм.
+													<!-- Объявление будет размещено бесплатно на 10 дней. Опубликованное объявление нельзя отредактировать, только удалить и создать новое. -->
+												  {{ getTranslation('menu_create_3') }}
+												  <br>
+												  <!-- Для создания объявления вам необходимо будет войти в телеграм. -->
+												   {{ getTranslation('menu_create_4') }}
 												</div>
 											</div>
-											<div @click="showScreen('create')" class="btn btn-sm btn-primary mb-2 shadow-sm">Создать</div>
+											<div @click="showScreen('create')" class="btn btn-sm btn-primary mb-2 shadow-sm">
+												<!-- Создать -->
+												{{ getTranslation('menu_create_5') }}
+											</div>
 		
 											<hr class="divider">
 		
 											<div class="row mb-3">
-												<label class="form-label">Найти все мои обьявления</label>
+												<label class="form-label">
+													<!-- Найти все мои объявления -->
+													{{ getTranslation('menu_get_own_list_1') }}
+												</label>
 												<div class="col-4">
-													<label for="inputPassword1" class="form-label">Пароль<span class="text text-danger">*</span></label>
+													<label for="inputPassword1" class="form-label">
+														<!-- Пароль -->
+														{{ getTranslation('menu_get_own_list_2') }}
+														<span class="text text-danger">*</span></label>
 												</div>
 												<div class="col-8">
 													<input v-model="authPassword" type="password" id="inputPassword1" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
 												</div>
 												<div id="passwordHelpBlock" class="form-text">
-												  Необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте <a href="#" class="link-primary">t.me/limonade_pro_bot</a>
+													<!-- Необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте  -->
+												  {{ getTranslation('menu_get_own_list_3') }}
+												  <a href="#" class="link-primary">t.me/limonade_pro_bot</a>
 												</div>
 											</div>
-											<button @click="loadUserAds()" class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="authPassword.length < 5">Искать</button>
+											<button @click="loadUserAds()" class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="authPassword.length < 5">
+												<!-- Искать -->
+												{{ getTranslation('menu_get_own_list_4') }}
+											</button>
 										</div>
 									  </div>
 									</div>
@@ -166,7 +179,8 @@
 								  <div class="accordion-item">
 									<h2 class="accordion-header">
 									  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-										Почитать о нас
+										<!-- Почитать о нас -->
+										{{ getTranslation('menu_get_info_1') }}
 									  </button>
 									</h2>
 									<div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
@@ -182,170 +196,262 @@
 					</div>
 				</nav>
 		
-				<div v-if="isLoading">Загрузка объявлений...</div>
-				<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-				<div v-if="successMessage" class="alert alert-danger">{{ successMessage }}</div>
-			
-				<div v-if="showAdList" v-for="ad in adsList" :key="ad.id" class="row mb-3">
-					<div class="col">
-						<div class="card shadow-sm">
-							<div class="row g-0">
-								<div class="col-5">
-									<img :src="ad.cover_photo" class="img-fluid rounded-start" alt="image">
-								</div>
-								<div class="col-7">
-									<div class="card-body">
-										<h5 class="card-title text-truncate">{{ ad.title }}</h5>
-										<p class="card-text description-text">{{ ad.description }}</p>
-										<p class="card-text">
-											<small class="text-body-secondary text-truncate">
-												Создано {{ ad.created_at.split(' ')[0] }}
-											</small>
-										</p>
-										<div class="btn btn-sm btn-primary shadow-sm" @click="loadAdDetail(ad.id)">
-											Посмотреть
+				<div v-if="isLoading" class="d-flex justify-content-center p-5">
+					<div class="spinner-grow text-warning" role="status">
+						<span class="visually-hidden">
+							<!-- Загружается... -->
+							{{ getTranslation('general_info_1') }}
+						</span>
+					</div>
+				</div>
+				<div v-else>
+					<!-- <div v-if="isLoading">Загрузка объявлений...</div> -->
+					<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+					<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
+				
+					<div v-if="showAdList" v-for="ad in adsList" :key="ad.id" class="row mb-3">
+						<div class="col">
+							<div class="card shadow-sm">
+								<div class="row g-0">
+									<div class="col-5">
+										<img :src="ad.cover_photo" class="img-fluid rounded-start" alt="image">
+									</div>
+									<div class="col-7">
+										<div class="card-body">
+											<h5 class="card-title text-truncate">{{ ad.title }}</h5>
+											<p class="card-text description-text">{{ ad.description }}</p>
+											<p class="card-text">
+												<small class="text-body-secondary text-truncate">
+													<!-- Создано  -->
+													{{ getTranslation('get_list_1') }}
+													{{ ad.created_at.split(' ')[0] }}
+												</small>
+											</p>
+											<div class="btn btn-sm btn-primary shadow-sm" @click="loadAdDetail(ad.id)">
+												<!-- Посмотреть -->
+												{{ getTranslation('get_list_2') }}
+											</div>
 										</div>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-				</div>
 
-				<div v-if="!isLoading && showAdList" class="row mb-3">
-					<div v-if="currentPage > 1" class="col">
-						<div @click="currentPage = 1; loadAdsList(currentPage)" class="btn btn-sm btn-secondary shadow-sm">В начало</div>
+					<div v-if="showAdList" class="row mb-3">
+						<div v-if="currentPage > 1" class="col">
+							<div @click="currentPage = 1; loadAdsList(currentPage)" class="btn btn-sm btn-secondary shadow-sm">
+								<!-- В начало -->
+								{{ getTranslation('get_list_3') }}
+							</div>
+						</div>
+						<div v-if="adsList.length >= 10" class="col">
+							<div @click="currentPage += 1; loadAdsList(currentPage)" class="btn btn-sm btn-primary shadow-sm">
+								<!-- Показать еще... -->
+								{{ getTranslation('get_list_4') }}
+							</div>
+						</div>
 					</div>
-					<div v-if="adsList.length >= 10" class="col">
-						<div @click="nextPage()" class="btn btn-sm btn-primary shadow-sm">Показать еще...</div>
-					</div>
-				</div>
+
+					<div v-if="showAdDetail" class="row mb-3">
+						<div class="col">
+							<div class="card shadow-sm">
+								<img v-if="currentAd.photo_1" :src="currentAd.photo_1" class="card-img-top mb-1" alt="image">
+								<img v-if="currentAd.photo_2" :src="currentAd.photo_2" class="mb-1" alt="image">
+								<img v-if="currentAd.photo_3" :src="currentAd.photo_3" class="" alt="image">
+								<div class="card-body">
+									<h5 class="card-title">{{ currentAd.title }}</h5>
+									<div class="btn btn-sm btn-warning mb-1 shadow-sm">
+										Аренда
+									</div>
+									<!-- <div class="btn btn-sm btn-warning mb-1 shadow-sm">
+										Квартира
+									</div>
+									<div class="btn btn-sm btn-warning mb-1 shadow-sm">
+										2 спальных места
+									</div>
+									<div class="btn btn-sm btn-warning mb-1 shadow-sm">
+										от 1 месяца
+									</div> -->
+									<p class="card-text">{{ currentAd.description }}</p>
+									<h6 class="card-subtitle mb-3 text-body-secondary">
+										{{ currentAd.contact }}
+									</h6>
 			
-				<div v-if="showCreateAd" class="row mb-3">
-					<div class="col">
-						<div class="card shadow-sm">
-						<div class="card-body">
-							<h5 class="card-title">Создать новое обьявление</h5>
-							<h6 class="card-subtitle mb-2 text-body-secondary">
-								Обьявление будет размещено бесплатно на 10 дней. Опубликованное обьявление нельзя отредактировать, только удалить и создать новое.
-							</h6>
-							<div class="form-text mb-3">
-							"Фото" не обязательно к заполнению, но это поможет вашему обьявлению выделиться на фоне других.
-							</div>
-							
-							<div class="mb-3">
-								<label for="formFile1" class="form-label">Заглавное фото</label>
-								<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm" id="formFile1" type="file">
-							</div>
-
-							<div v-if="photoInputs[1]" class="mb-2">
-								<label for="formFile2" class="form-label">Фото 2</label>
-								<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm" id="formFile2" type="file">
-							</div>
-							
-							<div v-if="photoInputs[2]" class="mb-2">
-								<label for="formFile3" class="form-label">Фото 3</label>
-								<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm" id="formFile3" type="file">
-							</div>
-						
-							<div class="mb-3">
-							<label for="FormControlInput1" class="form-label">Название<span class="text text-danger">*</span></label>
-							<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput1" placeholder="Студия, 3.5 млн...">
-							</div>
-		
-							<div class="mb-3">
-								<label for="FormControlInput2" class="form-label">Категория<span class="text text-danger">*</span></label>
-								<select v-model="newAd.category" class="form-select form-select-sm shadow-sm" id="FormControlInput2" aria-label="Small select example">
-								<option selected>Выберите категорию</option>
-								<option value="1">Жильё</option>
-								<option value="2">Транспорт</option>
-								<option value="3">Услуги</option>
-								<option value="4">Товары</option>
-								<option value="5">Работа</option>
-								</select>
-							</div>
-		
-							<div class="mb-3">
-							<label for="FormControlTextarea1" class="form-label">Описание<span class="text text-danger">*</span></label>
-							<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm" id="FormControlTextarea1" rows="3" placeholder="Аренда, юг, 1 комн. кв., студия, 3.5 млн., 35 м2. Большая двухспальная кровать. Полностью меблированная. Отдельно вода, свет, уборка..."></textarea>
-							</div>
-		
-							<div class="mb-3">
-							<label for="FormControlInput3" class="form-label">Контакт<span class="text text-danger">*</span></label>
-							<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput3" placeholder="Николай, телеграм #nikolay_bro">
-							</div>
-							
-							<div class="row mb-3">
-								<div class="col-4">
-									<label for="inputPassword2" class="form-label">Пароль<span class="text text-danger">*</span></label>
+									<div class="row">
+										<div class="col-6">
+											<p class="card-text"><small class="text-body-secondary">
+												<!-- Создано  -->
+												{{ getTranslation('get_one_1') }}
+												{{ currentAd.created_at.split(' ')[0] }}</small></p>
+										</div>
+										<div class="col-6">
+											<div class="btn btn-sm btn-primary shadow-sm" @click="returnToList()">
+												<!-- Назад к списку -->
+												{{ getTranslation('get_one_2') }}
+											</div>
+										</div>
+									</div>
 								</div>
-								<div class="col-8">
-									<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
-								</div>
-								<div id="passwordHelpBlock" class="form-text">
-								Зайдите в телеграм бота <a href="#" class="link-primary">t.me/limonade_pro_bot</a>, нажмите "старт", получите ваш ID номер, введите его сюда в качестве пароля.
+								<div v-if="isAdOwner" class="card-footer">
+									<div class="row mb-3">
+										<div class="col-4">
+											<label for="inputPassword3" class="form-label">
+												<!-- Пароль -->
+												{{ getTranslation('delete_1') }}
+											</label>
+										</div>
+										<div class="col-8">
+											<input v-model="authPassword" type="password" id="inputPassword3" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+										</div>
+										<div id="passwordHelpBlock" class="form-text">
+											<!-- Для удаления необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте  -->
+										  {{ getTranslation('delete_2') }}
+										  <a href="#" class="link-primary">t.me/limonade_pro_bot</a>
+										</div>
+									</div>
+									<button @click="deleteAd(currentAd.id)" class="btn btn-sm btn-danger mb-2 shadow-sm" :disabled="authPassword.length < 5">
+										<!-- Удалить объявление -->
+										{{ getTranslation('delete_3') }}
+									</button>
 								</div>
 							</div>
-							<button @click="createAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">Опубликовать обьявление</button>
-		
-						</div>
 						</div>
 					</div>
-				</div>
 
-				<div v-if="showAdDetail" class="row mb-3">
-					<div class="col">
-						<div class="card shadow-sm">
-							<img v-if="currentAd.photo_1" :src="currentAd.photo_1" class="card-img-top mb-1" alt="image">
-							<img v-if="currentAd.photo_2" :src="currentAd.photo_2" class="mb-1" alt="image">
-							<img v-if="currentAd.photo_3" :src="currentAd.photo_3" class="" alt="image">
+					<div v-if="showCreateAd" class="row mb-3">
+						<div class="col">
+							<div class="card shadow-sm">
 							<div class="card-body">
-								<h5 class="card-title">{{ currentAd.title }}</h5>
-								<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-									Аренда
-								</div>
-								<!-- <div class="btn btn-sm btn-warning mb-1 shadow-sm">
-									Квартира
-								</div>
-								<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-									2 спальных места
-								</div>
-								<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-									от 1 месяца
-								</div> -->
-								<p class="card-text">{{ currentAd.description }}</p>
-								<h6 class="card-subtitle mb-3 text-body-secondary">
-									{{ currentAd.contact }}
+								<h5 class="card-title">
+									<!-- Создать новое объявление -->
+									{{ getTranslation('create_1') }}
+								</h5>
+								<h6 class="card-subtitle mb-2 text-body-secondary">
+									<!-- Объявление будет размещено бесплатно на 10 дней. Опубликованное объявление нельзя отредактировать, только удалить и создать новое. -->
+									{{ getTranslation('create_2') }}
 								</h6>
-		
-								<div class="row">
-									<div class="col-6">
-										<p class="card-text"><small class="text-body-secondary">Создано {{ currentAd.created_at.split(' ')[0] }}</small></p>
-									</div>
-									<div class="col-6">
-										<div class="btn btn-sm btn-primary shadow-sm" @click="returnToList()">Назад к списку</div>
-									</div>
+								<div class="form-text mb-3">
+									<!-- 'Фото' не обязательно, но это поможет вашему объявлению выделиться на фоне других. -->
+									{{ getTranslation('create_3') }}
 								</div>
-							</div>
-							<div v-if="isAdOwner" class="card-footer">
+								
+								<div class="mb-3">
+									<label for="formFile1" class="form-label">
+										<!-- Заглавное фото -->
+										{{ getTranslation('create_4') }}
+									</label>
+									<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm" id="formFile1" type="file">
+								</div>
+	
+								<div v-if="photoInputs[1]" class="mb-2">
+									<label for="formFile2" class="form-label">
+										<!-- Фото 2 -->
+										{{ getTranslation('create_13') }}
+									</label>
+									<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm" id="formFile2" type="file">
+								</div>
+								
+								<div v-if="photoInputs[2]" class="mb-2">
+									<label for="formFile3" class="form-label">
+										<!-- Фото 3 -->
+										{{ getTranslation('create_14') }}
+									</label>
+									<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm" id="formFile3" type="file">
+								</div>
+							
+								<div class="mb-3">
+								<label for="FormControlInput1" class="form-label">
+									<!-- Название -->
+									{{ getTranslation('create_5') }}
+									<span class="text text-danger">*</span></label>
+								<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput1" placeholder="Студия, 3.5 млн...">
+								</div>
+
+								<!-- Выбор головной категории -->
+								<div class="mb-3">
+									<label for="categorySelect" class="form-label">
+									  	Категория
+									  <span class="text text-danger">*</span>
+									</label>
+									<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm shadow-sm" id="categorySelect" aria-label="Small select example">
+										<option value="">
+											Не выбрано
+										</option>
+										<option v-for="(cat, key) in categories" :key="key" :value="key">{{ key }}</option>
+									</select>
+								</div>
+								  
+								<!-- Выбор подкатегории 1 -->
+								<div v-if="selectedMainCategory && subcategories1" class="mb-3">
+									<!-- <label for="subcategory1Select" class="form-label">Подкатегория</label> -->
+									<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm shadow-sm" id="subcategory1Select" aria-label="Small select example">
+										<option value="">
+											Выберите подкатегорию
+										</option>
+										<option v-for="(sub, key) in subcategories1" :key="key" :value="key">{{ key }}</option>
+									</select>
+								</div>
+								  
+								<!-- Выбор подкатегории 2 -->
+								<div v-if="selectedSubcategory1 && subcategories2" class="mb-3">
+									<!-- <label for="subcategory2Select" class="form-label">Подкатегория</label> -->
+									<select v-model="selectedSubcategory2" class="form-select form-select-sm shadow-sm" id="subcategory2Select" aria-label="Small select example">
+										<option value="">
+											Выберите подкатегорию
+										</option>
+										<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
+									</select>
+								</div>
+
+								
+			
+								<div class="mb-3">
+									<label for="FormControlTextarea1" class="form-label">
+										<!-- Описание -->
+										{{ getTranslation('create_7') }}
+										<span class="text text-danger">*</span> <span v-if="categoryCode">{{ categoryCode }}</span></label>
+									<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm" id="FormControlTextarea1" rows="3" placeholder="Аренда, юг, 1 комн. кв., студия, 3.5 млн., 35 м2. Большая двухспальная кровать. Полностью меблированная. Отдельно вода, свет, уборка..."></textarea>
+								</div>
+			
+								<div class="mb-3">
+									<label for="FormControlInput3" class="form-label">
+										<!-- Контакт -->
+										{{ getTranslation('create_8') }}
+										<span class="text text-danger">*</span></label>
+									<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput3" placeholder="Николай, телеграм @nikolay_bro">
+								</div>
+								
 								<div class="row mb-3">
 									<div class="col-4">
-										<label for="inputPassword3" class="form-label">Пароль</label>
+										<label for="inputPassword2" class="form-label">
+											<!-- Пароль -->
+											{{ getTranslation('create_9') }}
+											<span class="text text-danger">*</span></label>
 									</div>
 									<div class="col-8">
-										<input v-model="authPassword" type="password" id="inputPassword3" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+										<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
 									</div>
 									<div id="passwordHelpBlock" class="form-text">
-									  Для удаления необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте <a href="#" class="link-primary">t.me/limonade_pro_bot</a>
+										<!-- Зайдите в телеграм бота  -->
+									{{ getTranslation('create_10') }}
+									<a href="#" class="link-primary">t.me/limonade_pro_bot</a>
+									<!-- , нажмите 'старт', получите ваш ID номер, введите его сюда в качестве пароля. -->
+									{{ getTranslation('create_11') }}
 									</div>
 								</div>
-								<button @click="deleteAd()" class="btn btn-sm btn-danger mb-2 shadow-sm" :disabled="authPassword.length < 5">Удалить обьявление</button>
+								<button @click="createAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+									<!-- Опубликовать объявление -->
+									{{ getTranslation('create_12') }}
+								</button>
+			
 							</div>
-		
+							</div>
 						</div>
 					</div>
+
+
 				</div>
-		
 			</div>
 		</div>
 	</div>
@@ -369,7 +475,10 @@
 					// содержит массив объявлений
                     adsList: [],
 					// содержит объект одного объявления
-                    currentAd: null,
+                    currentAd: {
+						photo_1: null,
+						created_at: ''
+					},
 					// содержит объект нового объявления (ещё не созданного)
 					newAd: {
 						title: '',
@@ -381,7 +490,7 @@
 					// содержит массив загруженных фото
         			photos: [],
 					// показывает, что данные в процессе загрузки с сервера
-                    isLoading: false,
+                    isLoading: true,
 					// содержит текст всплывающей подсказки в случае успеха
 					successMessage: null,
 					// содержит текст всплывающей подсказки в случае ошибки
@@ -392,12 +501,767 @@
 					isAdOwner: false,
 					// содержит пароль для авторизации
 					authPassword: '',
+					// язык интерфейса по умолчанию
+					currentLanguage: 'RU',
+					// словарь интерфейса
+					translations: {
+						RU: {
+							general_info_1: "Загружается...",
+							general_info_2: "",
+							general_info_3: "",
+							general_info_4: "",
+
+							navbar_1: "НЯ ЧАНГ",
+							navbar_2: "Меню",
+							navbar_3: "",
+							navbar_4: "",
+
+							get_list_1: "Создано",
+							get_list_2: "Посмотреть",
+							get_list_3: "В начало",
+							get_list_4: "Показать еще...",
+							get_list_5: "",
+							get_list_6: "",
+
+							get_one_1: "Создано",
+							get_one_2: "Назад к списку",
+							get_one_3: "",
+							get_one_4: "",
+
+							create_1: "Создать новое объявление",
+							create_2: "Объявление будет размещено бесплатно на 10 дней. Опубликованное объявление нельзя отредактировать, только удалить и создать новое.",
+							create_3: "'Фото' не обязательно, но это поможет вашему объявлению выделиться на фоне других.",
+							create_4: "Заглавное фото",
+							create_5: "Название",
+							create_6: "Категория",
+							create_7: "Описание",
+							create_8: "Контакт",
+							create_9: "Пароль",
+							create_10: "Зайдите в телеграм бота ",
+							create_11: ", нажмите 'старт', получите ваш ID номер, введите его сюда в качестве пароля.",
+							create_12: "Опубликовать объявление",
+							create_13: "Фото 2",
+							create_14: "Фото 3",
+							create_15: "",
+							create_16: "",
+
+							get_own_list_1: "",
+							get_own_list_2: "",
+
+							delete_1: "Пароль",
+							delete_2: "Для удаления необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте ",
+							delete_3: "Удалить объявление",
+							delete_4: "",
+							delete_5: "",
+
+							menu_get_list_1: "Фильтровать поиск",
+							menu_get_list_2: "Выберите категорию",
+							menu_get_list_3: "Выберите подкатегорию",
+							menu_get_list_4: "Искать",
+							menu_get_list_5: "",
+							menu_get_list_6: "",
+							menu_get_list_7: "",
+
+							menu_create_1: "Мои объявления",
+							menu_create_2: "Создать новое объявление",
+							menu_create_3: "Объявление будет размещено бесплатно на 10 дней. Опубликованное объявление нельзя отредактировать, только удалить и создать новое.",
+							menu_create_4: "Для создания объявления вам необходимо будет войти в телеграм.",
+							menu_create_5: "Создать",
+							menu_create_6: "",
+							menu_create_7: "",
+
+							menu_get_own_list_1: "Найти все мои объявления",
+							menu_get_own_list_2: "Пароль",
+							menu_get_own_list_3: "Необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте ",
+							menu_get_own_list_4: "Искать",
+							menu_get_own_list_5: "",
+							menu_get_own_list_6: "",
+
+							menu_get_info_1: "Почитать о нас",
+							menu_get_info_2: "",
+							menu_get_info_3: "",
+							menu_get_info_4: ""
+						},
+						EN: {
+							general_info_1: "Loading...",
+							general_info_2: "",
+							general_info_3: "",
+							general_info_4: "",
+
+							navbar_1: "NHA TRANG",
+							navbar_2: "Menu",
+							navbar_3: "",
+							navbar_4: "",
+
+							get_list_1: "Created",
+							get_list_2: "View details",
+							get_list_3: "Back to top",
+							get_list_4: "Show more...",
+							get_list_5: "",
+							get_list_6: "",
+
+							get_one_1: "Created",
+							get_one_2: "Back to the list",
+							get_one_3: "",
+							get_one_4: "",
+
+							create_1: "Create a new ad",
+							create_2: "The ad will be posted for free for 10 days. The published ad cannot be edited, only deleted and a new one created.",
+							create_3: "'Photos' are not required, but they will help your listing stand out from the crowd.",
+							create_4: "Main photo",
+							create_5: "Title",
+							create_6: "Category",
+							create_7: "Description",
+							create_8: "Contact",
+							create_9: "Password",
+							create_10: "Go to the telegram bot ",
+							create_11: ", press 'start', get your ID number, enter it here as a password.",
+							create_12: "Post the ad",
+							create_13: "Photo 2",
+							create_14: "Photo 3",
+							create_15: "",
+							create_16: "",
+
+							get_own_list_1: "",
+							get_own_list_2: "",
+
+							delete_1: "Password",
+							delete_2: "To delete, you need to enter your ID number as a password. You received it earlier in the telegram bot ",
+							delete_3: "Delete the Ad",
+							delete_4: "",
+							delete_5: "",
+
+							menu_get_list_1: "Filter search",
+							menu_get_list_2: "Select category",
+							menu_get_list_3: "Select a subcategory",
+							menu_get_list_4: "Search",
+							menu_get_list_5: "",
+							menu_get_list_6: "",
+							menu_get_list_7: "",
+
+							menu_create_1: "My ads",
+							menu_create_2: "Create a new ad",
+							menu_create_3: "The ad will be posted for free for 10 days. The published ad cannot be edited, only deleted and a new one created.",
+							menu_create_4: "To create an ad, you will need to enter to Telegram.",
+							menu_create_5: "Create",
+							menu_create_6: "",
+							menu_create_7: "",
+
+							menu_get_own_list_1: "Find all my ads",
+							menu_get_own_list_2: "Password",
+							menu_get_own_list_3: "You need to enter your ID number as a password. You received it earlier in the telegram bot ",
+							menu_get_own_list_4: "Search",
+							menu_get_own_list_5: "",
+							menu_get_own_list_6: "",
+
+							menu_get_info_1: "Read about us",
+							menu_get_info_2: "",
+							menu_get_info_3: "",
+							menu_get_info_4: ""
+						}
+					},
+					// содержит весь список категорий
+
+
+					// Структура категорий с кодами
+					categories: {
+						'Жильё': { code: '1', subcategories: {
+								'Аренда': { code: 'A', subcategories: {
+									'Кровать': { code: '1' },
+									'Комната': { code: '2' },
+									'Квартира': { code: '3' },
+									'Дом': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Продажа': { code: 'B'
+							}
+						}},
+						'Транспорт': { code: '2', subcategories: {
+								'Аренда': { code: 'A', subcategories: {
+									'Велосипед': { code: '1' },
+									'Мопед': { code: '2' },
+									'Мотоцикл': { code: '3' },
+									'Автомобиль': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Продажа': { code: 'B', subcategories: {
+									'Велосипед': { code: '1' },
+									'Мопед': { code: '2' },
+									'Мотоцикл': { code: '3' },
+									'Автомобиль': { code: '4' },
+									'Другое': { code: '5' }
+							}}
+						}},
+						'Услуги': { code: '3', subcategories: {
+								'Транспорт, грузоперевозки, визараны': { code: 'A', subcategories: {
+									'Транспорт': { code: '1' },
+									'Грузоперевозки': { code: '2' },
+									'Визараны': { code: '3' },
+									'Складские услуги': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Документы, визы, билеты': { code: 'B', subcategories: {
+									'Документы': { code: '1' },
+									'Визы': { code: '2' },
+									'Билеты': { code: '3' },
+									'Страховки': { code: '4' },
+									'Другое': { code: '5' }
+							}}
+						}},
+						'Товары': { code: '4', subcategories: {
+								'Электроника': { code: 'A' },
+								'Мебель': { code: 'B' },
+								'Бытовые товары': { code: 'C' },
+								'Одежда': { code: 'D' },
+								'Еда': { code: 'E' },
+								'Детские товары': { code: 'F' },
+								'Животные': { code: 'G' },
+								'Хобби и отдых': { code: 'H' },
+								'Автозапчасти': { code: 'I' },
+								'Красота и здоровье': { code: 'J' },
+								'Растения': { code: 'K' },
+								'Товары для бизнеса': { code: 'L' },
+								'Другое': { code: 'Z' }
+						}},
+						'Работа': { code: '5', subcategories: {
+								'Предложение': { code: 'A', subcategories: {
+									'Частичная занятость': { code: '1' },
+									'Полная занятость': { code: '2' }
+							}},
+								'Поиск': { code: 'B' }
+						}},
+					},
+					selectedMainCategory: '', // Выбранная головная категория
+					selectedSubcategory1: '', // Выбранная подкатегория 1
+					selectedSubcategory2: '', // Выбранная подкатегория 2
+					subcategories1: null, // Список подкатегорий 1
+					subcategories2: null, // Список подкатегорий 2
+					categoryCode: '', // Строка с итоговым кодом категории
+
+
+
+					// categories: [
+					// 	{
+					// 	name: "Жильё",
+					// 	array: {
+					// 		"A": {
+					// 		name: "Аренда",
+					// 		array: [
+					// 			{ name: "Квартира" },
+					// 			{ name: "Дом" }
+					// 		]
+					// 		},
+					// 		"B": {
+					// 		name: "Продажа",
+					// 		array: [
+					// 			{ name: "Квартира" },
+					// 			{ name: "Дом" }
+					// 		]
+					// 		}
+					// 	}
+					// 	},
+					// 	{
+					// 	name: "Транспорт",
+					// 	array: {
+					// 		"A": { name: "Автомобили" },
+					// 		"B": { name: "Мотоциклы" }
+					// 	}
+					// 	}
+					// ],
+					// categories: {
+					// 	"1": {
+					// 		"name": "Жильё",
+					// 		"array": {
+					// 			"A": {
+					// 				"name": "Аренда",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Кровать"
+					// 					},
+					// 					"3": {
+					// 						"name": "Комната"
+					// 					},
+					// 					"4": {
+					// 						"name": "Квартира"
+					// 					},
+					// 					"5": {
+					// 						"name": "Дом"
+					// 					}
+					// 				}
+					// 			},
+					// 			"B": {
+					// 				"name": "Продажа"
+					// 			}
+					// 		}
+					// 	},
+					// 	"2": {
+					// 		"name": "Транспорт",
+					// 		"array": {
+					// 			"A": {
+					// 				"name": "Аренда",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Велосипед"
+					// 					},
+					// 					"3": {
+					// 						"name": "Мопед"
+					// 					},
+					// 					"4": {
+					// 						"name": "Мотоцикл"
+					// 					},
+					// 					"5": {
+					// 						"name": "Автомобиль"
+					// 					}
+					// 				}
+					// 			},
+					// 			"B": {
+					// 				"name": "Продажа",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Велосипед"
+					// 					},
+					// 					"3": {
+					// 						"name": "Мопед"
+					// 					},
+					// 					"4": {
+					// 						"name": "Мотоцикл"
+					// 					},
+					// 					"5": {
+					// 						"name": "Автомобиль"
+					// 					}
+					// 				}
+					// 			}
+					// 		}
+					// 	},
+					// 	"3": {
+					// 		"name": "Услуги",
+					// 		"array": {
+					// 			"A": {
+					// 				"name": "Транспорт, грузоперевозки, визараны",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Транспорт"
+					// 					},
+					// 					"3": {
+					// 						"name": "Грузоперевозки"
+					// 					},
+					// 					"4": {
+					// 						"name": "Визараны"
+					// 					},
+					// 					"5": {
+					// 						"name": "Складские услуги"
+					// 					}
+					// 				}
+					// 			},
+					// 			"B": {
+					// 				"name": "Документы, визы, билеты",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Документы"
+					// 					},
+					// 					"3": {
+					// 						"name": "Визы"
+					// 					},
+					// 					"4": {
+					// 						"name": "Билеты"
+					// 					},
+					// 					"5": {
+					// 						"name": "Страховки"
+					// 					}
+					// 				}
+					// 			},
+					// 			"C": {
+					// 				"name": "Мобильная связь, интернет, IT",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Мобильная связь"
+					// 					},
+					// 					"3": {
+					// 						"name": "Интернет"
+					// 					},
+					// 					"4": {
+					// 						"name": "IT"
+					// 					}
+					// 				}
+					// 			},
+					// 			"D": {
+					// 				"name": "Обмен валюты, переводы, банковские карты",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Обмен валюты"
+					// 					},
+					// 					"3": {
+					// 						"name": "Переводы"
+					// 					},
+					// 					"4": {
+					// 						"name": "Банковские карты"
+					// 					}
+					// 				}
+					// 			},
+					// 			"E": {
+					// 				"name": "Поиск жилья, адаптация, камеры хранения",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Поиск жилья"
+					// 					},
+					// 					"3": {
+					// 						"name": "Адаптация"
+					// 					},
+					// 					"4": {
+					// 						"name": "Камеры хранения"
+					// 					}
+					// 				}
+					// 			},
+					// 			"F": {
+					// 				"name": "Красота, здоровье",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Красота"
+					// 					},
+					// 					"3": {
+					// 						"name": "Здоровье"
+					// 					}
+					// 				}
+					// 			},
+					// 			"G": {
+					// 				"name": "Уборка, стирка, дезинсекция",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Уборка"
+					// 					},
+					// 					"3": {
+					// 						"name": "Стирка"
+					// 					},
+					// 					"4": {
+					// 						"name": "Дезинсекция"
+					// 					}
+					// 				}
+					// 			},
+					// 			"H": {
+					// 				"name": "Ремонт электроники, телефонов, ноутбуков",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Ремонт электроники"
+					// 					},
+					// 					"3": {
+					// 						"name": "Ремонт телефонов"
+					// 					},
+					// 					"4": {
+					// 						"name": "Ремонт ноутбуков"
+					// 					}
+					// 				}
+					// 			},
+					// 			"I": {
+					// 				"name": "Мелкий бытовой ремонт (муж на час)",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Мелкий бытовой ремонт"
+					// 					},
+					// 					"3": {
+					// 						"name": "Монтаж и установка техники"
+					// 					}
+					// 				}
+					// 			},
+					// 			"J": {
+					// 				"name": "Обучение, курсы, искусство",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Обучение"
+					// 					},
+					// 					"3": {
+					// 						"name": "Курсы"
+					// 					},
+					// 					"4": {
+					// 						"name": "Искусство"
+					// 					}
+					// 				}
+					// 			},
+					// 			"K": {
+					// 				"name": "Тусовки, мероприятия, экскурсии",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Тусовки"
+					// 					},
+					// 					"3": {
+					// 						"name": "Мероприятия"
+					// 					},
+					// 					"4": {
+					// 						"name": "Экскурсии"
+					// 					}
+					// 				}
+					// 			},
+					// 			"L": {
+					// 				"name": "Еда, кулинария",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Еда"
+					// 					},
+					// 					"3": {
+					// 						"name": "Кулинария"
+					// 					}
+					// 				}
+					// 			},
+					// 			"M": {
+					// 				"name": "Ремонт, строительство",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Ремонт"
+					// 					},
+					// 					"3": {
+					// 						"name": "Строительство"
+					// 					}
+					// 				}
+					// 			},
+					// 			"N": {
+					// 				"name": "Переводчик, юридические услуги",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Переводчик"
+					// 					},
+					// 					"3": {
+					// 						"name": "Юридические услуги"
+					// 					}
+					// 				}
+					// 			},
+					// 			"O": {
+					// 				"name": "Няня, детские сады, школы",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Няня"
+					// 					},
+					// 					"3": {
+					// 						"name": "Детские сады"
+					// 					},
+					// 					"4": {
+					// 						"name": "Школы"
+					// 					}
+					// 				}
+					// 			},
+					// 			"P": {
+					// 				"name": "Домашние животные, передержка, выгул",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Домашние животные"
+					// 					},
+					// 					"3": {
+					// 						"name": "Передержка"
+					// 					},
+					// 					"4": {
+					// 						"name": "Выгул"
+					// 					}
+					// 				}
+					// 			},
+					// 			"Q": {
+					// 				"name": "Доставка товаров на дом",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Доставка товаров на дом"
+					// 					}
+					// 				}
+					// 			},
+					// 			"R": {
+					// 				"name": "Фото, видеосьемка",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Фото"
+					// 					},
+					// 					"3": {
+					// 						"name": "Видеосьемка"
+					// 					}
+					// 				}
+					// 			},
+					// 			"S": {
+					// 				"name": "Автосервис",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Автосервис"
+					// 					}
+					// 				}
+					// 			},
+					// 			"T": {
+					// 				"name": "Прокат, аренда",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Прокат"
+					// 					},
+					// 					"3": {
+					// 						"name": "Аренда"
+					// 					}
+					// 				}
+					// 			},
+					// 			"U": {
+					// 				"name": "Охрана, сторож",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Другое"
+					// 					},
+					// 					"2": {
+					// 						"name": "Охрана"
+					// 					},
+					// 					"3": {
+					// 						"name": "Сторож"
+					// 					}
+					// 				}
+					// 			},
+					// 			"Z": {
+					// 				"name": "Другое"
+					// 			}
+					// 		}
+					// 	},
+					// 	"4": {
+					// 		"name": "Товары",
+					// 		"array": {
+					// 			"A": {
+					// 				"name": "Электроника"
+					// 			},
+					// 			"B": {
+					// 				"name": "Мебель"
+					// 			},
+					// 			"C": {
+					// 				"name": "Бытовые товары"
+					// 			},
+					// 			"D": {
+					// 				"name": "Одежда"
+					// 			},
+					// 			"E": {
+					// 				"name": "Еда"
+					// 			},
+					// 			"F": {
+					// 				"name": "Детские товары"
+					// 			},
+					// 			"G": {
+					// 				"name": "Животные"
+					// 			},
+					// 			"H": {
+					// 				"name": "Хобби и отдых"
+					// 			},
+					// 			"I": {
+					// 				"name": "Автозапчасти"
+					// 			},
+					// 			"J": {
+					// 				"name": "Красота и здоровье"
+					// 			},
+					// 			"K": {
+					// 				"name": "Растения"
+					// 			},
+					// 			"L": {
+					// 				"name": "Товары для бизнеса"
+					// 			},
+					// 			"Z": {
+					// 				"name": "Другое"
+					// 			}
+					// 		}
+					// 	},
+					// 	"5": {
+					// 		"name": "Работа",
+					// 		"array": {
+					// 			"A": {
+					// 				"name": "Предложение",
+					// 				"array": {
+					// 					"1": {
+					// 						"name": "Частичная занятость"
+					// 					},
+					// 					"2": {
+					// 						"name": "Полная занятость"
+					// 					}
+					// 				}
+					// 			},
+					// 			"B": {
+					// 				"name": "Поиск"
+					// 			}
+					// 		}
+					// 	}
+					// },
+					// содержит список выбранных категорий
+					// selectedCategories: ['', ''], // добавляем пустую строку для подкатегорий
                 };
             },
             mounted() {
                 // метод загрузки списка объявлений при первой загрузке или при обновлении страницы
                 this.loadAdsList(1);
+				this.isLoading = false;
             },
+			watch: {
+				// Наблюдаем за изменением второго уровня подкатегорий (третий выпадающий список)
+				selectedSubcategory2() {
+				this.updateCategoryCode();
+				}
+			},
+			computed: {
+				// строка с итоговой категорией
+				// finalCategoryCode() {
+				// 	return this.selectedCategories.join('');
+				// },
+			},
             methods: {
 				// метод выбора, какой экран показать в данный момент
 				showScreen(screen) {
@@ -413,15 +1277,29 @@
 					this.isAdOwner = false;
 					this.showScreen('list');
                     this.isLoading = true;
-                    axios.get(`api/ads?page=${currentPage}`)
+                    axios.get(`api/get_list?page=${currentPage}`)
                         .then(response => {
-							// console.log(response.data);
-                            this.adsList = response.data;
 							// Плавная прокрутка вверх страницы после загрузки объявлений
 							window.scrollTo({top: 0, behavior: 'smooth'});
+							// console.log(response.data);
+                            this.adsList = response.data;
                         })
-                        .catch(() => {
-                            this.errorMessage = 'Не удалось загрузить объявления';
+                        .catch((error) => {
+                            // this.errorMessage = 'Не удалось загрузить объявления';
+							console.error('Сообщение ошибки:', error.message);
+							if (error.response) {
+								// Сервер вернул ответ с ошибкой
+								console.error('Данные ответа с ошибкой:', error.response.data);
+								console.error('Код ответа:', error.response.status);
+								console.error('Заголовки ответа:', error.response.headers);
+							} else if (error.request) {
+								// Запрос был отправлен, но ответа не было
+								console.error('Запрос без ответа:', error.request);
+							} else {
+								// Другая ошибка, связанная с настройкой запроса
+								console.error('Ошибка настройки запроса:', error.message);
+							}
+							console.error('Полный объект ошибки:', error);
                         })
                         .finally(() => {
                             this.isLoading = false;
@@ -432,13 +1310,27 @@
 					// console.log('id равна: ' + id);
 					this.showScreen('detail');
                     this.isLoading = true;
-                    axios.get(`api/ads/${id}`)
+                    axios.get(`api/get_one/${id}`)
                         .then(response => {
-							console.log(response.data);
+							// console.log(response.data);
                             this.currentAd = response.data;
                         })
-                        .catch(() => {
-                            this.errorMessage = 'Не удалось загрузить объявление';
+                        .catch((error) => {
+                            // this.errorMessage = 'Не удалось загрузить объявление';
+							console.error('Сообщение ошибки:', error.message);
+							if (error.response) {
+								// Сервер вернул ответ с ошибкой
+								console.error('Данные ответа с ошибкой:', error.response.data);
+								console.error('Код ответа:', error.response.status);
+								console.error('Заголовки ответа:', error.response.headers);
+							} else if (error.request) {
+								// Запрос был отправлен, но ответа не было
+								console.error('Запрос без ответа:', error.request);
+							} else {
+								// Другая ошибка, связанная с настройкой запроса
+								console.error('Ошибка настройки запроса:', error.message);
+							}
+							console.error('Полный объект ошибки:', error);
                         })
                         .finally(() => {
                             this.isLoading = false;
@@ -447,26 +1339,43 @@
 				// метод, возвращающий пользователя от просмотра одного объявления назад к списку уже загруженных объявлений
 				returnToList() {
 					this.showScreen('list');
-					this.currentAd = null;
-				},
-				// метод, который прибавляет одну страницу для пагинации и вызывает метод загрузки с сервера списка объявлений
-				nextPage() {
-					this.currentPage += 1; // Увеличиваем номер страницы
-					this.loadAdsList(this.currentPage); // Загружаем следующую страницу
+					this.currentAd = {photo_1: null, created_at: ''};
 				},
 				// метод загрузки с сервера только списка своих собственных объявлений
 				loadUserAds() {
+					// проверяем, введен ли пароль
+					if (!this.authPassword) {
+						this.errorMessage = 'Пожалуйста, введите пароль.';
+						return;
+					}
 					this.showScreen('list');
 					this.isLoading = true;
-                    axios.post('api/ads/auth', { password: this.authPassword })
+					this.currentPage = 1;
+                    axios.post('api/get_own_list', { password: this.authPassword })
                         .then(response => {
 							console.log(response.data);
+							// Плавная прокрутка вверх страницы после загрузки объявлений
+							window.scrollTo({top: 0, behavior: 'smooth'});
                             this.adsList = response.data;
 							this.isAdOwner = true;
 							this.authPassword = '';
                         })
-                        .catch(() => {
-                            this.errorMessage = 'Не удалось загрузить объявления';
+                        .catch((error) => {
+                            // this.errorMessage = 'Не удалось загрузить объявления';
+							console.error('Сообщение ошибки:', error.message);
+							if (error.response) {
+								// Сервер вернул ответ с ошибкой
+								console.error('Данные ответа с ошибкой:', error.response.data);
+								console.error('Код ответа:', error.response.status);
+								console.error('Заголовки ответа:', error.response.headers);
+							} else if (error.request) {
+								// Запрос был отправлен, но ответа не было
+								console.error('Запрос без ответа:', error.request);
+							} else {
+								// Другая ошибка, связанная с настройкой запроса
+								console.error('Ошибка настройки запроса:', error.message);
+							}
+							console.error('Полный объект ошибки:', error);
                         })
                         .finally(() => {
                             this.isLoading = false;
@@ -479,19 +1388,16 @@
 						this.errorMessage = 'Пожалуйста, заполните все обязательные поля.';
 						return;
 					}
-
 					// проверяем, введен ли пароль
 					if (!this.authPassword) {
 						this.errorMessage = 'Пожалуйста, введите пароль.';
 						return;
 					}
-
 					// проверяем наличие фотографий (максимум 3)
 					if (this.photos.length > 3) {
 						this.errorMessage = 'Максимум можно загрузить 3 фотографии.';
 						return;
 					}
-
 					// формируем объект FormData для отправки данных на сервер
 					const formData = new FormData();
 					formData.append('title', this.newAd.title);
@@ -507,10 +1413,10 @@
 
 					// отправляем данные на сервер
 					this.isLoading = true;
-					axios.post('api/ads', formData, {
+					axios.post('api/create', formData, {
 						headers: {
 							'Content-Type': 'multipart/form-data'
-						}
+						} 
 					})
 					.then(response => {
 						console.log(response.data);
@@ -518,11 +1424,28 @@
 						this.newAd = { title: '', description: '', contact: '', category: '' }; // очищаем форму
 						this.authPassword = ''; // очищаем пароль
 						this.photos = []; // очищаем поле с фото
-						this.showScreen('list');
+						// this.showScreen('list');
+						this.loadAdsList();
+						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+						setTimeout(() => { this.successMessage = ''; }, 3000);
 					})
-					.catch(error => {
-						this.errorMessage = 'Не удалось создать обьявление';
-						console.error(error);
+					.catch((error) => {
+						// this.errorMessage = 'Не удалось создать обьявление';
+						// console.error(error);
+						console.error('Сообщение ошибки:', error.message);
+							if (error.response) {
+								// Сервер вернул ответ с ошибкой
+								console.error('Данные ответа с ошибкой:', error.response.data);
+								console.error('Код ответа:', error.response.status);
+								console.error('Заголовки ответа:', error.response.headers);
+							} else if (error.request) {
+								// Запрос был отправлен, но ответа не было
+								console.error('Запрос без ответа:', error.request);
+							} else {
+								// Другая ошибка, связанная с настройкой запроса
+								console.error('Ошибка настройки запроса:', error.message);
+							}
+							console.error('Полный объект ошибки:', error);
 					})
 					.finally(() => {
 						this.isLoading = false;
@@ -540,8 +1463,48 @@
 					}
 				},
 				// метод удаления существующего объявления
-				deleteAd() {
-
+				deleteAd(id) {
+					// проверяем, введен ли пароль
+					if (!this.authPassword) {
+						this.errorMessage = 'Пожалуйста, введите пароль.';
+						return;
+					}
+					// отправляем данные на сервер
+					this.isLoading = true;
+					axios.post(`api/delete/${id}`, { password: this.authPassword })
+						.then(response => {
+							console.log(response.data);
+							this.successMessage = 'Объявление успешно удалено!';
+							// удаляем объявление из массива adsList
+							this.adsList = this.adsList.filter(ad => ad.id !== id);
+							this.currentAd = {photo_1: null, created_at: ''};
+							this.authPassword = '';
+							console.log('auth_pass: ' + this.authPassword);
+							// this.showScreen('list');
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.successMessage = ''; }, 3000);
+						})
+						.catch((error) => {
+							// this.errorMessage = 'Не удалось удалить обьявление';
+							// console.error(error);
+							console.error('Сообщение ошибки:', error.message);
+								if (error.response) {
+									// Сервер вернул ответ с ошибкой
+									console.error('Данные ответа с ошибкой:', error.response.data);
+									console.error('Код ответа:', error.response.status);
+									console.error('Заголовки ответа:', error.response.headers);
+								} else if (error.request) {
+									// Запрос был отправлен, но ответа не было
+									console.error('Запрос без ответа:', error.request);
+								} else {
+									// Другая ошибка, связанная с настройкой запроса
+									console.error('Ошибка настройки запроса:', error.message);
+								}
+								console.error('Полный объект ошибки:', error);
+						})
+						.finally(() => {
+							this.isLoading = false;
+						});
 				},
 				// метод закрытия бокового меню и возврата на базовый экран
 				closeSidebar() {
@@ -551,6 +1514,63 @@
 						bsOffcanvas.hide(); // Скрыть offcanvas
 					}
 				},
+				// метод установки языка
+				setLanguage(lang) {
+                    this.currentLanguage = lang; // Устанавливаем текущий язык
+                },
+				// метод получения выбранного перевода
+                getTranslation(key) {
+                    return this.translations[this.currentLanguage][key]; // Возвращаем перевод по ключу
+                },
+
+
+				// метод обновления выбранных категорий
+				loadSubcategories(level) {
+					// Если выбран уровень "main" - подгружаем первую подкатегорию или сбрасываем
+					if (level === 'main') {
+					if (this.selectedMainCategory) {
+						this.subcategories1 = this.categories[this.selectedMainCategory].subcategories;
+					} else {
+						this.subcategories1 = null;
+					}
+					this.selectedSubcategory1 = '';
+					this.selectedSubcategory2 = '';
+					this.subcategories2 = null;
+					this.updateCategoryCode();
+					}
+
+					// Если выбран уровень "sub1" - подгружаем подкатегорию 2 или сбрасываем
+					if (level === 'sub1') {
+					if (this.selectedSubcategory1) {
+						this.subcategories2 = this.subcategories1[this.selectedSubcategory1].subcategories;
+					} else {
+						this.subcategories2 = null;
+					}
+					this.selectedSubcategory2 = '';
+					this.updateCategoryCode();
+					}
+				},
+				updateCategoryCode() {
+					// формирование итогового кода на основе выбора
+					let mainCategoryCode = this.categories[this.selectedMainCategory]?.code || '';
+					let subCategory1Code = this.subcategories1?.[this.selectedSubcategory1]?.code || '';
+					let subCategory2Code = this.subcategories2?.[this.selectedSubcategory2]?.code || '';
+					this.categoryCode = `${mainCategoryCode}${subCategory1Code}${subCategory2Code}`;
+				},
+				
+				
+				// updateSubcategories(level) {
+				// 	// очищаем все последующие категории
+				// 	this.selectedCategories = this.selectedCategories.slice(0, level + 1);
+				// },
+				// // метод получения подкатегорий для текущего уровня
+				// getSubcategories(level) {
+				// 	const selectedCategory = this.categories[this.selectedCategories[0]];
+				// 	if (level === 0) {
+				// 		return Object.values(selectedCategory.array).flatMap(sub => Object.values(sub.array));
+				// 	}
+				// 	return []; // если на следующем уровне, возвращаем пустой массив
+				// }
             }
         });
 
