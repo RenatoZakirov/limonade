@@ -10,6 +10,7 @@ class ImageEditor
     private $fileType;
     private $fileSize;
     public $orientation;
+    public $watermarkAdded = false;
 
     // Метод установки базовых параметров
     public function __construct($file) {
@@ -80,7 +81,7 @@ class ImageEditor
         return true;
     }
 
-    // Изменение размера изображения до стандарта
+    // Изменение размера изображения до стандарта и вставка watermark по центру
     public function resizeToFit($text = 'Limonade.pro') {
         // Устанавливаем целевые размеры в зависимости от ориентации
         $targetWidth = $this->orientation === 'h' ? 600 : 450;
@@ -127,24 +128,30 @@ class ImageEditor
             $targetWidth, $targetHeight
         );
 
-        // Путь к файлу шрифта
-        $fontFile = 'libraries/fonts/NerkoRegular.ttf'; // Укажите путь к вашему файлу шрифта TTF
-        $fontSize = 40; // Размер шрифта
+        // Если текст еще не был добавлен, добавляем его
+        if (!$this->watermarkAdded) {
+            // Путь к файлу шрифта
+            $fontFile = 'libraries/fonts/NerkoRegular.ttf'; // Укажите путь к вашему файлу шрифта TTF
+            $fontSize = 50; // Размер шрифта
 
-        // Устанавливаем параметры для текста
-        $textColor = imagecolorallocatealpha($newImage, 255, 255, 255, 85); // Белый цвет с 25% прозрачностью (64 из 127)
+            // Устанавливаем параметры для текста
+            $textColor = imagecolorallocatealpha($newImage, 255, 255, 255, 85); // Белый цвет с прозрачностью
 
-        // Определяем размеры текста
-        $textBox = imagettfbbox($fontSize, 0, $fontFile, $text);
-        $textWidth = $textBox[2] - $textBox[0];
-        $textHeight = $textBox[7] - $textBox[1];
+            // Определяем размеры текста
+            $textBox = imagettfbbox($fontSize, 0, $fontFile, $text);
+            $textWidth = $textBox[2] - $textBox[0];
+            $textHeight = $textBox[7] - $textBox[1];
 
-        // Вычисляем координаты для центрирования текста
-        $textX = ($targetWidth - $textWidth) / 2;
-        $textY = ($targetHeight - $textHeight) / 2 + $textHeight;
+            // Вычисляем координаты для центрирования текста
+            $textX = ($targetWidth - $textWidth) / 2;
+            $textY = ($targetHeight - $textHeight) / 2 + $textHeight;
 
-        // Добавляем текст на изображение
-        imagettftext($newImage, $fontSize, 0, $textX, $textY, $textColor, $fontFile, $text);
+            // Добавляем текст на изображение
+            imagettftext($newImage, $fontSize, 0, $textX, $textY, $textColor, $fontFile, $text);
+
+            // Устанавливаем флаг
+            $this->watermarkAdded = true;
+        }
   
         // Заменяем старое изображение новым
         $this->image = $newImage;
@@ -154,7 +161,6 @@ class ImageEditor
         // Освобождаем ресурсы промежуточного изображения
         imagedestroy($scaledImage);
 
-        //
         return true;
     }
 

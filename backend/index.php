@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once 'libraries/redbeanphp/rb.php';
 
 // Подключение библиотеки для работы с фото
-require_once 'libraries/cropimagephp/ie.php';
+require_once 'libraries/imageeditorphp/ie.php';
 
 // Конфигурация базы данных
 require_once 'config/database.php';

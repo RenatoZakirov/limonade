@@ -22,6 +22,10 @@ class Router {
             header('Content-Type: text/html');
             readfile(__DIR__ . '/../frontend/index.html');
         }
+        // Обработка HTML-запросов
+        elseif ($this->pathParts[0] === 'html') {
+            $this->handleHtmlRequest();
+        }
         // API-запросы
         elseif ($this->pathParts[0] === 'api') {
             $this->handleApiRequest();
@@ -31,6 +35,19 @@ class Router {
             $this->handleTelegramWebhook();
         }
         else {
+            http_response_code(404);
+            echo json_encode(["message" => "Not Found"]);
+        }
+    }
+
+    private function handleHtmlRequest() {
+        $controller = new AdController();
+
+        // Показать одно объявление по ID (HTML)
+        if ($this->requestMethod === 'GET' && $this->pathParts[1] === 'get_one' && isset($this->pathParts[2]) && is_numeric($this->pathParts[2])) {
+            $adId = intval($this->pathParts[2]);
+            $controller->getAd($adId, true);
+        } else {
             http_response_code(404);
             echo json_encode(["message" => "Not Found"]);
         }
@@ -46,7 +63,13 @@ class Router {
         // Показать одно объявление по ID
         elseif ($this->requestMethod === 'GET' && $this->pathParts[1] === 'get_one' && isset($this->pathParts[2]) && is_numeric($this->pathParts[2])) {
             $adId = intval($this->pathParts[2]);
-            $controller->getAd($adId);
+            $controller->getAd($adId, false);
+        }
+        // Заблокировать пользователя
+        elseif ($this->requestMethod === 'GET' && $this->pathParts[1] === 'block_user' && isset($this->pathParts[2]) && isset($this->pathParts[3]) && is_numeric($this->pathParts[3])) {
+            // $password = $this->pathParts[2];
+            // $userId = intval($this->pathParts[3]);
+            // $controller->blockUser($password, $userId);
         }
         // Создать новое объявление
         elseif ($this->requestMethod === 'POST' && $this->pathParts[1] === 'create') {

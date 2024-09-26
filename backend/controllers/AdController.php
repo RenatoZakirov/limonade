@@ -166,15 +166,27 @@ class AdController {
     }
 
     // Получить одно объявление по ID
-    public function getAd($id) {
+    public function getAd($id, $html = false) {
+        // Здесь будет ваша логика для получения объявления
+        if ($html) {
+            // Логика для обработки HTML-ответа
+            // Например, загрузка шаблона и передача данных в него
+        } else {
+            // Логика для обработки API-ответа
+            // Например, возвращение данных в формате JSON
+        }
+
+
         // Проверяем заголовки запроса
         $isJsonRequest = false;
-        if (isset($_SERVER['HTTP_ACCEPT'])) {
+        // if (isset($_SERVER['HTTP_ACCEPT'])) {
+        if ($html === false && isset($_SERVER['HTTP_ACCEPT'])) {
             $isJsonRequest = strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
         }
 
         // Если запрос не JSON, отправляем базовую HTML-страницу
         if (!$isJsonRequest) {
+            // реализация через передачу id обьявления в переменной php. и вставки этой переменной в верстку
             header('Content-Type: text/html');
             readfile(__DIR__ . '/../../frontend/index.html');
             return;
@@ -284,7 +296,7 @@ class AdController {
         // Проверка количества активных объявлений пользователя
         $activeAdsCount = R::count('ads', 'user_id = ? AND status = 1', [$user->id]);
 
-        if ($activeAdsCount >= 4) {
+        if ($activeAdsCount >= 6) {
             http_response_code(400);
             echo json_encode(["message" => "Лимит объявлений исчерпан"]);
             return;
@@ -540,6 +552,12 @@ class AdController {
                 unlink($imageFile);
             }
         }
+    }
+
+    // Заблокировать пользователя по ID
+    public function blockUser($password, $id) {
+        //
+        
     }
 
 }

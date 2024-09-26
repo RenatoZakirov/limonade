@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Объявления</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 	<style>
 		[v-cloak] {
 			display: none;
@@ -37,12 +38,12 @@
 
 				<nav class="navbar bg-body-tertiary fixed-top shadow-sm">
 					<div class="container-fluid">
-						<button @click="loadAdsList(1)" class=" btn btn-sm btn-success">LIMONADE.PRO</button>
+						<button @click="cleanCategory(); loadAdsList()" class=" btn btn-sm btn-success shadow-sm">LIMONADE.PRO</button>
 						<button type="button" class="btn btn-sm btn-warning shadow-sm">
 							<!-- НЯ ЧАНГ -->
 							{{ getTranslation('navbar_1') }}
 						</button>
-						<div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+						<div class="btn-group btn-group-sm shadow-sm" role="group" aria-label="Small button group">
 							<button @click="setLanguage('RU')" type="button" 
 									:class="['btn', 'btn-sm', currentLanguage === 'RU' ? 'btn-warning' : 'btn-outline-warning']">RU</button>
 							<button @click="setLanguage('EN')" type="button" 
@@ -74,7 +75,6 @@
 									<div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
 										<div class="accordion-body">
 		
-											<!-- Выбор головной категории -->
 											<label for="categorySelect" class="form-label">
 												<!-- Выберите категорию -->
 												{{ getTranslation('menu_get_list_2') }}
@@ -83,36 +83,33 @@
 											<select v-model="selectedMainCategory" @change="loadSubcategories('main')"
 												class="form-select form-select-sm mb-3 shadow-sm" id="categorySelect" aria-label="Small select example">
 												<option value="">
-													Не выбрано
+													<!-- Не выбрано -->
+													{{ getTranslation('menu_get_list_3') }}
 												</option>
 												<option v-for="(cat, key) in categories" :key="key" :value="key">{{ key }}</option>
 											</select>
 											
-											<!-- Выбор подкатегории 1 -->
-											<!-- <label for="subcategory1Select" class="form-label">Подкатегория</label> -->
 											<select v-if="selectedMainCategory && subcategories1" v-model="selectedSubcategory1" @change="loadSubcategories('sub1')"
 												class="form-select form-select-sm mb-3 shadow-sm" id="subcategory1Select" aria-label="Small select example">
 												<option value="">
 													<!-- Выберите подкатегорию -->
-													{{ getTranslation('menu_get_list_3') }}
+													{{ getTranslation('menu_get_list_4') }}
 												</option>
 												<option v-for="(sub, key) in subcategories1" :key="key" :value="key">{{ key }}</option>
 											</select>
 											
-											<!-- Выбор подкатегории 2 -->
-											<!-- <label for="subcategory2Select" class="form-label">Подкатегория</label> -->
 											<select v-if="selectedSubcategory1 && subcategories2" v-model="selectedSubcategory2"
 												class="form-select form-select-sm mb-3 shadow-sm" id="subcategory2Select" aria-label="Small select example">
 												<option value="">
 													<!-- Выберите подкатегорию -->
-													{{ getTranslation('menu_get_list_3') }}
+													{{ getTranslation('menu_get_list_5') }}
 												</option>
 												<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
 											</select>
 										
-											<button class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="categoryCode.length < 1">
+											<button @click="loadAdsList()" class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="categoryCode.length < 1">
 												<!-- Искать -->
-												{{ getTranslation('menu_get_list_4') }}
+												{{ getTranslation('menu_get_list_6') }} <span v-if="categoryCode">{{ categoryCode }}</span>
 											</button>
 		
 										</div>
@@ -141,7 +138,7 @@
 												   {{ getTranslation('menu_create_4') }}
 												</div>
 											</div>
-											<div @click="showScreen('create')" class="btn btn-sm btn-primary mb-2 shadow-sm">
+											<div @click="cleanCategory(); showScreen('create')" class="btn btn-sm btn-primary mb-2 shadow-sm">
 												<!-- Создать -->
 												{{ getTranslation('menu_create_5') }}
 											</div>
@@ -260,39 +257,48 @@
 								<img v-if="currentAd.photo_2" :src="currentAd.photo_2" class="mb-1" alt="image">
 								<img v-if="currentAd.photo_3" :src="currentAd.photo_3" class="" alt="image">
 								<div class="card-body">
-									<h5 class="card-title">{{ currentAd.title }}</h5>
-									<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-										Аренда
+									<h5 class="card-title">{{ currentAd.title }} {{ currentAd.category }}</h5>
+									<!-- Генерация кнопок категорий -->
+									<div v-for="categoryName in getCategoryNames(currentAd.category)" :key="categoryName" class="d-inline-block">
+										<button class="btn btn-sm btn-warning mb-1 me-2 shadow-sm">
+											{{ categoryName }}
+										</button>
 									</div>
 									<!-- <div class="btn btn-sm btn-warning mb-1 shadow-sm">
-										Квартира
-									</div>
-									<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-										2 спальных места
-									</div>
-									<div class="btn btn-sm btn-warning mb-1 shadow-sm">
-										от 1 месяца
+										Аренда
 									</div> -->
 									<p class="card-text">{{ currentAd.description }}</p>
-									<h6 class="card-subtitle mb-3 text-body-secondary">
+									<h6 class="card-subtitle mb-2 text-body-secondary">
 										{{ currentAd.contact }}
 									</h6>
-			
-									<div class="row">
-										<div class="col-6">
+
+									<div class="row mb-3">
+										<div class="col">
 											<p class="card-text"><small class="text-body-secondary">
 												<!-- Создано  -->
 												{{ getTranslation('get_one_1') }}
 												{{ currentAd.created_at.split(' ')[0] }}</small></p>
 										</div>
-										<div class="col-6">
-											<div class="btn btn-sm btn-primary shadow-sm" @click="returnToList()">
+									</div>
+									
+									<div class="row">
+										<div class="col-4">
+											<div class="btn btn-sm btn-secondary shadow-sm" @click="returnToList()">
 												<!-- Назад к списку -->
 												{{ getTranslation('get_one_2') }}
 											</div>
 										</div>
+										<div class="col">
+											<div class="btn btn-sm btn-primary shadow-sm" @click="copyLink(currentAd.id)">
+												<!-- Скопировать ссылку -->
+												<i class="bi bi-clipboard"></i> 
+												{{ copyIcon ? getTranslation('get_one_4') : getTranslation('get_one_3') }}
+											</div>
+										</div>
 									</div>
+
 								</div>
+
 								<div v-if="isAdOwner" class="card-footer">
 									<div class="row mb-3">
 										<div class="col-4">
@@ -347,7 +353,7 @@
 								<div v-if="photoInputs[1]" class="mb-2">
 									<label for="formFile2" class="form-label">
 										<!-- Фото 2 -->
-										{{ getTranslation('create_13') }}
+										{{ getTranslation('create_5') }}
 									</label>
 									<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm" id="formFile2" type="file">
 								</div>
@@ -355,7 +361,7 @@
 								<div v-if="photoInputs[2]" class="mb-2">
 									<label for="formFile3" class="form-label">
 										<!-- Фото 3 -->
-										{{ getTranslation('create_14') }}
+										{{ getTranslation('create_6') }}
 									</label>
 									<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm" id="formFile3" type="file">
 								</div>
@@ -363,20 +369,21 @@
 								<div class="mb-3">
 								<label for="FormControlInput1" class="form-label">
 									<!-- Название -->
-									{{ getTranslation('create_5') }}
+									{{ getTranslation('create_7') }}
 									<span class="text text-danger">*</span></label>
 								<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput1" placeholder="Студия, 3.5 млн...">
 								</div>
 
-								<!-- Выбор головной категории -->
 								<div class="mb-3">
 									<label for="categorySelect" class="form-label">
-									  	Категория
+										<!-- Категория -->
+										{{ getTranslation('create_8') }}
 									  <span class="text text-danger">*</span>
 									</label>
 									<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm shadow-sm" id="categorySelect" aria-label="Small select example">
 										<option value="">
-											Не выбрано
+											<!-- Не выбрано -->
+											{{ getTranslation('create_9') }}
 										</option>
 										<option v-for="(cat, key) in categories" :key="key" :value="key">{{ key }}</option>
 									</select>
@@ -387,7 +394,8 @@
 									<!-- <label for="subcategory1Select" class="form-label">Подкатегория</label> -->
 									<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm shadow-sm" id="subcategory1Select" aria-label="Small select example">
 										<option value="">
-											Выберите подкатегорию
+											<!-- Выберите подкатегорию -->
+											{{ getTranslation('create_10') }}
 										</option>
 										<option v-for="(sub, key) in subcategories1" :key="key" :value="key">{{ key }}</option>
 									</select>
@@ -398,26 +406,25 @@
 									<!-- <label for="subcategory2Select" class="form-label">Подкатегория</label> -->
 									<select v-model="selectedSubcategory2" class="form-select form-select-sm shadow-sm" id="subcategory2Select" aria-label="Small select example">
 										<option value="">
-											Выберите подкатегорию
+											<!-- Выберите подкатегорию -->
+											{{ getTranslation('create_11') }}
 										</option>
 										<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
 									</select>
 								</div>
 
-								
-			
 								<div class="mb-3">
 									<label for="FormControlTextarea1" class="form-label">
 										<!-- Описание -->
-										{{ getTranslation('create_7') }}
-										<span class="text text-danger">*</span> <span v-if="categoryCode">{{ categoryCode }}</span></label>
+										{{ getTranslation('create_12') }}
+										<span class="text text-danger">*</span> <span v-if="categoryCode">{{ categoryCode }}</label>
 									<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm" id="FormControlTextarea1" rows="3" placeholder="Аренда, юг, 1 комн. кв., студия, 3.5 млн., 35 м2. Большая двухспальная кровать. Полностью меблированная. Отдельно вода, свет, уборка..."></textarea>
 								</div>
 			
 								<div class="mb-3">
 									<label for="FormControlInput3" class="form-label">
 										<!-- Контакт -->
-										{{ getTranslation('create_8') }}
+										{{ getTranslation('create_13') }}
 										<span class="text text-danger">*</span></label>
 									<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput3" placeholder="Николай, телеграм @nikolay_bro">
 								</div>
@@ -426,7 +433,7 @@
 									<div class="col-4">
 										<label for="inputPassword2" class="form-label">
 											<!-- Пароль -->
-											{{ getTranslation('create_9') }}
+											{{ getTranslation('create_14') }}
 											<span class="text text-danger">*</span></label>
 									</div>
 									<div class="col-8">
@@ -434,15 +441,15 @@
 									</div>
 									<div id="passwordHelpBlock" class="form-text">
 										<!-- Зайдите в телеграм бота  -->
-									{{ getTranslation('create_10') }}
+									{{ getTranslation('create_15') }}
 									<a href="#" class="link-primary">t.me/limonade_pro_bot</a>
 									<!-- , нажмите 'старт', получите ваш ID номер, введите его сюда в качестве пароля. -->
-									{{ getTranslation('create_11') }}
+									{{ getTranslation('create_16') }}
 									</div>
 								</div>
 								<button @click="createAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
 									<!-- Опубликовать объявление -->
-									{{ getTranslation('create_12') }}
+									{{ getTranslation('create_17') }}
 								</button>
 			
 							</div>
@@ -484,6 +491,7 @@
 						title: '',
           				description: '',
 						contact: '',
+						category: ''
 					},
 					// управляет видимостью полей для фото
 					photoInputs: [true, false, false], // скрываем фото 2 и фото 3
@@ -524,26 +532,31 @@
 							get_list_6: "",
 
 							get_one_1: "Создано",
-							get_one_2: "Назад к списку",
-							get_one_3: "",
-							get_one_4: "",
+							get_one_2: "Назад",
+							get_one_3: "Копировать ссылку",
+							get_one_4: "Ссылка скопирована",
+							get_one_5: "",
+							get_one_6: "",
 
 							create_1: "Создать новое объявление",
 							create_2: "Объявление будет размещено бесплатно на 10 дней. Опубликованное объявление нельзя отредактировать, только удалить и создать новое.",
 							create_3: "'Фото' не обязательно, но это поможет вашему объявлению выделиться на фоне других.",
 							create_4: "Заглавное фото",
-							create_5: "Название",
-							create_6: "Категория",
-							create_7: "Описание",
-							create_8: "Контакт",
-							create_9: "Пароль",
-							create_10: "Зайдите в телеграм бота ",
-							create_11: ", нажмите 'старт', получите ваш ID номер, введите его сюда в качестве пароля.",
-							create_12: "Опубликовать объявление",
-							create_13: "Фото 2",
-							create_14: "Фото 3",
-							create_15: "",
-							create_16: "",
+							create_5: "Фото 2",
+							create_6: "Фото 3",
+							create_7: "Название",
+							create_8: "Категория",
+							create_9: "Не выбрано",
+							create_10: "Выберите подкатегорию",
+							create_11: "Выберите подкатегорию",
+							create_12: "Описание",
+							create_13: "Контакт",
+							create_14: "Пароль",
+							create_15: "Зайдите в телеграм бота ",
+							create_16: ", нажмите 'старт', получите ваш ID номер, введите его сюда в качестве пароля.",
+							create_17: "Опубликовать объявление",
+							create_18: "",
+							create_19: "",
 
 							get_own_list_1: "",
 							get_own_list_2: "",
@@ -556,11 +569,12 @@
 
 							menu_get_list_1: "Фильтровать поиск",
 							menu_get_list_2: "Выберите категорию",
-							menu_get_list_3: "Выберите подкатегорию",
-							menu_get_list_4: "Искать",
-							menu_get_list_5: "",
-							menu_get_list_6: "",
+							menu_get_list_3: "Не выбрано",
+							menu_get_list_4: "Выберите подкатегорию",
+							menu_get_list_5: "Выберите подкатегорию",
+							menu_get_list_6: "Искать",
 							menu_get_list_7: "",
+							menu_get_list_8: "",
 
 							menu_create_1: "Мои объявления",
 							menu_create_2: "Создать новое объявление",
@@ -601,26 +615,31 @@
 							get_list_6: "",
 
 							get_one_1: "Created",
-							get_one_2: "Back to the list",
-							get_one_3: "",
-							get_one_4: "",
+							get_one_2: "Back",
+							get_one_3: "Copy link",
+							get_one_4: "Link copied",
+							get_one_5: "",
+							get_one_6: "",
 
 							create_1: "Create a new ad",
 							create_2: "The ad will be posted for free for 10 days. The published ad cannot be edited, only deleted and a new one created.",
 							create_3: "'Photos' are not required, but they will help your listing stand out from the crowd.",
 							create_4: "Main photo",
-							create_5: "Title",
-							create_6: "Category",
-							create_7: "Description",
-							create_8: "Contact",
-							create_9: "Password",
-							create_10: "Go to the telegram bot ",
-							create_11: ", press 'start', get your ID number, enter it here as a password.",
-							create_12: "Post the ad",
-							create_13: "Photo 2",
-							create_14: "Photo 3",
-							create_15: "",
-							create_16: "",
+							create_5: "Photo 2",
+							create_6: "Photo 3",
+							create_7: "Title",
+							create_8: "Category",
+							create_9: "Not selected",
+							create_10: "Select a subcategory",
+							create_11: "Select a subcategory",
+							create_12: "Description",
+							create_13: "Contact",
+							create_14: "Password",
+							create_15: "Go to the telegram bot ",
+							create_16: ", press 'start', get your ID number, enter it here as a password.",
+							create_17: "Post the ad",
+							create_18: "",
+							create_19: "",
 
 							get_own_list_1: "",
 							get_own_list_2: "",
@@ -633,16 +652,17 @@
 
 							menu_get_list_1: "Filter search",
 							menu_get_list_2: "Select category",
-							menu_get_list_3: "Select a subcategory",
-							menu_get_list_4: "Search",
-							menu_get_list_5: "",
-							menu_get_list_6: "",
+							menu_get_list_3: "Not selected",
+							menu_get_list_4: "Select a subcategory",
+							menu_get_list_5: "Select a subcategory",
+							menu_get_list_6: "Search",
 							menu_get_list_7: "",
+							menu_get_list_8: "",
 
 							menu_create_1: "My ads",
 							menu_create_2: "Create a new ad",
 							menu_create_3: "The ad will be posted for free for 10 days. The published ad cannot be edited, only deleted and a new one created.",
-							menu_create_4: "To create an ad, you will need to enter to Telegram.",
+							menu_create_4: "To create an ad, you will need to visit to Telegram.",
 							menu_create_5: "Create",
 							menu_create_6: "",
 							menu_create_7: "",
@@ -660,10 +680,7 @@
 							menu_get_info_4: ""
 						}
 					},
-					// содержит весь список категорий
-
-
-					// Структура категорий с кодами
+					// содержит весь список категорий с кодами
 					categories: {
 						'Жильё': { code: '1', subcategories: {
 								'Аренда': { code: 'A', subcategories: {
@@ -731,117 +748,22 @@
 								'Поиск': { code: 'B' }
 						}},
 					},
-					selectedMainCategory: '', // Выбранная головная категория
-					selectedSubcategory1: '', // Выбранная подкатегория 1
-					selectedSubcategory2: '', // Выбранная подкатегория 2
-					subcategories1: null, // Список подкатегорий 1
-					subcategories2: null, // Список подкатегорий 2
-					categoryCode: '', // Строка с итоговым кодом категории
+					// Выбранная головная категория
+					selectedMainCategory: '',
+					// Выбранная подкатегория 1
+					selectedSubcategory1: '',
+					// Выбранная подкатегория 2
+					selectedSubcategory2: '',
+					// Список подкатегорий 1
+					subcategories1: null,
+					// Список подкатегорий 2
+					subcategories2: null,
+					// Строка с итоговым кодом категории
+					categoryCode: '',
+					//
+					copyIcon: false,
+					// переменная php для обозначение id обьявления. по умолчанию пустая
 
-
-
-					// categories: [
-					// 	{
-					// 	name: "Жильё",
-					// 	array: {
-					// 		"A": {
-					// 		name: "Аренда",
-					// 		array: [
-					// 			{ name: "Квартира" },
-					// 			{ name: "Дом" }
-					// 		]
-					// 		},
-					// 		"B": {
-					// 		name: "Продажа",
-					// 		array: [
-					// 			{ name: "Квартира" },
-					// 			{ name: "Дом" }
-					// 		]
-					// 		}
-					// 	}
-					// 	},
-					// 	{
-					// 	name: "Транспорт",
-					// 	array: {
-					// 		"A": { name: "Автомобили" },
-					// 		"B": { name: "Мотоциклы" }
-					// 	}
-					// 	}
-					// ],
-					// categories: {
-					// 	"1": {
-					// 		"name": "Жильё",
-					// 		"array": {
-					// 			"A": {
-					// 				"name": "Аренда",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Кровать"
-					// 					},
-					// 					"3": {
-					// 						"name": "Комната"
-					// 					},
-					// 					"4": {
-					// 						"name": "Квартира"
-					// 					},
-					// 					"5": {
-					// 						"name": "Дом"
-					// 					}
-					// 				}
-					// 			},
-					// 			"B": {
-					// 				"name": "Продажа"
-					// 			}
-					// 		}
-					// 	},
-					// 	"2": {
-					// 		"name": "Транспорт",
-					// 		"array": {
-					// 			"A": {
-					// 				"name": "Аренда",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Велосипед"
-					// 					},
-					// 					"3": {
-					// 						"name": "Мопед"
-					// 					},
-					// 					"4": {
-					// 						"name": "Мотоцикл"
-					// 					},
-					// 					"5": {
-					// 						"name": "Автомобиль"
-					// 					}
-					// 				}
-					// 			},
-					// 			"B": {
-					// 				"name": "Продажа",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Велосипед"
-					// 					},
-					// 					"3": {
-					// 						"name": "Мопед"
-					// 					},
-					// 					"4": {
-					// 						"name": "Мотоцикл"
-					// 					},
-					// 					"5": {
-					// 						"name": "Автомобиль"
-					// 					}
-					// 				}
-					// 			}
-					// 		}
-					// 	},
 					// 	"3": {
 					// 		"name": "Услуги",
 					// 		"array": {
@@ -1177,77 +1099,15 @@
 					// 			}
 					// 		}
 					// 	},
-					// 	"4": {
-					// 		"name": "Товары",
-					// 		"array": {
-					// 			"A": {
-					// 				"name": "Электроника"
-					// 			},
-					// 			"B": {
-					// 				"name": "Мебель"
-					// 			},
-					// 			"C": {
-					// 				"name": "Бытовые товары"
-					// 			},
-					// 			"D": {
-					// 				"name": "Одежда"
-					// 			},
-					// 			"E": {
-					// 				"name": "Еда"
-					// 			},
-					// 			"F": {
-					// 				"name": "Детские товары"
-					// 			},
-					// 			"G": {
-					// 				"name": "Животные"
-					// 			},
-					// 			"H": {
-					// 				"name": "Хобби и отдых"
-					// 			},
-					// 			"I": {
-					// 				"name": "Автозапчасти"
-					// 			},
-					// 			"J": {
-					// 				"name": "Красота и здоровье"
-					// 			},
-					// 			"K": {
-					// 				"name": "Растения"
-					// 			},
-					// 			"L": {
-					// 				"name": "Товары для бизнеса"
-					// 			},
-					// 			"Z": {
-					// 				"name": "Другое"
-					// 			}
-					// 		}
-					// 	},
-					// 	"5": {
-					// 		"name": "Работа",
-					// 		"array": {
-					// 			"A": {
-					// 				"name": "Предложение",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Частичная занятость"
-					// 					},
-					// 					"2": {
-					// 						"name": "Полная занятость"
-					// 					}
-					// 				}
-					// 			},
-					// 			"B": {
-					// 				"name": "Поиск"
-					// 			}
-					// 		}
-					// 	}
-					// },
-					// содержит список выбранных категорий
-					// selectedCategories: ['', ''], // добавляем пустую строку для подкатегорий
+					
                 };
             },
             mounted() {
+				// ветвление. если переменная php пустая, загружаем список обьявлений
+				// если не пуста, загружаем одно обьявление
+				
                 // метод загрузки списка объявлений при первой загрузке или при обновлении страницы
-                this.loadAdsList(1);
+                this.loadAdsList();
 				this.isLoading = false;
             },
 			watch: {
@@ -1256,13 +1116,16 @@
 				this.updateCategoryCode();
 				}
 			},
-			computed: {
-				// строка с итоговой категорией
-				// finalCategoryCode() {
-				// 	return this.selectedCategories.join('');
-				// },
-			},
             methods: {
+				// метод очистки категорий
+				cleanCategory() {
+					this.selectedMainCategory = '';
+					this.selectedSubcategory1 = '';
+					this.selectedSubcategory2 = '';
+					this.subcategories1 = null;
+					this.subcategories2 = null;
+					this.categoryCode = '';
+				},
 				// метод выбора, какой экран показать в данный момент
 				showScreen(screen) {
 					this.showAdList = screen === 'list';
@@ -1274,18 +1137,30 @@
 				},
                 // метод загрузки с сервера списка объявлений
                 loadAdsList(currentPage = 1) {
-					this.isAdOwner = false;
+					// Плавная прокрутка страницы вверх после загрузки объявлений
+					window.scrollTo({top: 0, behavior: 'smooth'});
 					this.showScreen('list');
-                    this.isLoading = true;
-                    axios.get(`api/get_list?page=${currentPage}`)
+					this.isLoading = true;
+					// this.cleanCategory();
+
+					this.isAdOwner = false;
+					this.authPassword = '';
+
+					// Формируем URL для запроса
+    				let url = `api/get_list?page=${currentPage}`;
+
+					// Добавляем параметр categoryCode, если он не пустой
+					if (this.categoryCode.length > 0) {
+						url += `&category=${this.categoryCode}`;
+					}
+
+                    // axios.get(`api/get_list?page=${currentPage}`)
+					axios.get(url)
                         .then(response => {
-							// Плавная прокрутка вверх страницы после загрузки объявлений
-							window.scrollTo({top: 0, behavior: 'smooth'});
-							// console.log(response.data);
                             this.adsList = response.data;
                         })
                         .catch((error) => {
-                            // this.errorMessage = 'Не удалось загрузить объявления';
+                            this.errorMessage = 'Не удалось загрузить объявления';
 							console.error('Сообщение ошибки:', error.message);
 							if (error.response) {
 								// Сервер вернул ответ с ошибкой
@@ -1299,7 +1174,8 @@
 								// Другая ошибка, связанная с настройкой запроса
 								console.error('Ошибка настройки запроса:', error.message);
 							}
-							console.error('Полный объект ошибки:', error);
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })
                         .finally(() => {
                             this.isLoading = false;
@@ -1307,7 +1183,6 @@
                 },
                 // метод загрузки с сервера одного объявления по ID
                 loadAdDetail(id) {
-					// console.log('id равна: ' + id);
 					this.showScreen('detail');
                     this.isLoading = true;
                     axios.get(`api/get_one/${id}`)
@@ -1316,8 +1191,7 @@
                             this.currentAd = response.data;
                         })
                         .catch((error) => {
-                            // this.errorMessage = 'Не удалось загрузить объявление';
-							console.error('Сообщение ошибки:', error.message);
+                            this.errorMessage = 'Не удалось загрузить объявление';
 							if (error.response) {
 								// Сервер вернул ответ с ошибкой
 								console.error('Данные ответа с ошибкой:', error.response.data);
@@ -1330,7 +1204,8 @@
 								// Другая ошибка, связанная с настройкой запроса
 								console.error('Ошибка настройки запроса:', error.message);
 							}
-							console.error('Полный объект ошибки:', error);
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })
                         .finally(() => {
                             this.isLoading = false;
@@ -1340,6 +1215,7 @@
 				returnToList() {
 					this.showScreen('list');
 					this.currentAd = {photo_1: null, created_at: ''};
+					this.copyIcon = false;
 				},
 				// метод загрузки с сервера только списка своих собственных объявлений
 				loadUserAds() {
@@ -1348,21 +1224,22 @@
 						this.errorMessage = 'Пожалуйста, введите пароль.';
 						return;
 					}
+					// Плавная прокрутка вверх страницы после загрузки объявлений
+					window.scrollTo({top: 0, behavior: 'smooth'});
 					this.showScreen('list');
 					this.isLoading = true;
+					this.cleanCategory();
+
 					this.currentPage = 1;
                     axios.post('api/get_own_list', { password: this.authPassword })
                         .then(response => {
-							console.log(response.data);
-							// Плавная прокрутка вверх страницы после загрузки объявлений
-							window.scrollTo({top: 0, behavior: 'smooth'});
+							// console.log(response.data);
                             this.adsList = response.data;
 							this.isAdOwner = true;
 							this.authPassword = '';
                         })
                         .catch((error) => {
-                            // this.errorMessage = 'Не удалось загрузить объявления';
-							console.error('Сообщение ошибки:', error.message);
+                            this.errorMessage = 'Не удалось загрузить объявления';
 							if (error.response) {
 								// Сервер вернул ответ с ошибкой
 								console.error('Данные ответа с ошибкой:', error.response.data);
@@ -1375,7 +1252,8 @@
 								// Другая ошибка, связанная с настройкой запроса
 								console.error('Ошибка настройки запроса:', error.message);
 							}
-							console.error('Полный объект ошибки:', error);
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })
                         .finally(() => {
                             this.isLoading = false;
@@ -1384,10 +1262,17 @@
 				// метод создания нового объявления (и отправка его на сервер)
 				createAd() {
 					// сначала проверяем обязательные поля
-					if (!this.newAd.title || !this.newAd.description || !this.newAd.contact || !this.newAd.category) {
+					// if (!this.newAd.title || !this.newAd.description || !this.newAd.contact || !this.newAd.category) {
+					// 	this.errorMessage = 'Пожалуйста, заполните все обязательные поля.';
+					// 	return;
+					// }
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+					if (!this.newAd.title || !this.newAd.description || !this.newAd.contact || !this.categoryCode) {
 						this.errorMessage = 'Пожалуйста, заполните все обязательные поля.';
 						return;
 					}
+					this.newAd.category = this.categoryCode;
 					// проверяем, введен ли пароль
 					if (!this.authPassword) {
 						this.errorMessage = 'Пожалуйста, введите пароль.';
@@ -1410,7 +1295,7 @@
 					for (let i = 0; i < this.photos.length; i++) {
 						formData.append('photos[]', this.photos[i]);
 					}
-
+					
 					// отправляем данные на сервер
 					this.isLoading = true;
 					axios.post('api/create', formData, {
@@ -1419,33 +1304,34 @@
 						} 
 					})
 					.then(response => {
-						console.log(response.data);
 						this.successMessage = 'Объявление успешно создано!';
-						this.newAd = { title: '', description: '', contact: '', category: '' }; // очищаем форму
-						this.authPassword = ''; // очищаем пароль
-						this.photos = []; // очищаем поле с фото
-						// this.showScreen('list');
+						// очищаем форму
+						this.newAd = { title: '', description: '', contact: '', category: '' };
+						// очищаем пароль
+						this.authPassword = '';
+						// очищаем массив фото
+						this.photos = [];
+						this.cleanCategory();
 						this.loadAdsList();
 						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 						setTimeout(() => { this.successMessage = ''; }, 3000);
 					})
 					.catch((error) => {
-						// this.errorMessage = 'Не удалось создать обьявление';
-						// console.error(error);
-						console.error('Сообщение ошибки:', error.message);
-							if (error.response) {
-								// Сервер вернул ответ с ошибкой
-								console.error('Данные ответа с ошибкой:', error.response.data);
-								console.error('Код ответа:', error.response.status);
-								console.error('Заголовки ответа:', error.response.headers);
-							} else if (error.request) {
-								// Запрос был отправлен, но ответа не было
-								console.error('Запрос без ответа:', error.request);
-							} else {
-								// Другая ошибка, связанная с настройкой запроса
-								console.error('Ошибка настройки запроса:', error.message);
-							}
-							console.error('Полный объект ошибки:', error);
+						this.errorMessage = 'Не удалось создать объявление';	
+						if (error.response) {
+							// Сервер вернул ответ с ошибкой
+							console.error('Данные ответа с ошибкой:', error.response.data);
+							console.error('Код ответа:', error.response.status);
+							console.error('Заголовки ответа:', error.response.headers);
+						} else if (error.request) {
+							// Запрос был отправлен, но ответа не было
+							console.error('Запрос без ответа:', error.request);
+						} else {
+							// Другая ошибка, связанная с настройкой запроса
+							console.error('Ошибка настройки запроса:', error.message);
+						}
+						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
 					})
 					.finally(() => {
 						this.isLoading = false;
@@ -1464,6 +1350,8 @@
 				},
 				// метод удаления существующего объявления
 				deleteAd(id) {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
 					// проверяем, введен ли пароль
 					if (!this.authPassword) {
 						this.errorMessage = 'Пожалуйста, введите пароль.';
@@ -1473,21 +1361,19 @@
 					this.isLoading = true;
 					axios.post(`api/delete/${id}`, { password: this.authPassword })
 						.then(response => {
-							console.log(response.data);
+							// console.log(response.data);
 							this.successMessage = 'Объявление успешно удалено!';
 							// удаляем объявление из массива adsList
 							this.adsList = this.adsList.filter(ad => ad.id !== id);
 							this.currentAd = {photo_1: null, created_at: ''};
-							this.authPassword = '';
-							console.log('auth_pass: ' + this.authPassword);
-							// this.showScreen('list');
+							this.showScreen('list');
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.successMessage = ''; }, 3000);
 						})
 						.catch((error) => {
-							// this.errorMessage = 'Не удалось удалить обьявление';
+							this.errorMessage = 'Не удалось удалить объявление';
 							// console.error(error);
-							console.error('Сообщение ошибки:', error.message);
+							// console.error('Сообщение ошибки:', error.message);
 								if (error.response) {
 									// Сервер вернул ответ с ошибкой
 									console.error('Данные ответа с ошибкой:', error.response.data);
@@ -1500,11 +1386,41 @@
 									// Другая ошибка, связанная с настройкой запроса
 									console.error('Ошибка настройки запроса:', error.message);
 								}
-								console.error('Полный объект ошибки:', error);
+								// console.error('Полный объект ошибки:', error);
+								// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+								setTimeout(() => { this.errorMessage = ''; }, 3000);
 						})
 						.finally(() => {
 							this.isLoading = false;
 						});
+				},
+				//
+				getCategoryNames(categoryCode) {
+					const categoryNames = [];
+					let currentLevel = this.categories;
+
+					// Проходим по каждому символу строки categoryCode
+					for (const char of categoryCode) {
+						// Ищем категорию на текущем уровне
+						const foundCategory = Object.entries(currentLevel).find(([key, value]) => value.code === char);
+						if (foundCategory) {
+							const [categoryName, categoryData] = foundCategory;
+							categoryNames.push(categoryName);
+							
+							// Если есть подкатегории, проваливаемся глубже
+							if (categoryData.subcategories) {
+								currentLevel = categoryData.subcategories;
+							} else {
+								// Если нет подкатегорий, прекращаем цикл
+								break;
+							}
+						} else {
+							// Если символ не найден, прекращаем цикл
+							break;
+						}
+					}
+
+					return categoryNames;
 				},
 				// метод закрытия бокового меню и возврата на базовый экран
 				closeSidebar() {
@@ -1514,6 +1430,19 @@
 						bsOffcanvas.hide(); // Скрыть offcanvas
 					}
 				},
+				// метод копирования ссылки в буфер обмена
+				copyLink(id) {
+					const url = `http://localhost/limonade/html/get_one/${id}`;
+					navigator.clipboard.writeText(url)
+						.then(() => {
+							this.copyIcon = true;
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							// setTimeout(() => { this.copyIcon = false; }, 1000);
+						})
+						.catch(err => {
+							// console.error("Ошибка при копировании ссылки: ", err);
+						});
+				},
 				// метод установки языка
 				setLanguage(lang) {
                     this.currentLanguage = lang; // Устанавливаем текущий язык
@@ -1522,8 +1451,6 @@
                 getTranslation(key) {
                     return this.translations[this.currentLanguage][key]; // Возвращаем перевод по ключу
                 },
-
-
 				// метод обновления выбранных категорий
 				loadSubcategories(level) {
 					// Если выбран уровень "main" - подгружаем первую подкатегорию или сбрасываем
@@ -1550,6 +1477,7 @@
 					this.updateCategoryCode();
 					}
 				},
+				// 
 				updateCategoryCode() {
 					// формирование итогового кода на основе выбора
 					let mainCategoryCode = this.categories[this.selectedMainCategory]?.code || '';
@@ -1557,20 +1485,7 @@
 					let subCategory2Code = this.subcategories2?.[this.selectedSubcategory2]?.code || '';
 					this.categoryCode = `${mainCategoryCode}${subCategory1Code}${subCategory2Code}`;
 				},
-				
-				
-				// updateSubcategories(level) {
-				// 	// очищаем все последующие категории
-				// 	this.selectedCategories = this.selectedCategories.slice(0, level + 1);
-				// },
-				// // метод получения подкатегорий для текущего уровня
-				// getSubcategories(level) {
-				// 	const selectedCategory = this.categories[this.selectedCategories[0]];
-				// 	if (level === 0) {
-				// 		return Object.values(selectedCategory.array).flatMap(sub => Object.values(sub.array));
-				// 	}
-				// 	return []; // если на следующем уровне, возвращаем пустой массив
-				// }
+
             }
         });
 
