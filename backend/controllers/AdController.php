@@ -89,8 +89,9 @@ class AdController {
 
     // Получить полный путь к фото, если оно существует
     private function getPhotoUrl($photoName) {
+        $baseUrl = 'http://localhost/limonade/'; // Базовый URL вашего проекта
         $filePath = 'backend/uploads/images/';
-        return $photoName ? $filePath . $photoName . '.jpg' : null;
+        return $photoName ? $baseUrl . $filePath . $photoName . '.jpg' : null;
     }
 
     // Найти все активные обьявления одного пользователя
@@ -167,32 +168,23 @@ class AdController {
 
     // Получить одно объявление по ID
     public function getAd($id, $html = false) {
-        // Здесь будет ваша логика для получения объявления
-        if ($html) {
-            // Логика для обработки HTML-ответа
-            // Например, загрузка шаблона и передача данных в него
-        } else {
-            // Логика для обработки API-ответа
-            // Например, возвращение данных в формате JSON
-        }
-
-
-        // Проверяем заголовки запроса
+        // Проверяем, это JSON запрос или нет
         $isJsonRequest = false;
-        // if (isset($_SERVER['HTTP_ACCEPT'])) {
         if ($html === false && isset($_SERVER['HTTP_ACCEPT'])) {
             $isJsonRequest = strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
         }
 
-        // Если запрос не JSON, отправляем базовую HTML-страницу
+        // Если это не JSON запрос, возвращаем базовую HTML страницу
         if (!$isJsonRequest) {
-            // реализация через передачу id обьявления в переменной php. и вставки этой переменной в верстку
             header('Content-Type: text/html');
-            readfile(__DIR__ . '/../../frontend/index.html');
+
+            // вставляем id обьявления в js код
+            $htmlContent = file_get_contents(__DIR__ . '/../../frontend/index.html');
+            echo str_replace('phpAdId: 0', 'phpAdId: ' . $id, $htmlContent);
             return;
         }
 
-        // Загрузить объявление по ID
+        // Если это JSON запрос, возвращаем объявление в формате JSON. загружаем объявление по ID
         $ad = R::load('ads', $id);
         
         // Проверить, существует ли объявление и его статус равен 1 (активное объявление)
@@ -515,7 +507,7 @@ class AdController {
         // Загрузить объявление по ID
         $ad = R::load('ads', $id);
 
-        // Проверка, существует ли объявление
+        // Проверка, существует ли объявление и его статус
         if ($ad->id && $ad->status == 1) {
             if ($ad->user_id == $user->id) {
                 // Удалить связанные фотографии, если они существуют
@@ -524,7 +516,7 @@ class AdController {
                 $this->deletePhotoIfExists($ad->photo_2);
                 $this->deletePhotoIfExists($ad->photo_3);
 
-                // Пометить объявление как удалённое (статус = 0)
+                // Обновить статус объявления и дату
                 $ad->status = 0; // Статус объявления
                 $ad->closed_at = date('d.m.Y H:i:s'); // Дата удаления
                 R::store($ad);
@@ -540,7 +532,7 @@ class AdController {
         } else {
             // Если объявление не найдено, вернуть ошибку 404
             http_response_code(404);
-            echo json_encode(["message" => "Объявление не найдено"]);
+            echo json_encode(["message" => "Объявление не найдено или уже было заблокировано"]);
         }
     }
 
@@ -554,10 +546,56 @@ class AdController {
         }
     }
 
-    // Заблокировать пользователя по ID
-    public function blockUser($password, $id) {
-        //
-        
+    // Заблокировать обьявление по ID
+    public function blockAd($password, $id) {
+        // Проверка на наличие пароля и ID
+        if (empty($password) || empty($id) || strlen($password) > 20) {
+            http_response_code(400);
+            // Выводим сообщение на экран
+            echo '<p>Не достаточно данных</p>';
+            return;
+        }
+
+        // Загрузка пользователя с ID = 1
+        $user = R::load('users', 1);
+
+        // Проверить введенный пароль
+        if ($user->hash_num != $password) {
+            // Пароль не правильный
+            http_response_code(400);
+            // Выводим сообщение на экран
+            echo '<p>Неверный пароль</p>';
+            return;
+        }
+
+        // Обновление даты последнего визита
+        $user->last_visit = date('d.m.Y H:i:s');
+        R::store($user);
+
+        // Загрузить объявление по ID
+        $ad = R::load('ads', $id);
+
+        // Проверка, существует ли объявление и его статус
+        if ($ad->id && $ad->status == 1) {
+            // Удалить связанные фотографии, если они существуют
+            $this->deletePhotoIfExists($ad->cover_photo);
+            $this->deletePhotoIfExists($ad->photo_1);
+            $this->deletePhotoIfExists($ad->photo_2);
+            $this->deletePhotoIfExists($ad->photo_3);
+
+            // Обновить статус объявления и дату
+            $ad->status = 0; // Статус объявления
+            $ad->closed_at = date('d.m.Y H:i:s'); // Дата удаления
+            R::store($ad);
+
+            // Сообщение об успехе
+            echo '<p>Объявление было успешно заблокировано</p>';
+        } else {
+            // Объявление не найдено или уже не активно
+            http_response_code(404);
+            // Выводим сообщение на экран
+            echo '<p>Объявление не найдено или уже было заблокировано</p>';
+        }
     }
 
 }

@@ -21,6 +21,9 @@
 		.big-top-margin {
 			margin-top: 56px;
 		}
+		.inspect-text {
+			font-size: 0.5rem; /* Можно уменьшить размер текста как нужно */
+		}
 	</style>
 </head>
 <body>
@@ -107,9 +110,9 @@
 												<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
 											</select>
 										
-											<button @click="loadAdsList()" class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="categoryCode.length < 1">
+											<button @click="currentPage = 1; loadAdsList()" class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="categoryCode.length < 1">
 												<!-- Искать -->
-												{{ getTranslation('menu_get_list_6') }} <span v-if="categoryCode">{{ categoryCode }}</span>
+												{{ getTranslation('menu_get_list_6') }}
 											</button>
 		
 										</div>
@@ -148,12 +151,12 @@
 											<div class="row mb-3">
 												<label class="form-label">
 													<!-- Найти все мои объявления -->
-													{{ getTranslation('menu_get_own_list_1') }}
+													{{ getTranslation('menu_get_user_list_1') }}
 												</label>
 												<div class="col-4">
 													<label for="inputPassword1" class="form-label">
 														<!-- Пароль -->
-														{{ getTranslation('menu_get_own_list_2') }}
+														{{ getTranslation('menu_get_user_list_2') }}
 														<span class="text text-danger">*</span></label>
 												</div>
 												<div class="col-8">
@@ -161,13 +164,13 @@
 												</div>
 												<div id="passwordHelpBlock" class="form-text">
 													<!-- Необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте  -->
-												  {{ getTranslation('menu_get_own_list_3') }}
+												  {{ getTranslation('menu_get_user_list_3') }}
 												  <a href="#" class="link-primary">t.me/limonade_pro_bot</a>
 												</div>
 											</div>
 											<button @click="loadUserAds()" class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="authPassword.length < 5">
 												<!-- Искать -->
-												{{ getTranslation('menu_get_own_list_4') }}
+												{{ getTranslation('menu_get_user_list_4') }}
 											</button>
 										</div>
 									  </div>
@@ -264,9 +267,6 @@
 											{{ categoryName }}
 										</button>
 									</div>
-									<!-- <div class="btn btn-sm btn-warning mb-1 shadow-sm">
-										Аренда
-									</div> -->
 									<p class="card-text">{{ currentAd.description }}</p>
 									<h6 class="card-subtitle mb-2 text-body-secondary">
 										{{ currentAd.contact }}
@@ -277,22 +277,34 @@
 											<p class="card-text"><small class="text-body-secondary">
 												<!-- Создано  -->
 												{{ getTranslation('get_one_1') }}
-												{{ currentAd.created_at.split(' ')[0] }}</small></p>
+												{{ currentAd.created_at.split(' ')[0] }}</small> <span v-if="!isAdOwner" class="inspect-text fw-light opacity-25">{{ inspect }}</span></p>
+										</div>
+										<div v-if="isAdOwner" class="col">
+											<p class="card-text"><small class="text-body-secondary">
+												<!-- Просмотрено  -->
+												{{ getTranslation('get_one_2') }}
+												{{ currentAd.viewed }}</small></p>
 										</div>
 									</div>
 									
 									<div class="row">
-										<div class="col-4">
+										<div v-if="!phpAdId" class="col-4">
 											<div class="btn btn-sm btn-secondary shadow-sm" @click="returnToList()">
-												<!-- Назад к списку -->
-												{{ getTranslation('get_one_2') }}
+												<!-- Назад -->
+												{{ getTranslation('get_one_3') }}
 											</div>
 										</div>
-										<div class="col">
+										<div v-if="phpAdId" class="col">
+											<div class="btn btn-sm btn-primary shadow-sm" @click="loadAdsList()">
+												<!-- Показать другие... -->
+												{{ getTranslation('get_one_4') }}
+											</div>
+										</div>
+										<div v-if="!phpAdId" class="col">
 											<div class="btn btn-sm btn-primary shadow-sm" @click="copyLink(currentAd.id)">
 												<!-- Скопировать ссылку -->
 												<i class="bi bi-clipboard"></i> 
-												{{ copyIcon ? getTranslation('get_one_4') : getTranslation('get_one_3') }}
+												{{ copyIcon ? getTranslation('get_one_6') : getTranslation('get_one_5') }}
 											</div>
 										</div>
 									</div>
@@ -417,7 +429,7 @@
 									<label for="FormControlTextarea1" class="form-label">
 										<!-- Описание -->
 										{{ getTranslation('create_12') }}
-										<span class="text text-danger">*</span> <span v-if="categoryCode">{{ categoryCode }}</label>
+										<span class="text text-danger">*</span></label>
 									<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm" id="FormControlTextarea1" rows="3" placeholder="Аренда, юг, 1 комн. кв., студия, 3.5 млн., 35 м2. Большая двухспальная кровать. Полностью меблированная. Отдельно вода, свет, уборка..."></textarea>
 								</div>
 			
@@ -524,19 +536,21 @@
 							navbar_3: "",
 							navbar_4: "",
 
-							get_list_1: "Создано",
+							get_list_1: "Создано:",
 							get_list_2: "Посмотреть",
 							get_list_3: "В начало",
 							get_list_4: "Показать еще...",
 							get_list_5: "",
 							get_list_6: "",
 
-							get_one_1: "Создано",
-							get_one_2: "Назад",
-							get_one_3: "Копировать ссылку",
-							get_one_4: "Ссылка скопирована",
-							get_one_5: "",
-							get_one_6: "",
+							get_one_1: "Создано:",
+							get_one_2: "Просмотрено:",
+							get_one_3: "Назад",
+							get_one_4: "Показать другие...",
+							get_one_5: "Копировать ссылку",
+							get_one_6: "Ссылка скопирована",
+							get_one_7: "",
+							get_one_8: "",
 
 							create_1: "Создать новое объявление",
 							create_2: "Объявление будет размещено бесплатно на 10 дней. Опубликованное объявление нельзя отредактировать, только удалить и создать новое.",
@@ -558,8 +572,8 @@
 							create_18: "",
 							create_19: "",
 
-							get_own_list_1: "",
-							get_own_list_2: "",
+							get_user_list_1: "",
+							get_user_list_2: "",
 
 							delete_1: "Пароль",
 							delete_2: "Для удаления необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте ",
@@ -584,12 +598,12 @@
 							menu_create_6: "",
 							menu_create_7: "",
 
-							menu_get_own_list_1: "Найти все мои объявления",
-							menu_get_own_list_2: "Пароль",
-							menu_get_own_list_3: "Необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте ",
-							menu_get_own_list_4: "Искать",
-							menu_get_own_list_5: "",
-							menu_get_own_list_6: "",
+							menu_get_user_list_1: "Найти все мои объявления",
+							menu_get_user_list_2: "Пароль",
+							menu_get_user_list_3: "Необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте ",
+							menu_get_user_list_4: "Искать",
+							menu_get_user_list_5: "",
+							menu_get_user_list_6: "",
 
 							menu_get_info_1: "Почитать о нас",
 							menu_get_info_2: "",
@@ -607,19 +621,21 @@
 							navbar_3: "",
 							navbar_4: "",
 
-							get_list_1: "Created",
+							get_list_1: "Created:",
 							get_list_2: "View details",
 							get_list_3: "Back to top",
 							get_list_4: "Show more...",
 							get_list_5: "",
 							get_list_6: "",
 
-							get_one_1: "Created",
-							get_one_2: "Back",
-							get_one_3: "Copy link",
-							get_one_4: "Link copied",
-							get_one_5: "",
-							get_one_6: "",
+							get_one_1: "Created:",
+							get_one_2: "Viewed:",
+							get_one_3: "Back",
+							get_one_4: "Show other...",
+							get_one_5: "Copy link",
+							get_one_6: "Link copied",
+							get_one_7: "",
+							get_one_8: "",
 
 							create_1: "Create a new ad",
 							create_2: "The ad will be posted for free for 10 days. The published ad cannot be edited, only deleted and a new one created.",
@@ -641,8 +657,8 @@
 							create_18: "",
 							create_19: "",
 
-							get_own_list_1: "",
-							get_own_list_2: "",
+							get_user_list_1: "",
+							get_user_list_2: "",
 
 							delete_1: "Password",
 							delete_2: "To delete, you need to enter your ID number as a password. You received it earlier in the telegram bot ",
@@ -667,12 +683,12 @@
 							menu_create_6: "",
 							menu_create_7: "",
 
-							menu_get_own_list_1: "Find all my ads",
-							menu_get_own_list_2: "Password",
-							menu_get_own_list_3: "You need to enter your ID number as a password. You received it earlier in the telegram bot ",
-							menu_get_own_list_4: "Search",
-							menu_get_own_list_5: "",
-							menu_get_own_list_6: "",
+							menu_get_user_list_1: "Find all my ads",
+							menu_get_user_list_2: "Password",
+							menu_get_user_list_3: "You need to enter your ID number as a password. You received it earlier in the telegram bot ",
+							menu_get_user_list_4: "Search",
+							menu_get_user_list_5: "",
+							menu_get_user_list_6: "",
 
 							menu_get_info_1: "Read about us",
 							menu_get_info_2: "",
@@ -680,8 +696,8 @@
 							menu_get_info_4: ""
 						}
 					},
-					// содержит весь список категорий с кодами
-					categories: {
+					// содержит весь список категорий с кодами на русском
+					categoriesRu: {
 						'Жильё': { code: '1', subcategories: {
 								'Аренда': { code: 'A', subcategories: {
 									'Кровать': { code: '1' },
@@ -748,6 +764,74 @@
 								'Поиск': { code: 'B' }
 						}},
 					},
+					// содержит весь список категорий с кодами на русском
+					categoriesEn: {
+						'Housing': { code: '1', subcategories: {
+								'Rent': { code: 'A', subcategories: {
+									'Bed': { code: '1' },
+									'Room': { code: '2' },
+									'Apartment': { code: '3' },
+									'House': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Sale': { code: 'B'
+							}
+						}},
+						'Transport': { code: '2', subcategories: {
+								'Rent': { code: 'A', subcategories: {
+									'Bicycle': { code: '1' },
+									'Bike': { code: '2' },
+									'Motorcycle': { code: '3' },
+									'Car': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Sale': { code: 'B', subcategories: {
+									'Bicycle': { code: '1' },
+									'Bike': { code: '2' },
+									'Motorcycle': { code: '3' },
+									'Car': { code: '4' },
+									'Other': { code: '5' }
+							}}
+						}},
+						'Services': { code: '3', subcategories: {
+								'Transport, cargo transportation, visarun': { code: 'A', subcategories: {
+									'Transport': { code: '1' },
+									'Cargo transportation': { code: '2' },
+									'Visarun': { code: '3' },
+									'Warehouse services': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Documents, visas, tickets': { code: 'B', subcategories: {
+									'Documents': { code: '1' },
+									'Visas': { code: '2' },
+									'Tickets': { code: '3' },
+									'Insurance': { code: '4' },
+									'Other': { code: '5' }
+							}}
+						}},
+						'Goods': { code: '4', subcategories: {
+								'Electronics': { code: 'A' },
+								'Furniture': { code: 'B' },
+								'Household goods': { code: 'C' },
+								'Cloth': { code: 'D' },
+								'Food': { code: 'E' },
+								'Children\'s goods': { code: 'F' },
+								'Animals': { code: 'G' },
+								'Hobbies and recreation': { code: 'H' },
+								'Auto parts': { code: 'I' },
+								'Beauty and health': { code: 'J' },
+								'Plants': { code: 'K' },
+								'Business Products': { code: 'L' },
+								'Other': { code: 'Z' }
+						}},
+						'Job': { code: '5', subcategories: {
+								'Offer': { code: 'A', subcategories: {
+									'Part-time employment': { code: '1' },
+									'Full-time employment': { code: '2' }
+							}},
+								'Search': { code: 'B' }
+						}},
+					},
 					// Выбранная головная категория
 					selectedMainCategory: '',
 					// Выбранная подкатегория 1
@@ -760,360 +844,33 @@
 					subcategories2: null,
 					// Строка с итоговым кодом категории
 					categoryCode: '',
-					//
+					// флаг указывающий скопирована ссылка в буфер или нет
 					copyIcon: false,
-					// переменная php для обозначение id обьявления. по умолчанию пустая
-
-					// 	"3": {
-					// 		"name": "Услуги",
-					// 		"array": {
-					// 			"A": {
-					// 				"name": "Транспорт, грузоперевозки, визараны",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Транспорт"
-					// 					},
-					// 					"3": {
-					// 						"name": "Грузоперевозки"
-					// 					},
-					// 					"4": {
-					// 						"name": "Визараны"
-					// 					},
-					// 					"5": {
-					// 						"name": "Складские услуги"
-					// 					}
-					// 				}
-					// 			},
-					// 			"B": {
-					// 				"name": "Документы, визы, билеты",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Документы"
-					// 					},
-					// 					"3": {
-					// 						"name": "Визы"
-					// 					},
-					// 					"4": {
-					// 						"name": "Билеты"
-					// 					},
-					// 					"5": {
-					// 						"name": "Страховки"
-					// 					}
-					// 				}
-					// 			},
-					// 			"C": {
-					// 				"name": "Мобильная связь, интернет, IT",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Мобильная связь"
-					// 					},
-					// 					"3": {
-					// 						"name": "Интернет"
-					// 					},
-					// 					"4": {
-					// 						"name": "IT"
-					// 					}
-					// 				}
-					// 			},
-					// 			"D": {
-					// 				"name": "Обмен валюты, переводы, банковские карты",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Обмен валюты"
-					// 					},
-					// 					"3": {
-					// 						"name": "Переводы"
-					// 					},
-					// 					"4": {
-					// 						"name": "Банковские карты"
-					// 					}
-					// 				}
-					// 			},
-					// 			"E": {
-					// 				"name": "Поиск жилья, адаптация, камеры хранения",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Поиск жилья"
-					// 					},
-					// 					"3": {
-					// 						"name": "Адаптация"
-					// 					},
-					// 					"4": {
-					// 						"name": "Камеры хранения"
-					// 					}
-					// 				}
-					// 			},
-					// 			"F": {
-					// 				"name": "Красота, здоровье",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Красота"
-					// 					},
-					// 					"3": {
-					// 						"name": "Здоровье"
-					// 					}
-					// 				}
-					// 			},
-					// 			"G": {
-					// 				"name": "Уборка, стирка, дезинсекция",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Уборка"
-					// 					},
-					// 					"3": {
-					// 						"name": "Стирка"
-					// 					},
-					// 					"4": {
-					// 						"name": "Дезинсекция"
-					// 					}
-					// 				}
-					// 			},
-					// 			"H": {
-					// 				"name": "Ремонт электроники, телефонов, ноутбуков",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Ремонт электроники"
-					// 					},
-					// 					"3": {
-					// 						"name": "Ремонт телефонов"
-					// 					},
-					// 					"4": {
-					// 						"name": "Ремонт ноутбуков"
-					// 					}
-					// 				}
-					// 			},
-					// 			"I": {
-					// 				"name": "Мелкий бытовой ремонт (муж на час)",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Мелкий бытовой ремонт"
-					// 					},
-					// 					"3": {
-					// 						"name": "Монтаж и установка техники"
-					// 					}
-					// 				}
-					// 			},
-					// 			"J": {
-					// 				"name": "Обучение, курсы, искусство",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Обучение"
-					// 					},
-					// 					"3": {
-					// 						"name": "Курсы"
-					// 					},
-					// 					"4": {
-					// 						"name": "Искусство"
-					// 					}
-					// 				}
-					// 			},
-					// 			"K": {
-					// 				"name": "Тусовки, мероприятия, экскурсии",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Тусовки"
-					// 					},
-					// 					"3": {
-					// 						"name": "Мероприятия"
-					// 					},
-					// 					"4": {
-					// 						"name": "Экскурсии"
-					// 					}
-					// 				}
-					// 			},
-					// 			"L": {
-					// 				"name": "Еда, кулинария",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Еда"
-					// 					},
-					// 					"3": {
-					// 						"name": "Кулинария"
-					// 					}
-					// 				}
-					// 			},
-					// 			"M": {
-					// 				"name": "Ремонт, строительство",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Ремонт"
-					// 					},
-					// 					"3": {
-					// 						"name": "Строительство"
-					// 					}
-					// 				}
-					// 			},
-					// 			"N": {
-					// 				"name": "Переводчик, юридические услуги",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Переводчик"
-					// 					},
-					// 					"3": {
-					// 						"name": "Юридические услуги"
-					// 					}
-					// 				}
-					// 			},
-					// 			"O": {
-					// 				"name": "Няня, детские сады, школы",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Няня"
-					// 					},
-					// 					"3": {
-					// 						"name": "Детские сады"
-					// 					},
-					// 					"4": {
-					// 						"name": "Школы"
-					// 					}
-					// 				}
-					// 			},
-					// 			"P": {
-					// 				"name": "Домашние животные, передержка, выгул",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Домашние животные"
-					// 					},
-					// 					"3": {
-					// 						"name": "Передержка"
-					// 					},
-					// 					"4": {
-					// 						"name": "Выгул"
-					// 					}
-					// 				}
-					// 			},
-					// 			"Q": {
-					// 				"name": "Доставка товаров на дом",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Доставка товаров на дом"
-					// 					}
-					// 				}
-					// 			},
-					// 			"R": {
-					// 				"name": "Фото, видеосьемка",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Фото"
-					// 					},
-					// 					"3": {
-					// 						"name": "Видеосьемка"
-					// 					}
-					// 				}
-					// 			},
-					// 			"S": {
-					// 				"name": "Автосервис",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Автосервис"
-					// 					}
-					// 				}
-					// 			},
-					// 			"T": {
-					// 				"name": "Прокат, аренда",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Прокат"
-					// 					},
-					// 					"3": {
-					// 						"name": "Аренда"
-					// 					}
-					// 				}
-					// 			},
-					// 			"U": {
-					// 				"name": "Охрана, сторож",
-					// 				"array": {
-					// 					"1": {
-					// 						"name": "Другое"
-					// 					},
-					// 					"2": {
-					// 						"name": "Охрана"
-					// 					},
-					// 					"3": {
-					// 						"name": "Сторож"
-					// 					}
-					// 				}
-					// 			},
-					// 			"Z": {
-					// 				"name": "Другое"
-					// 			}
-					// 		}
-					// 	},
-					
+					// Если phpAdId не передан, по умолчанию будет 0
+					phpAdId: 0,
+					// переменная для инспектирования
+					inspect: '',
                 };
             },
             mounted() {
-				// ветвление. если переменная php пустая, загружаем список обьявлений
-				// если не пуста, загружаем одно обьявление
-				
-                // метод загрузки списка объявлений при первой загрузке или при обновлении страницы
-                this.loadAdsList();
-				this.isLoading = false;
+				// если переменная php не пустая, загружаем одно обьявление
+				if (this.phpAdId) {
+                    this.loadAdDetail(this.phpAdId);
+                } else {
+					// если переменная php пустая, загружаем список обьявлений
+					// также это будет срабатывать при первой загрузке страницы или при обновлении
+                    this.loadAdsList();
+                }
             },
 			watch: {
 				// Наблюдаем за изменением второго уровня подкатегорий (третий выпадающий список)
 				selectedSubcategory2() {
 				this.updateCategoryCode();
+				}
+			},
+			computed: {
+				categories() {
+					return this.currentLanguage === 'RU' ? this.categoriesRu : this.categoriesEn;
 				}
 			},
             methods: {
@@ -1145,9 +902,10 @@
 
 					this.isAdOwner = false;
 					this.authPassword = '';
+					this.phpAdId = 0;
 
 					// Формируем URL для запроса
-    				let url = `api/get_list?page=${currentPage}`;
+    				let url = `api/ad/get_list?page=${currentPage}`;
 
 					// Добавляем параметр categoryCode, если он не пустой
 					if (this.categoryCode.length > 0) {
@@ -1185,10 +943,17 @@
                 loadAdDetail(id) {
 					this.showScreen('detail');
                     this.isLoading = true;
-                    axios.get(`api/get_one/${id}`)
+                    axios.get(`api/ad/get_one/${id}`)
                         .then(response => {
-							// console.log(response.data);
+							// загрузить данные по обьявлению
                             this.currentAd = response.data;
+							// поместить в переменную для инспектирования
+							this.inspect = this.currentAd.user_id + '.' + this.currentAd.id;
+							// если это была загрузка по ссылке, нужно почистить url
+							if (this.phpAdId) {
+								// Изменить URL в адресной строке
+								window.history.replaceState(null, null, 'http://localhost/limonade/');
+							}
                         })
                         .catch((error) => {
                             this.errorMessage = 'Не удалось загрузить объявление';
@@ -1231,7 +996,7 @@
 					this.cleanCategory();
 
 					this.currentPage = 1;
-                    axios.post('api/get_own_list', { password: this.authPassword })
+                    axios.post('api/ad/get_your_list', { password: this.authPassword })
                         .then(response => {
 							// console.log(response.data);
                             this.adsList = response.data;
@@ -1298,7 +1063,7 @@
 					
 					// отправляем данные на сервер
 					this.isLoading = true;
-					axios.post('api/create', formData, {
+					axios.post('api/ad/create', formData, {
 						headers: {
 							'Content-Type': 'multipart/form-data'
 						} 
@@ -1359,7 +1124,7 @@
 					}
 					// отправляем данные на сервер
 					this.isLoading = true;
-					axios.post(`api/delete/${id}`, { password: this.authPassword })
+					axios.post(`api/ad/delete/${id}`, { password: this.authPassword })
 						.then(response => {
 							// console.log(response.data);
 							this.successMessage = 'Объявление успешно удалено!';
@@ -1394,10 +1159,14 @@
 							this.isLoading = false;
 						});
 				},
-				//
+				// Генерация кнопок категорий
 				getCategoryNames(categoryCode) {
 					const categoryNames = [];
-					let currentLevel = this.categories;
+					// let currentLevel = this.categories;
+
+					// Выбираем правильный массив категорий в зависимости от локали
+    				let currentLevel = this.currentLanguage === 'RU' ? this.categoriesRu : this.categoriesEn;
+
 
 					// Проходим по каждому символу строки categoryCode
 					for (const char of categoryCode) {
@@ -1432,7 +1201,7 @@
 				},
 				// метод копирования ссылки в буфер обмена
 				copyLink(id) {
-					const url = `http://localhost/limonade/html/get_one/${id}`;
+					const url = `http://localhost/limonade/html/ad/get_one/${id}`;
 					navigator.clipboard.writeText(url)
 						.then(() => {
 							this.copyIcon = true;
@@ -1488,6 +1257,8 @@
 
             }
         });
+		// Устанавливаем глобальный базовый URL для всех запросов axios
+        axios.defaults.baseURL = 'http://localhost/limonade/';
 
         app.mount('#app');
     </script>

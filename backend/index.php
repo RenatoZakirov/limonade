@@ -30,10 +30,13 @@ R::freeze(false); // Установить true в продакшн для пов
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/logs/app.log');
 
-// Подключение базового контроллера
+// Подключение контроллера обьявлений
 require_once 'controllers/AdController.php';
 
-// Подключение бот контроллера
+// Подключение контроллера пользователей
+require_once 'controllers/UserController.php';
+
+// Подключение контроллера ботов
 require_once 'controllers/TgController.php';
 
 // Подключение маршрутизатора
