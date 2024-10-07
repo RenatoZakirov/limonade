@@ -4,137 +4,162 @@ class Router {
     private $basePath;
     private $requestMethod;
     private $requestUri;
-    private $path;
-    private $pathParts;
+    private $routes = [];
 
     public function __construct($basePath = '/') {
         $this->basePath = $basePath;
         $this->requestMethod = $_SERVER["REQUEST_METHOD"];
         $this->requestUri = $_SERVER["REQUEST_URI"];
-        $path = str_replace($this->basePath, '', $this->requestUri);
-        $this->path = parse_url($path, PHP_URL_PATH);
-        $this->pathParts = explode('/', trim($this->path, '/'));
+        $this->initializeRoutes();
+    }
+
+    private function initializeRoutes() {
+        $this->routes = [
+            'GET' => [
+                '/' => function() {
+                    header('Content-Type: text/html');
+                    readfile(__DIR__ . '/../frontend/index.html');
+                },
+                // Объявления
+                'api/ad/get_list' => function() {
+                    $controller = new AdController(ADM_PASS);
+                    $controller->getAllAds();
+                },
+                'api/ad/get_one/{id}' => function($params) {
+                    $id = intval($params[0]); // 
+                    $controller = new AdController(ADM_PASS);
+                    $controller->getAd($id, false);
+                },
+                'api/ad/get_list_by_user/{password}' => function($params) {
+                    $password = trim((string)$params[0]); // 
+                    $controller = new AdController(ADM_PASS);
+                    $controller->findAdsByUser($password);
+                },
+                'api/ad/delete/{id}/{password}' => function($params) {
+                    $id = intval($params[0]); // 
+                    $password = trim((string)$params[1]); // 
+                    $controller = new AdController(ADM_PASS);
+                    $controller->deleteAd($id, $password);
+                },
+                'api/ad/block/{id}/{password}' => function($params) {
+                    $id = intval($params[0]); // 
+                    $password = trim((string)$params[1]); // 
+                    $controller = new AdController(ADM_PASS);
+                    $controller->blockAd($id, $password);
+                },
+
+                // Новости
+                'api/news/get_list' => function() {
+                    $controller = new NewsController(ADM_PASS);
+                    $controller->getAllNews();
+                },
+                'api/news/get_one/{id}' => function($params) {
+                    $id = intval($params[0]); // 
+                    $controller = new NewsController(ADM_PASS);
+                    $controller->getNews($id);
+                },
+                'api/news/delete/{id}/{password}' => function($params) {
+                    $id = intval($params[0]); // 
+                    $password = trim((string)$params[1]); // 
+                    $controller = new NewsController(ADM_PASS);
+                    $controller->deleteNews($id, $password);
+                },
+
+                // Пользователи
+                'api/user/block/{id}/{password}' => function($params) {
+                    $id = intval($params[0]); // 
+                    $password = trim((string)$params[1]); // 
+                    $controller = new UserController(ADM_PASS);
+                    $controller->blockUser($id, $password);
+                },
+
+                // Запрос HTML
+                'html/ad/get_one/{id}' => function($params) {
+                    $id = intval($params[0]); // 
+                    $controller = new AdController(ADM_PASS);
+                    $controller->getAd($id, true);
+                },
+                'html/admin' => function() {
+                    header('Content-Type: text/html');
+                    readfile(__DIR__ . '/../frontend/index_adm.html');
+                },
+
+            ],
+            'POST' => [
+                // Объявления
+                'api/ad/create' => function() {
+                    $controller = new AdController(ADM_PASS);
+                    $controller->createAd();
+                },
+                'api/ad/dislike/{id}' => function($params) {
+                    $id = intval($params[0]); // 
+                    $controller = new AdController(ADM_PASS);
+                    $controller->dislikeAd($id);
+                },
+                // Новости
+                'api/news/create' => function() {
+                    $controller = new NewsController(ADM_PASS);
+                    $controller->createNews();
+                },
+                // Пользователи
+                'api/user/create' => function() {
+                    $controller = new UserController(ADM_PASS);
+                    $controller->createUser();
+                },
+                // Телеграм
+                'bot' => function() {
+                    $controller = new TgController(TG_KEY);
+                    $controller->handleWebhook();
+                }
+            ],
+        ];
     }
 
     public function handleRequest() {
-        // Стартовая страница
-        if ($this->requestMethod === 'GET'
-            && empty($this->path)) {
-            header('Content-Type: text/html');
-            readfile(__DIR__ . '/../frontend/index.html');
+        $path = str_replace($this->basePath, '', $this->requestUri);
+        // $pathParts = explode('/', trim($path, '/'));
+        $pathParts = explode('?', $path, 2); // Разделяем по '?'
+        $path = trim($pathParts[0], '/');
+
+        // Добавим вывод для отладки
+        // error_log("Request URI: " . $this->requestUri);
+        // error_log("Base Path: " . $this->basePath);
+        // error_log("Path: " . $path);
+
+        // Проверяем, пустой ли путь
+        if ($path === '') {
+            $this->routes[$this->requestMethod]['/']();
+            return;
         }
-        // Обработка HTML-запросов
-        elseif ($this->pathParts[0] === 'html') {
-            $this->handleHtmlRequest();
+
+        // Найдем подходящий маршрут
+        foreach ($this->routes[$this->requestMethod] as $route => $handler) {
+            // Заменим параметры на регулярные выражения
+            $pattern = preg_replace('/{[^}]+}/', '([^/]+)', $route);
+            if (preg_match('#^' . $pattern . '$#', $path, $matches)) {
+                array_shift($matches); // Удалим полный путь
+                $this->callHandler($handler, $matches);
+                return;
+            }
         }
-        // API-запросы
-        elseif ($this->pathParts[0] === 'api') {
-            $this->handleApiRequest();
-        }
-        // Обработка вебхуков от Telegram
-        elseif ($this->path === 'bot') {
-            $this->handleTelegramWebhook();
-        }
-        else {
-            http_response_code(404);
-            echo json_encode(["message" => "Not Found"]);
-        }
+
+        // Если маршрут не найден
+        $this->notFound();
     }
 
-    private function handleHtmlRequest() {
-        $controller = new AdController();
-
-        // Показать одно объявление по ID (HTML)
-        if ($this->requestMethod === 'GET'
-            && $this->pathParts[1] === 'ad'
-            && $this->pathParts[2] === 'get_one'
-            && isset($this->pathParts[3]) && is_numeric($this->pathParts[3])) {
-            $adId = intval($this->pathParts[3]);
-            $controller->getAd($adId, true);
+    private function callHandler($handler, $params) {
+        if (is_callable($handler)) {
+            // Вызовем анонимную функцию обработчик
+            call_user_func($handler, $params);
         } else {
-            http_response_code(404);
-            echo json_encode(["message" => "Not Found"]);
+            // Если это не функция, то можно сделать дополнительные действия
+            $this->notFound();
         }
     }
 
-    private function handleApiRequest() {
-        $controller = new AdController();
-
-        // Показать список объявлений
-        if ($this->requestMethod === 'GET'
-            && $this->pathParts[1] === 'ad'
-            && $this->pathParts[2] === 'get_list') {
-            $controller->getAllAds();
-        }
-        // Показать одно объявление по ID
-        elseif ($this->requestMethod === 'GET'
-            && $this->pathParts[1] === 'ad'
-            && $this->pathParts[2] === 'get_one'
-            && isset($this->pathParts[3]) && is_numeric($this->pathParts[3])) {
-            $adId = intval($this->pathParts[3]);
-            $controller->getAd($adId, false);
-        }
-        // Заблокировать одно обьявление по ID
-        elseif ($this->requestMethod === 'GET'
-            && $this->pathParts[1] === 'ad'
-            && $this->pathParts[2] === 'block'
-            && isset($this->pathParts[3]) // password
-            && isset($this->pathParts[4]) && is_numeric($this->pathParts[4])) {
-            // Приводим пароль к строке и обрезаем лишние пробелы
-            $password = trim((string)$this->pathParts[3]);
-            $adId = intval($this->pathParts[4]);
-            // Вызов метода блокировки объявления
-            $controller->blockAd($password, $adId);
-        }
-        // Создать новое объявление
-        elseif ($this->requestMethod === 'POST'
-            && $this->pathParts[1] === 'ad'
-            && $this->pathParts[2] === 'create') {
-            $controller->createAd();
-        }
-        // Показать список активных объявлений одного пользователя
-        elseif ($this->requestMethod === 'POST'
-            && $this->pathParts[1] === 'ad'
-            && $this->pathParts[2] === 'get_your_list') {
-            $controller->findAdsByUser();
-        }
-        // Удалить одно объявление по ID
-        elseif ($this->requestMethod === 'POST'
-            && $this->pathParts[1] === 'ad'
-            && $this->pathParts[2] === 'delete'
-            && isset($this->pathParts[3]) && is_numeric($this->pathParts[3])) {
-            $adId = intval($this->pathParts[3]);
-            $controller->deleteAd($adId);
-        }
-        // Заблокировать одного пользователя по ID
-        elseif ($this->requestMethod === 'GET'
-            && $this->pathParts[1] === 'user'
-            && $this->pathParts[2] === 'block'
-            && isset($this->pathParts[3]) // password
-            && isset($this->pathParts[4]) && is_numeric($this->pathParts[4])) {
-            $controller = new UserController();
-            // Приводим пароль к строке и обрезаем лишние пробелы
-            $password = trim((string)$this->pathParts[3]);
-            $userId = intval($this->pathParts[4]);
-            // Вызов метода блокировки пользователя
-            $controller->blockUser($password, $userId);
-        }
-        else {
-            http_response_code(404);
-            echo json_encode(["message" => "Not Found"]);
-        }
-    }
-
-    // Обработка вебхуков от Telegram
-    private function handleTelegramWebhook() {
-        if ($this->requestMethod === 'POST') {
-            $controller = new TgController();
-            $controller->handleWebhook();
-        }
-        else {
-            http_response_code(404);
-            echo json_encode(["message" => "Not Found"]);
-        }
+    private function notFound() {
+        http_response_code(404);
+        echo json_encode(["message" => "Not Found"]);
     }
 }
 

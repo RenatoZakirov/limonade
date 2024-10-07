@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Объявления</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+	<style>
+		[v-cloak] {
+			display: none;
+		}
+		.big-top-margin {
+			margin-top: 56px;
+		}
+		.no-border-top {
+			border-top: none;
+		}
+	</style>
+</head>
+<body>
+	<div id="app" v-cloak>
+		<div class="d-none d-md-block">
+			<div class="d-flex justify-content-center p-4 fs-3" >
+				Этот сайт работает только на мобильных устройствах...<br>
+				This site only works on mobile devices...
+			</div>
+        </div>
+
+		<div class="d-block d-md-none big-top-margin">
+
+			<div class="container">
+
+				<nav class="navbar bg-body-tertiary fixed-top shadow-sm">
+					<div class="container-fluid">
+						<button @click="cleanForm()" class=" btn btn-sm btn-success shadow-sm">LIMONADE.PRO</button>
+						<button type="button" class="btn btn-sm btn-warning shadow-sm">
+							<!-- НЯ ЧАНГ -->
+							{{ getTranslation('navbar_1') }}
+						</button>
+						<div class="btn-group btn-group-sm shadow-sm" role="group" aria-label="Small button group">
+							<button @click="setLanguage('RU')" type="button" 
+									:class="['btn', 'btn-sm', currentLanguage === 'RU' ? 'btn-warning' : 'btn-outline-warning']">RU</button>
+							<button @click="setLanguage('EN')" type="button" 
+									:class="['btn', 'btn-sm', currentLanguage === 'EN' ? 'btn-warning' : 'btn-outline-warning']">EN</button>
+							<!-- <button type="button" class="btn btn-outline-warning">VN</button> -->
+						</div>
+						<button @click="notAvailableMenu()" class="btn btn-sm btn-primary shadow-sm" type="button">
+							<!-- Меню -->
+							{{ getTranslation('navbar_2') }}
+						</button>
+					</div>
+				</nav>
+
+
+				<nav>
+					<div class="nav nav-tabs" id="nav-tab" role="tablist">
+					  <button class="nav-link active" id="nav-ad-tab" data-bs-toggle="tab"
+					  	data-bs-target="#nav-ad" type="button" role="tab"
+						aria-controls="nav-ad" aria-selected="true">Объявления</button>
+					  <button class="nav-link" id="nav-news-tab" data-bs-toggle="tab"
+					  	data-bs-target="#nav-news" type="button" role="tab"
+						aria-controls="nav-news" aria-selected="false">Новости</button>
+					</div>
+				</nav>
+				<div class="tab-content mb-3" id="nav-tabContent">
+					<div class="tab-pane fade show active" id="nav-ad" role="tabpanel" aria-labelledby="nav-ad-tab" tabindex="0">
+
+						<div v-if="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
+						<div v-if="successMessage" class="alert alert-success mt-3">{{ successMessage }}</div>
+
+
+						<div class="accordion mt-3" id="accordionExample">
+							<div class="accordion-item">
+							  <h2 class="accordion-header">
+								<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+									<!-- Создать новое объявление -->
+									{{ getTranslation('create_1') }}
+								</button>
+							  </h2>
+							  <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+								<div class="accordion-body">
+									
+									<div class="col mt-1">
+										<div class="card shadow-sm">
+											<div class="card-body">
+												<h5 class="card-title">
+													<!-- Создать новое объявление -->
+													{{ getTranslation('create_1') }}
+												</h5>
+												
+												<div class="mb-3">
+													<label for="formFile1" class="form-label">
+														<!-- Заглавное фото -->
+														{{ getTranslation('create_4') }}
+													</label>
+													<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm" id="formFile1" type="file">
+												</div>
+					
+												<div v-if="photoInputs[1]" class="mb-2">
+													<label for="formFile2" class="form-label">
+														<!-- Фото 2 -->
+														{{ getTranslation('create_5') }}
+													</label>
+													<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm" id="formFile2" type="file">
+												</div>
+												
+												<div v-if="photoInputs[2]" class="mb-2">
+													<label for="formFile3" class="form-label">
+														<!-- Фото 3 -->
+														{{ getTranslation('create_6') }}
+													</label>
+													<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm" id="formFile3" type="file">
+												</div>
+											
+												<div class="mb-3">
+													<label for="FormControlInput1" class="form-label">
+														<!-- Название -->
+														{{ getTranslation('create_7') }}
+														<span class="text text-danger">*</span></label>
+													<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput1" placeholder="">
+												</div>
+				
+												<div class="mb-3">
+													<label for="categorySelect" class="form-label">
+														<!-- Категория -->
+														{{ getTranslation('create_8') }}
+													<span class="text text-danger">*</span>
+													</label>
+													<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm shadow-sm" id="categorySelect" aria-label="Small select example">
+														<option value="">
+															<!-- Не выбрано -->
+															{{ getTranslation('create_9') }}
+														</option>
+														<option v-for="(cat, key) in categories" :key="key" :value="key">{{ key }}</option>
+													</select>
+												</div>
+												
+												<!-- Выбор подкатегории 1 -->
+												<div v-if="selectedMainCategory && subcategories1" class="mb-3">
+													<!-- <label for="subcategory1Select" class="form-label">Подкатегория</label> -->
+													<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm shadow-sm" id="subcategory1Select" aria-label="Small select example">
+														<option value="">
+															<!-- Выберите подкатегорию -->
+															{{ getTranslation('create_10') }}
+														</option>
+														<option v-for="(sub, key) in subcategories1" :key="key" :value="key">{{ key }}</option>
+													</select>
+												</div>
+												
+												<!-- Выбор подкатегории 2 -->
+												<div v-if="selectedSubcategory1 && subcategories2" class="mb-3">
+													<!-- <label for="subcategory2Select" class="form-label">Подкатегория</label> -->
+													<select v-model="selectedSubcategory2" class="form-select form-select-sm shadow-sm" id="subcategory2Select" aria-label="Small select example">
+														<option value="">
+															<!-- Выберите подкатегорию -->
+															{{ getTranslation('create_11') }}
+														</option>
+														<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
+													</select>
+												</div>
+				
+												<div class="mb-3">
+													<label for="FormControlTextarea1" class="form-label">
+														<!-- Описание -->
+														{{ getTranslation('create_12') }}
+														<span class="text text-danger">*</span></label>
+													<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm" id="FormControlTextarea1" rows="3" placeholder=""></textarea>
+												</div>
+							
+												<div class="mb-3">
+													<label for="FormControlInput3" class="form-label">
+														<!-- Контакт -->
+														{{ getTranslation('create_13') }}
+														<span class="text text-danger">*</span></label>
+													<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput3"
+														placeholder="">
+												</div>
+			
+												<div class="form-check form-switch mb-3">
+													<input v-model="newAd.permanent" class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+													<label class="form-check-label" for="flexSwitchCheckDefault">
+														Сделать объявление вечным
+													</label>
+												</div>
+												
+												<div class="row mb-3">
+													<div class="col-4">
+														<label for="inputPassword2" class="form-label">
+															<!-- Пароль -->
+															{{ getTranslation('create_14') }}
+															<span class="text text-danger">*</span></label>
+													</div>
+													<div class="col-8">
+														<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+													</div>
+												</div>
+												<button @click="createAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+													<!-- Опубликовать объявление -->
+													{{ getTranslation('create_17') }}
+												</button>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							  </div>
+							</div>
+							<div class="accordion-item">
+							  <h2 class="accordion-header">
+								<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+									Заблокировать объявление
+								</button>
+							  </h2>
+							  <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+								<div class="accordion-body">
+									
+									<div class="col mt-1">
+										<div class="card shadow-sm">
+											<div class="card-body">
+												<h5 class="card-title mb-3">
+													<!-- Заблокировать объявление -->
+													Заблокировать объявление
+													<!-- {{ getTranslation('create_1') }} -->
+												</h5>
+												<div class="mb-3 row">
+													<div class="col">
+														<label for="FormControlInput11" class="form-label">
+															<!-- ID объявления -->
+															ID объявления
+															<!-- {{ getTranslation('create_7') }} -->
+															<span class="text text-danger">*</span></label>
+													</div>
+													<div class="col">
+														<input v-model="adId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput11"
+														placeholder="">
+													</div>
+												</div>
+												<div class="row mb-3">
+													<div class="col-4">
+														<label for="inputPassword21" class="form-label">
+															<!-- Пароль -->
+															Пароль
+															<!-- {{ getTranslation('create_14') }} -->
+															<span class="text text-danger">*</span></label>
+													</div>
+													<div class="col-8">
+														<input v-model="authPassword" type="password" id="inputPassword21" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+													</div>
+												</div>
+												<button @click="blockAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+													<!-- Заблокировать объявление -->
+													Заблокировать объявление
+													<!-- {{ getTranslation('create_17') }} -->
+												</button>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							  </div>
+							</div>
+							<div class="accordion-item">
+							  <h2 class="accordion-header">
+								<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+									Заблокировать пользователя
+								</button>
+							  </h2>
+							  <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+								<div class="accordion-body">
+									
+									<div class="col mt-1"></div>
+										<div class="card shadow-sm">
+											<div class="card-body">
+												<h5 class="card-title mb-3">
+													<!-- Заблокировать пользователя -->
+													Заблокировать пользователя
+													<!-- {{ getTranslation('create_1') }} -->
+												</h5>
+												<div class="mb-3 row">
+													<div class="col">
+														<label for="FormControlInput21" class="form-label">
+															<!-- ID пользователя -->
+															ID пользователя
+															<!-- {{ getTranslation('create_7') }} -->
+															<span class="text text-danger">*</span></label>
+													</div>
+													<div class="col">
+														<input v-model="userId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput21"
+														placeholder="">
+													</div>
+												</div>
+												<div class="row mb-3">
+													<div class="col-4">
+														<label for="inputPassword31" class="form-label">
+															<!-- Пароль -->
+															Пароль
+															<!-- {{ getTranslation('create_14') }} -->
+															<span class="text text-danger">*</span></label>
+													</div>
+													<div class="col-8">
+														<input v-model="authPassword" type="password" id="inputPassword31" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+													</div>
+												</div>
+												<button @click="blockUser()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+													<!-- Заблокировать пользователя -->
+													Заблокировать пользователя
+													<!-- {{ getTranslation('create_17') }} -->
+												</button>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+
+					</div>
+					<div class="tab-pane fade" id="nav-news" role="tabpanel" aria-labelledby="nav-news-tab" tabindex="0">
+
+						<div v-if="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
+						<div v-if="successMessage" class="alert alert-success mt-3">{{ successMessage }}</div>
+
+						<div class="accordion mt-3" id="accordionExample2">
+							<div class="accordion-item">
+							  <h2 class="accordion-header">
+								<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
+									Создать новую новость
+								</button>
+							  </h2>
+							  <div id="collapseFour" class="accordion-collapse collapse show" data-bs-parent="#accordionExample2">
+								<div class="accordion-body">
+									
+									<div class="col mt-1">
+										<div class="card shadow-sm">
+											<!-- style="background-color: #f0f0f0" -->
+											<div class="card-body">
+												<h5 class="card-title">
+													<!-- Создать новую новость -->
+													{{ getTranslation('create_news_1') }}
+												</h5>
+												
+												<div class="mb-3">
+													<label for="formFile4" class="form-label">
+														<!-- Заглавное фото -->
+														{{ getTranslation('create_news_2') }}
+													</label>
+													<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm"
+														id="formFile4" type="file" ref="fileInput">
+												</div>
+					
+												<div v-if="photoInputs[1]" class="mb-2">
+													<label for="formFile5" class="form-label">
+														<!-- Фото 2 -->
+														{{ getTranslation('create_news_3') }}
+													</label>
+													<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm"
+														id="formFile5" type="file" ref="fileInput">
+												</div>
+												
+												<div v-if="photoInputs[2]" class="mb-2">
+													<label for="formFile6" class="form-label">
+														<!-- Фото 3 -->
+														{{ getTranslation('create_news_4') }}
+													</label>
+													<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm"
+														id="formFile6" type="file" ref="fileInput">
+												</div>
+											
+												<div class="mb-3">
+													<label for="FormControlInput7" class="form-label">
+														<!-- Заголовок -->
+														{{ getTranslation('create_news_5') }}
+														<span class="text text-danger">*</span></label>
+													<input v-model="newNews.title_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput7"
+														placeholder="">
+												</div>
+				
+												<div class="mb-3">
+													<label for="FormControlTextarea3" class="form-label">
+														<!-- Текст -->
+														{{ getTranslation('create_news_6') }}
+														<span class="text text-danger">*</span></label>
+													<textarea v-model="newNews.description_ru" class="form-control form-select-sm shadow-sm" id="FormControlTextarea3" rows="3"
+														placeholder=""></textarea>
+												</div>
+							
+												<div class="mb-3">
+													<label for="FormControlInput8" class="form-label">
+														<!-- Автор -->
+														{{ getTranslation('create_news_7') }}
+														<span class="text text-danger">*</span></label>
+													<input v-model="newNews.author_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput8"
+														placeholder="">
+												</div>
+
+												<div class="mb-3">
+													<label for="FormControlInput17" class="form-label">
+														<!-- Заголовок en -->
+														{{ getTranslation('create_news_8') }}
+														<span class="text text-danger">*</span></label>
+													<input v-model="newNews.title_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput17"
+														placeholder="">
+												</div>
+				
+												<div class="mb-3">
+													<label for="FormControlTextarea13" class="form-label">
+														<!-- Текст en -->
+														{{ getTranslation('create_news_9') }}
+														<span class="text text-danger">*</span></label>
+													<textarea v-model="newNews.description_en" class="form-control form-select-sm shadow-sm" id="FormControlTextarea13" rows="3"
+														placeholder=""></textarea>
+												</div>
+							
+												<div class="mb-3">
+													<label for="FormControlInput18" class="form-label">
+														<!-- Автор en -->
+														{{ getTranslation('create_news_10') }}
+														<span class="text text-danger">*</span></label>
+													<input v-model="newNews.author_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput18"
+														placeholder="">
+												</div>
+												
+												<div class="row mb-3">
+													<div class="col-4">
+														<label for="inputPassword4" class="form-label">
+															<!-- Пароль -->
+															{{ getTranslation('create_news_11') }}
+															<span class="text text-danger">*</span></label>
+													</div>
+													<div class="col-8">
+														<input v-model="authPassword" type="password" id="inputPassword4" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+													</div>
+												</div>
+												<button @click="createNews()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+													<!-- Опубликовать новость -->
+													{{ getTranslation('create_news_12') }}
+												</button>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							  </div>
+							</div>
+							<div class="accordion-item">
+							  <h2 class="accordion-header">
+								<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+									Удалить новость
+								</button>
+							  </h2>
+							  <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#accordionExample2">
+								<div class="accordion-body">
+									
+									<div class="col mt-1">
+										<div class="card shadow-sm">
+											<div class="card-body">
+												<h5 class="card-title mb-3">
+													<!-- Удалить новость -->
+													Удалить новость
+													<!-- {{ getTranslation('create_1') }} -->
+												</h5>
+												<div class="mb-3 row">
+													<div class="col">
+														<label for="FormControlInput41" class="form-label">
+															<!-- ID новости -->
+															ID новости
+															<!-- {{ getTranslation('create_7') }} -->
+															<span class="text text-danger">*</span></label>
+													</div>
+													<div class="col">
+														<input v-model="newsId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput41"
+														placeholder="">
+													</div>
+												</div>
+												<div class="row mb-3">
+													<div class="col-4">
+														<label for="inputPassword41" class="form-label">
+															<!-- Пароль -->
+															Пароль
+															<!-- {{ getTranslation('create_14') }} -->
+															<span class="text text-danger">*</span></label>
+													</div>
+													<div class="col-8">
+														<input v-model="authPassword" type="password" id="inputPassword41" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+													</div>
+												</div>
+												<button @click="deleteNews()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+													<!-- Заблокировать новость -->
+													Удалить новость
+													<!-- {{ getTranslation('create_17') }} -->
+												</button>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							  </div>
+							</div>
+							
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+	<script>
+        const app = Vue.createApp({
+            data() {
+                return {
+					// содержит объект нового объявления (ещё не созданного)
+					newAd: {
+						title: '',
+          				description: '',
+						contact: '',
+						category: '',
+						permanent: false
+					},
+					// содержит объект новой новости (ещё не созданной)
+					newNews: {
+						title_ru: '',
+          				description_ru: '',
+						author_ru: '',
+						title_en: '',
+          				description_en: '',
+						author_en: ''
+					},
+					adId: null,
+					userId: null,
+					newsId: null,
+					// управляет видимостью полей для фото
+					photoInputs: [true, false, false], // скрываем фото 2 и фото 3
+					// содержит массив загруженных фото
+        			photos: [],
+					// содержит текст всплывающей подсказки в случае успеха
+					successMessage: null,
+					// содержит текст всплывающей подсказки в случае ошибки
+                    errorMessage: null,
+					// содержит пароль для авторизации
+					authPassword: '',
+					// язык интерфейса по умолчанию
+					currentLanguage: 'RU',
+					// словарь интерфейса
+					translations: {
+						RU: {
+							general_info_1: "Загружается...",
+							general_info_2: "",
+							general_info_3: "",
+							general_info_4: "",
+
+							navbar_1: "НЯ ЧАНГ",
+							navbar_2: "Меню",
+							navbar_3: "",
+							navbar_4: "",
+
+							get_list_1: "Создано:",
+							get_list_2: "Посмотреть",
+							get_list_3: "В начало",
+							get_list_4: "Показать еще...",
+							get_list_5: "",
+							get_list_6: "",
+
+							get_one_1: "Создано:",
+							get_one_2: "Просмотрено:",
+							get_one_3: "Назад",
+							get_one_4: "Показать другие...",
+							get_one_5: "Копировать ссылку",
+							get_one_6: "Ссылка скопирована",
+							get_one_7: "",
+							get_one_8: "",
+
+							create_1: "Создать новое объявление",
+							create_2: "Объявление будет размещено бесплатно на 10 дней. Опубликованное объявление нельзя отредактировать, только удалить и создать новое.",
+							create_3: "'Фото' не обязательно, но это поможет вашему объявлению выделиться на фоне других.",
+							create_4: "Заглавное фото",
+							create_5: "Фото 2",
+							create_6: "Фото 3",
+							create_7: "Название",
+							create_8: "Категория",
+							create_9: "Не выбрано",
+							create_10: "Выберите подкатегорию",
+							create_11: "Выберите подкатегорию",
+							create_12: "Описание",
+							create_13: "Контакт",
+							create_14: "Пароль",
+							create_15: "Зайдите в телеграм бота ",
+							create_16: ", нажмите 'старт', получите ваш ID номер, введите его сюда в качестве пароля.",
+							create_17: "Опубликовать объявление",
+							create_18: "",
+							create_19: "",
+
+							create_news_1: "Создать новую новость",
+							create_news_2: "Заглавное фото",
+							create_news_3: "Фото 2",
+							create_news_4: "Фото 3",
+							create_news_5: "Заголовок (ru)",
+							create_news_6: "Текст (ru)",
+							create_news_7: "Автор (ru)",
+
+							create_news_8: "Заголовок (en)",
+							create_news_9: "Текст (en)",
+							create_news_10: "Автор (en)",
+
+							create_news_11: "Пароль",
+							create_news_12: "Опубликовать новость",
+							create_news_13: "",
+							create_news_14: "",
+
+							get_user_list_1: "",
+							get_user_list_2: "",
+
+							delete_1: "Пароль",
+							delete_2: "Для удаления необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте ",
+							delete_3: "Удалить объявление",
+							delete_4: "",
+							delete_5: "",
+
+							menu_get_list_1: "Фильтровать объявления",
+							menu_get_list_2: "Выберите категорию",
+							menu_get_list_3: "Не выбрано",
+							menu_get_list_4: "Выберите подкатегорию",
+							menu_get_list_5: "Выберите подкатегорию",
+							menu_get_list_6: "Искать",
+							menu_get_list_7: "",
+							menu_get_list_8: "",
+
+							menu_create_1: "Мои объявления",
+							menu_create_2: "Создать новое объявление",
+							menu_create_3: "Объявление будет размещено бесплатно на 10 дней. Опубликованное объявление нельзя отредактировать, только удалить и создать новое.",
+							menu_create_4: "Для создания объявления вам необходимо будет войти в телеграм.",
+							menu_create_5: "Создать",
+							menu_create_6: "",
+							menu_create_7: "",
+
+							menu_get_user_list_1: "Найти все мои объявления",
+							menu_get_user_list_2: "Пароль",
+							menu_get_user_list_3: "Необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в телеграм боте ",
+							menu_get_user_list_4: "Искать",
+							menu_get_user_list_5: "",
+							menu_get_user_list_6: "",
+
+							menu_get_info_1: "Почитать о нас",
+							menu_get_info_2: "",
+							menu_get_info_3: "",
+							menu_get_info_4: ""
+						},
+						EN: {
+							general_info_1: "Loading...",
+							general_info_2: "",
+							general_info_3: "",
+							general_info_4: "",
+
+							navbar_1: "NHA TRANG",
+							navbar_2: "Menu",
+							navbar_3: "",
+							navbar_4: "",
+
+							get_list_1: "Created:",
+							get_list_2: "View details",
+							get_list_3: "Back to top",
+							get_list_4: "Show more...",
+							get_list_5: "",
+							get_list_6: "",
+
+							get_one_1: "Created:",
+							get_one_2: "Viewed:",
+							get_one_3: "Back",
+							get_one_4: "Show other...",
+							get_one_5: "Copy link",
+							get_one_6: "Link copied",
+							get_one_7: "",
+							get_one_8: "",
+
+							create_1: "Create a new ad",
+							create_2: "The ad will be posted for free for 10 days. The published ad cannot be edited, only deleted and a new one created.",
+							create_3: "'Photos' are not required, but they will help your listing stand out from the crowd.",
+							create_4: "Main photo",
+							create_5: "Photo 2",
+							create_6: "Photo 3",
+							create_7: "Title",
+							create_8: "Category",
+							create_9: "Not selected",
+							create_10: "Select a subcategory",
+							create_11: "Select a subcategory",
+							create_12: "Description",
+							create_13: "Contact",
+							create_14: "Password",
+							create_15: "Go to the telegram bot ",
+							create_16: ", press 'start', get your ID number, enter it here as a password.",
+							create_17: "Post the ad",
+							create_18: "",
+							create_19: "",
+
+							create_news_1: "Create new news",
+							create_news_2: "Main photo",
+							create_news_3: "Photo 2",
+							create_news_4: "Photo 3",
+							create_news_5: "Headline",
+							create_news_6: "Text",
+							create_news_7: "Author",
+							create_news_8: "Password",
+							create_news_9: "Post the news",
+							create_news_10: "",
+							create_news_11: "",
+
+							get_user_list_1: "",
+							get_user_list_2: "",
+
+							delete_1: "Password",
+							delete_2: "To delete, you need to enter your ID number as a password. You received it earlier in the telegram bot ",
+							delete_3: "Delete the Ad",
+							delete_4: "",
+							delete_5: "",
+
+							menu_get_list_1: "Filter ads",
+							menu_get_list_2: "Select category",
+							menu_get_list_3: "Not selected",
+							menu_get_list_4: "Select a subcategory",
+							menu_get_list_5: "Select a subcategory",
+							menu_get_list_6: "Search",
+							menu_get_list_7: "",
+							menu_get_list_8: "",
+
+							menu_create_1: "My ads",
+							menu_create_2: "Create a new ad",
+							menu_create_3: "The ad will be posted for free for 10 days. The published ad cannot be edited, only deleted and a new one created.",
+							menu_create_4: "To create an ad, you will need to visit to Telegram.",
+							menu_create_5: "Create",
+							menu_create_6: "",
+							menu_create_7: "",
+
+							menu_get_user_list_1: "Find all my ads",
+							menu_get_user_list_2: "Password",
+							menu_get_user_list_3: "You need to enter your ID number as a password. You received it earlier in the telegram bot ",
+							menu_get_user_list_4: "Search",
+							menu_get_user_list_5: "",
+							menu_get_user_list_6: "",
+
+							menu_get_info_1: "Read about us",
+							menu_get_info_2: "",
+							menu_get_info_3: "",
+							menu_get_info_4: ""
+						}
+					},
+					// содержит весь список категорий с кодами на русском
+					categoriesRu: {
+						'Жильё': { code: '1', subcategories: {
+								'Аренда': { code: 'A', subcategories: {
+									'Кровать': { code: '1' },
+									'Комната': { code: '2' },
+									'Квартира': { code: '3' },
+									'Дом': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Продажа': { code: 'B'
+							}
+						}},
+						'Транспорт': { code: '2', subcategories: {
+								'Аренда': { code: 'A', subcategories: {
+									'Велосипед': { code: '1' },
+									'Мопед': { code: '2' },
+									'Мотоцикл': { code: '3' },
+									'Автомобиль': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Продажа': { code: 'B', subcategories: {
+									'Велосипед': { code: '1' },
+									'Мопед': { code: '2' },
+									'Мотоцикл': { code: '3' },
+									'Автомобиль': { code: '4' },
+									'Другое': { code: '5' }
+							}}
+						}},
+						'Услуги': { code: '3', subcategories: {
+								'Транспорт, грузоперевозки, визараны': { code: 'A', subcategories: {
+									'Транспорт': { code: '1' },
+									'Грузоперевозки': { code: '2' },
+									'Визараны': { code: '3' },
+									'Складские услуги': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Документы, визы, билеты': { code: 'B', subcategories: {
+									'Документы': { code: '1' },
+									'Визы': { code: '2' },
+									'Билеты': { code: '3' },
+									'Страховки': { code: '4' },
+									'Другое': { code: '5' }
+							}}
+						}},
+						'Товары': { code: '4', subcategories: {
+								'Электроника': { code: 'A' },
+								'Мебель': { code: 'B' },
+								'Бытовые товары': { code: 'C' },
+								'Одежда': { code: 'D' },
+								'Еда': { code: 'E' },
+								'Детские товары': { code: 'F' },
+								'Животные': { code: 'G' },
+								'Хобби и отдых': { code: 'H' },
+								'Автозапчасти': { code: 'I' },
+								'Красота и здоровье': { code: 'J' },
+								'Растения': { code: 'K' },
+								'Товары для бизнеса': { code: 'L' },
+								'Другое': { code: 'Z' }
+						}},
+						'Работа': { code: '5', subcategories: {
+								'Предложение': { code: 'A', subcategories: {
+									'Частичная занятость': { code: '1' },
+									'Полная занятость': { code: '2' }
+							}},
+								'Поиск': { code: 'B' }
+						}},
+					},
+					// содержит весь список категорий с кодами на русском
+					categoriesEn: {
+						'Housing': { code: '1', subcategories: {
+								'Rent': { code: 'A', subcategories: {
+									'Bed': { code: '1' },
+									'Room': { code: '2' },
+									'Apartment': { code: '3' },
+									'House': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Sale': { code: 'B'
+							}
+						}},
+						'Transport': { code: '2', subcategories: {
+								'Rent': { code: 'A', subcategories: {
+									'Bicycle': { code: '1' },
+									'Bike': { code: '2' },
+									'Motorcycle': { code: '3' },
+									'Car': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Sale': { code: 'B', subcategories: {
+									'Bicycle': { code: '1' },
+									'Bike': { code: '2' },
+									'Motorcycle': { code: '3' },
+									'Car': { code: '4' },
+									'Other': { code: '5' }
+							}}
+						}},
+						'Services': { code: '3', subcategories: {
+								'Transport, cargo transportation, visarun': { code: 'A', subcategories: {
+									'Transport': { code: '1' },
+									'Cargo transportation': { code: '2' },
+									'Visarun': { code: '3' },
+									'Warehouse services': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Documents, visas, tickets': { code: 'B', subcategories: {
+									'Documents': { code: '1' },
+									'Visas': { code: '2' },
+									'Tickets': { code: '3' },
+									'Insurance': { code: '4' },
+									'Other': { code: '5' }
+							}}
+						}},
+						'Goods': { code: '4', subcategories: {
+								'Electronics': { code: 'A' },
+								'Furniture': { code: 'B' },
+								'Household goods': { code: 'C' },
+								'Cloth': { code: 'D' },
+								'Food': { code: 'E' },
+								'Children\'s goods': { code: 'F' },
+								'Animals': { code: 'G' },
+								'Hobbies and recreation': { code: 'H' },
+								'Auto parts': { code: 'I' },
+								'Beauty and health': { code: 'J' },
+								'Plants': { code: 'K' },
+								'Business Products': { code: 'L' },
+								'Other': { code: 'Z' }
+						}},
+						'Job': { code: '5', subcategories: {
+								'Offer': { code: 'A', subcategories: {
+									'Part-time employment': { code: '1' },
+									'Full-time employment': { code: '2' }
+							}},
+								'Search': { code: 'B' }
+						}},
+					},
+					// Выбранная головная категория
+					selectedMainCategory: '',
+					// Выбранная подкатегория 1
+					selectedSubcategory1: '',
+					// Выбранная подкатегория 2
+					selectedSubcategory2: '',
+					// Список подкатегорий 1
+					subcategories1: null,
+					// Список подкатегорий 2
+					subcategories2: null,
+					// Строка с итоговым кодом категории
+					categoryCode: '',
+                };
+            },
+			watch: {
+				// Наблюдаем за изменением второго уровня подкатегорий (третий выпадающий список)
+				selectedSubcategory2() {
+				this.updateCategoryCode();
+				}
+			},
+			computed: {
+				categories() {
+					return this.currentLanguage === 'RU' ? this.categoriesRu : this.categoriesEn;
+				}
+			},
+            methods: {
+				notAvailableMenu() {
+					this.errorMessage = 'Меню временно отключено';
+					setTimeout(() => { this.errorMessage = ''; }, 2000);
+				},
+				//
+				cleanForm() {
+					// очищаем форму 1
+					this.newAd = { title: '', description: '', contact: '', category: '', permanent: false };
+					// очищаем форму 2
+					this.newNews = { title_ru: '', description_ru: '', author_ru: '', title_en: '', description_en: '', author_en: '' };
+					// очищаем пароль
+					this.authPassword = '';
+					//
+					this.photoInputs = [true, false, false];
+					// Очистить поле файла через ref
+					this.$refs.fileInput.value = '';
+					// очищаем массив фото
+					this.photos = [];
+					//
+					this.cleanCategory();
+				},
+				// метод очистки категорий
+				cleanCategory() {
+					this.selectedMainCategory = '';
+					this.selectedSubcategory1 = '';
+					this.selectedSubcategory2 = '';
+					this.subcategories1 = null;
+					this.subcategories2 = null;
+					this.categoryCode = '';
+				},
+				// метод создания нового объявления
+				createAd() {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+					// проверяем обязательные поля
+					if (!this.newAd.title || !this.newAd.description || !this.newAd.contact || !this.categoryCode) {
+						this.errorMessage = 'Пожалуйста, заполните все обязательные поля';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					this.newAd.category = this.categoryCode;
+					// проверяем, введен ли пароль
+					if (!this.authPassword) {
+						this.errorMessage = 'Пожалуйста, введите пароль';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					// проверяем наличие фотографий (максимум 3)
+					if (this.photos.length > 3) {
+						this.errorMessage = 'Максимум можно загрузить 3 фотографии';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					// формируем объект FormData для отправки данных на сервер
+					const formData = new FormData();
+					formData.append('title', this.newAd.title);
+					formData.append('description', this.newAd.description);
+					formData.append('contact', this.newAd.contact);
+					formData.append('category', this.newAd.category);
+					formData.append('permanent', this.newAd.permanent);
+					formData.append('password', this.authPassword);
+
+					// добавляем фотографии в FormData
+					for (let i = 0; i < this.photos.length; i++) {
+						formData.append('photos[]', this.photos[i]);
+					}
+					
+					// отправляем данные на сервер
+					this.isLoading = true;
+					axios.post('api/ad/create', formData, {
+						headers: {
+							'Content-Type': 'multipart/form-data'
+						} 
+					})
+					.then(response => {
+						this.successMessage = 'Объявление успешно создано!';
+						// очищаем форму
+						this.cleanForm();
+						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+						setTimeout(() => { this.successMessage = ''; }, 3000);
+					})
+					.catch((error) => {
+						this.errorMessage = 'Не удалось создать объявление';	
+						if (error.response) {
+							// Сервер вернул ответ с ошибкой
+							console.error('Данные ответа с ошибкой:', error.response.data);
+							console.error('Код ответа:', error.response.status);
+							console.error('Заголовки ответа:', error.response.headers);
+						} else if (error.request) {
+							// Запрос был отправлен, но ответа не было
+							console.error('Запрос без ответа:', error.request);
+						} else {
+							// Другая ошибка, связанная с настройкой запроса
+							console.error('Ошибка настройки запроса:', error.message);
+						}
+						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+					})
+					.finally(() => {
+						this.isLoading = false;
+					});
+				},
+				// метод создания новой новости
+				createNews() {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+					// проверяем обязательные поля
+					if (!this.newNews.title_ru
+						|| !this.newNews.description_ru
+						|| !this.newNews.author_ru
+						|| !this.newNews.title_en
+						|| !this.newNews.description_en
+						|| !this.newNews.author_en
+					) {
+						this.errorMessage = 'Пожалуйста, заполните все обязательные поля.';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					// проверяем, введен ли пароль
+					if (!this.authPassword) {
+						this.errorMessage = 'Пожалуйста, введите пароль.';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					// проверяем наличие фотографий (максимум 3)
+					if (this.photos.length > 3) {
+						this.errorMessage = 'Максимум можно загрузить 3 фотографии.';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					// формируем объект FormData для отправки данных на сервер
+					const formData = new FormData();
+					formData.append('title_ru', this.newNews.title_ru);
+					formData.append('description_ru', this.newNews.description_ru);
+					formData.append('author_ru', this.newNews.author_ru);
+					formData.append('title_en', this.newNews.title_en);
+					formData.append('description_en', this.newNews.description_en);
+					formData.append('author_en', this.newNews.author_en);
+					formData.append('password', this.authPassword);
+
+					// добавляем фотографии в FormData
+					for (let i = 0; i < this.photos.length; i++) {
+						formData.append('photos[]', this.photos[i]);
+					}
+					
+					// отправляем данные на сервер
+					this.isLoading = true;
+					axios.post('api/news/create', formData, {
+						headers: {
+							'Content-Type': 'multipart/form-data'
+						} 
+					})
+					.then(response => {
+						this.successMessage = 'Новость успешно создана!';
+						// очищаем форму
+						this.cleanForm();
+						// очищаем сообщение
+						setTimeout(() => { this.successMessage = ''; }, 3000);
+					})
+					.catch((error) => {
+						this.errorMessage = 'Не удалось создать новость';	
+						if (error.response) {
+							// Сервер вернул ответ с ошибкой
+							console.error('Данные ответа с ошибкой:', error.response.data);
+							console.error('Код ответа:', error.response.status);
+							console.error('Заголовки ответа:', error.response.headers);
+						} else if (error.request) {
+							// Запрос был отправлен, но ответа не было
+							console.error('Запрос без ответа:', error.request);
+						} else {
+							// Другая ошибка, связанная с настройкой запроса
+							console.error('Ошибка настройки запроса:', error.message);
+						}
+						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+					})
+					.finally(() => {
+						this.isLoading = false;
+					});
+				},
+				//
+				blockAd() {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+					// проверяем обязательные поля
+					if (!this.adId) {
+						this.errorMessage = 'Пожалуйста, введите ID объявления.';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					// проверяем, введен ли пароль
+					if (!this.authPassword) {
+						this.errorMessage = 'Пожалуйста, введите пароль.';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					// отправляем данные на сервер
+					this.isLoading = true;
+					axios.get(`api/ad/block/${this.adId}/${this.authPassword}`)
+					.then(response => {
+						this.successMessage = 'Объявление успешно заблокировано!';
+						// очищаем id
+						this.adId = null;
+						// очищаем пароль
+						this.authPassword = '';
+						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+						setTimeout(() => { this.successMessage = ''; }, 3000);
+					})
+					.catch((error) => {
+						this.errorMessage = 'Не удалось заблокировать объявление';	
+						if (error.response) {
+							// Сервер вернул ответ с ошибкой
+							console.error('Данные ответа с ошибкой:', error.response.data);
+							console.error('Код ответа:', error.response.status);
+							console.error('Заголовки ответа:', error.response.headers);
+						} else if (error.request) {
+							// Запрос был отправлен, но ответа не было
+							console.error('Запрос без ответа:', error.request);
+						} else {
+							// Другая ошибка, связанная с настройкой запроса
+							console.error('Ошибка настройки запроса:', error.message);
+						}
+						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+					})
+					.finally(() => {
+						this.isLoading = false;
+					});
+				},
+				//
+				blockUser() {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+					// проверяем обязательные поля
+					if (!this.userId) {
+						this.errorMessage = 'Пожалуйста, введите ID пользователя.';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					// проверяем, введен ли пароль
+					if (!this.authPassword) {
+						this.errorMessage = 'Пожалуйста, введите пароль.';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					// отправляем данные на сервер
+					this.isLoading = true;
+					axios.get(`api/user/block/${this.userId}/${this.authPassword}`)
+					.then(response => {
+						this.successMessage = 'Пользователь успешно заблокирован!';
+						// очищаем id
+						this.userId = null;
+						// очищаем пароль
+						this.authPassword = '';
+						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+						setTimeout(() => { this.successMessage = ''; }, 3000);
+					})
+					.catch((error) => {
+						this.errorMessage = 'Не удалось заблокировать пользователя';	
+						if (error.response) {
+							// Сервер вернул ответ с ошибкой
+							console.error('Данные ответа с ошибкой:', error.response.data);
+							console.error('Код ответа:', error.response.status);
+							console.error('Заголовки ответа:', error.response.headers);
+						} else if (error.request) {
+							// Запрос был отправлен, но ответа не было
+							console.error('Запрос без ответа:', error.request);
+						} else {
+							// Другая ошибка, связанная с настройкой запроса
+							console.error('Ошибка настройки запроса:', error.message);
+						}
+						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+					})
+					.finally(() => {
+						this.isLoading = false;
+					});
+				},
+				//
+				deleteNews() {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+					// проверяем обязательные поля
+					if (!this.newsId) {
+						this.errorMessage = 'Пожалуйста, введите ID новости.';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					// проверяем, введен ли пароль
+					if (!this.authPassword) {
+						this.errorMessage = 'Пожалуйста, введите пароль.';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					// отправляем данные на сервер
+					this.isLoading = true;
+					axios.get(`api/news/delete/${this.newsId}/${this.authPassword}`)
+					.then(response => {
+						this.successMessage = 'Новость успешно удалена!';
+						// очищаем id
+						this.newsId = null;
+						// очищаем пароль
+						this.authPassword = '';
+						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+						setTimeout(() => { this.successMessage = ''; }, 3000);
+					})
+					.catch((error) => {
+						this.errorMessage = 'Не удалось удалить новость';
+						if (error.response) {
+							// Сервер вернул ответ с ошибкой
+							console.error('Данные ответа с ошибкой:', error.response.data);
+							console.error('Код ответа:', error.response.status);
+							console.error('Заголовки ответа:', error.response.headers);
+						} else if (error.request) {
+							// Запрос был отправлен, но ответа не было
+							console.error('Запрос без ответа:', error.request);
+						} else {
+							// Другая ошибка, связанная с настройкой запроса
+							console.error('Ошибка настройки запроса:', error.message);
+						}
+						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+					})
+					.finally(() => {
+						this.isLoading = false;
+					});
+				},
+				// метод обработки изменения файла в поле загрузки, обновляющий массив с фото
+				handleFileChange(event, index) {
+					// сохраняем выбранное фото в массиве
+					const file = event.target.files[0];
+					if (file) {
+						this.photos[index] = file; // сохраняем файл
+						if (index < this.photoInputs.length - 1) {
+							this.photoInputs[index + 1] = true; // показываем следующее поле
+						}
+					}
+				},
+				// метод установки языка
+				setLanguage(lang) {
+                    this.currentLanguage = lang; // Устанавливаем текущий язык
+                },
+				// метод получения выбранного перевода
+                getTranslation(key) {
+                    return this.translations[this.currentLanguage][key]; // Возвращаем перевод по ключу
+                },
+				// метод обновления выбранных категорий
+				loadSubcategories(level) {
+					// Если выбран уровень "main" - подгружаем первую подкатегорию или сбрасываем
+					if (level === 'main') {
+					if (this.selectedMainCategory) {
+						this.subcategories1 = this.categories[this.selectedMainCategory].subcategories;
+					} else {
+						this.subcategories1 = null;
+					}
+					this.selectedSubcategory1 = '';
+					this.selectedSubcategory2 = '';
+					this.subcategories2 = null;
+					this.updateCategoryCode();
+					}
+
+					// Если выбран уровень "sub1" - подгружаем подкатегорию 2 или сбрасываем
+					if (level === 'sub1') {
+					if (this.selectedSubcategory1) {
+						this.subcategories2 = this.subcategories1[this.selectedSubcategory1].subcategories;
+					} else {
+						this.subcategories2 = null;
+					}
+					this.selectedSubcategory2 = '';
+					this.updateCategoryCode();
+					}
+				},
+				// 
+				updateCategoryCode() {
+					// формирование итогового кода на основе выбора
+					let mainCategoryCode = this.categories[this.selectedMainCategory]?.code || '';
+					let subCategory1Code = this.subcategories1?.[this.selectedSubcategory1]?.code || '';
+					let subCategory2Code = this.subcategories2?.[this.selectedSubcategory2]?.code || '';
+					this.categoryCode = `${mainCategoryCode}${subCategory1Code}${subCategory2Code}`;
+				},
+
+            }
+        });
+		// Устанавливаем глобальный базовый URL для всех запросов axios
+        axios.defaults.baseURL = 'http://localhost/limonade/';
+
+        app.mount('#app');
+    </script>
+
+</body>
+</html>

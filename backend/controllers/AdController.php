@@ -1,6 +1,12 @@
 <?php
 
 class AdController {
+    private $adm_pass;
+
+    public function __construct($adm_pass) {
+        $this->adm_pass = $adm_pass;
+    }
+
     // Получить все объявления с пагинацией и фильтрацией по категории
     public function getAllAds() {
         // Фиксированное количество объявлений на странице
@@ -33,7 +39,7 @@ class AdController {
             // Проверка, что категория — это строка и не длиннее 6 символов
             if (!is_string($category) || strlen($category) > 4) {
                 http_response_code(400); // Bad Request
-                echo json_encode(["message" => "Invalid category"]);
+                echo json_encode(["message" => "Ошибка в категориях"]);
                 return;
             }
 
@@ -41,7 +47,7 @@ class AdController {
             $ads = $this->findAdsByCategory($category, $perPage, $offset);
             if (empty($ads)) {
                 // Если ничего не найдено, вернуть сообщение
-                http_response_code(404); // Not Found
+                http_response_code(404);
                 echo json_encode(["message" => "Обьявления не найдены"]);
                 return;
             }
@@ -95,19 +101,17 @@ class AdController {
     }
 
     // Найти все активные обьявления одного пользователя
-    public function findAdsByUser() {
-        // Получить тело запроса (например, JSON с hash_num)
-        $data = json_decode(file_get_contents("php://input"), true);
-
-        // Проверка наличия hash_num
-        if (!isset($data['password'])) {
+    public function findAdsByUser($password) {
+        // Проверка на наличие пароля и ID
+        if (empty($password) || strlen($password) > 20) {
+            // Выводим сообщение на экран
             http_response_code(400);
             echo json_encode(["message" => "Не указан пароль"]);
             return;
         }
 
         // Поиск пользователя по hash_num
-        $user = R::findOne('users', 'hash_num = ?', [$data['password']]);
+        $user = R::findOne('users', 'hash_num = ?', [$password]);
 
         // Проверка, существует ли пользователь и активен ли он
         if (!$user || $user->status != 1) {
@@ -117,30 +121,12 @@ class AdController {
         }
 
         // Обновление даты последнего визита
-        $user->last_visit = date('d.m.Y H:i:s');
+        $user->last_visit = date('Y-m-d H:i:s');
         R::store($user);
 
-        // Фиксированное количество объявлений на странице
-        $perPage = 10;
-
-        // Получить номер страницы из запроса
-        $page = isset($_GET['page']) ? $_GET['page'] : '1';
-
-        // Проверка на валидность номера страницы
-        if (!ctype_digit($page) || intval($page) < 1) {
-            http_response_code(400); // Bad Request
-            echo json_encode(["message" => "Invalid page number"]);
-            return;
-        }
-
-        $page = intval($page); // Преобразование в целое число после проверки
-
-        // Рассчитать смещение для выборки
-        $offset = ($page - 1) * $perPage;
-
         // Запрос на выборку объявлений пользователя со статусом 1 (активные)
-        $query = 'WHERE status = 1 AND user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
-        $ads = R::findAll('ads', $query, [$user->id, $perPage, $offset]);
+        $query = 'WHERE status = 1 AND user_id = ? ORDER BY created_at DESC';
+        $ads = R::findAll('ads', $query, [$user->id]);
 
         // Проверка, найдены ли объявления
         if (empty($ads)) {
@@ -188,89 +174,90 @@ class AdController {
         $ad = R::load('ads', $id);
         
         // Проверить, существует ли объявление и его статус равен 1 (активное объявление)
-        if ($ad->id && $ad->status == 1) {
-            // Подготовить массив для данных объявления
-            $adData = R::exportAll([$ad])[0];
-
-            // Обновить пути к фотографиям прямо в соответствующих полях
-            if ($adData['photo_1']) {
-                $adData['photo_1'] = $this->getPhotoUrl($adData['photo_1']);
-                
-                // Если есть фото_2, обновить путь
-                if ($adData['photo_2']) {
-                    $adData['photo_2'] = $this->getPhotoUrl($adData['photo_2']);
-                }
-
-                // Если есть фото_3, обновить путь
-                if ($adData['photo_3']) {
-                    $adData['photo_3'] = $this->getPhotoUrl($adData['photo_3']);
-                }
-            }
-
-            // Увеличить значение просмотров на 1
-            $ad->viewed += 1;
-            R::store($ad); // Сохранить изменения в базе данных
-
-            // Отправить результат
-            header('Content-Type: application/json');
-            echo json_encode($adData);
-        } else {
+        if (!$ad->id || $ad->status != 1) {
             // Если объявление не найдено или статус не равен 1, вернуть ошибку 404
             http_response_code(404);
             echo json_encode(["message" => "Объявление не найдено"]);
         }
+
+        // Подготовить массив для данных объявления
+        $adData = R::exportAll([$ad])[0];
+
+        // Обновить пути к фотографиям прямо в соответствующих полях
+        if ($adData['photo_1']) {
+            $adData['photo_1'] = $this->getPhotoUrl($adData['photo_1']);
+            
+            // Если есть фото_2, обновить путь
+            if ($adData['photo_2']) {
+                $adData['photo_2'] = $this->getPhotoUrl($adData['photo_2']);
+            }
+
+            // Если есть фото_3, обновить путь
+            if ($adData['photo_3']) {
+                $adData['photo_3'] = $this->getPhotoUrl($adData['photo_3']);
+            }
+        }
+
+        // Увеличить значение просмотров на 1
+        $ad->viewed += 1;
+        R::store($ad); // Сохранить изменения в базе данных
+
+        // Отправить результат
+        header('Content-Type: application/json');
+        echo json_encode($adData);
+        
     }
 
     // Создать новое объявление
     public function createAd() {
-        // Собираем данные из POST как массив $data
-        $data = [
+        // Поля и их значения по умолчанию
+        $fields = [
             'hash_num' => $_POST['password'] ?? null,
             'title' => $_POST['title'] ?? null,
             'description' => $_POST['description'] ?? null,
             'category' => $_POST['category'] ?? null,
-            'contact' => $_POST['contact'] ?? null
+            'contact' => $_POST['contact'] ?? null,
+            'permanent' => ($_POST['permanent'] === 'true') ? 1 : 0
         ];
 
-        // Проверка наличия всех необходимых полей
-        if (
-            !isset($data['hash_num']) ||
-            !isset($data['title']) ||
-            !isset($data['description']) ||
-            !isset($data['category']) ||
-            !isset($data['contact'])
-        ) {
-            http_response_code(400);
-            echo json_encode(["message" => "Недостаточно данных"]);
-            return;
+        // Проверка обязательных полей на наличие и непустоту
+        foreach (['title', 'description', 'category', 'contact'] as $field) {
+            if (empty(trim($fields[$field]))) {
+                http_response_code(400);
+                echo json_encode(["message" => "Поле $field пустое или отсутствует"]);
+                return;
+            }
         }
 
-        // Присвоение и валидация данных
-        $hash_num = $data['hash_num'];
-        $title = $data['title'];
-        $description = $data['description'];
-        $category = $data['category'];
-        $contact = $data['contact'];
+        // Ограничения по длине полей
+        $fieldLimits = [
+            'title' => 100,
+            'description' => 1100,
+            'category' => 5,
+            'contact' => 200
+        ];
 
-        // Проверка полей на пустоту
-        if (empty(trim($title)) || empty(trim($description)) || empty(trim($category)) || empty(trim($contact))) {
-            http_response_code(400);
-            echo json_encode(["message" => "Одно из обязательных полей пусто"]);
-            return;
-        }
-        
         // Проверка длины полей
-        if (strlen($title) > 100 || strlen($description) > 1100 || strlen($category) > 5 || strlen($contact) > 200) {
-            http_response_code(400);
-            echo json_encode(["message" => "Длина данных превышает допустимые пределы"]);
-            echo json_encode([
-                "title" => strlen($title),
-                "description" => strlen($description),
-                "category" => strlen($category),
-                "contact" => strlen($contact)
-            ]);
-            return;
+        foreach ($fieldLimits as $field => $limit) {
+            if (strlen($fields[$field]) > $limit) {
+                http_response_code(400);
+                echo json_encode([
+                    "message" => "Длина поля $field превышает $limit символов",
+                    "lengths" => [
+                        $field => strlen($fields[$field])
+                    ]
+                ]);
+                return;
+            }
         }
+
+        // Присвоение переменных для дальнейшего использования
+        $hash_num = $fields['hash_num'];
+        $title = $fields['title'];
+        $description = $fields['description'];
+        $category = $fields['category'];
+        $contact = $fields['contact'];
+        $permanent = $fields['permanent'];
 
         // Поиск пользователя по hash_num
         $user = R::findOne('users', 'hash_num = ?', [$hash_num]);
@@ -282,16 +269,19 @@ class AdController {
         }
 
         // Обновление даты последнего визита
-        $user->last_visit = date('d.m.Y H:i:s');
+        $user->last_visit = date('Y-m-d H:i:s');
         R::store($user);
 
-        // Проверка количества активных объявлений пользователя
-        $activeAdsCount = R::count('ads', 'user_id = ? AND status = 1', [$user->id]);
+        if ($hash_num != $this->adm_pass) {
 
-        if ($activeAdsCount >= 6) {
-            http_response_code(400);
-            echo json_encode(["message" => "Лимит объявлений исчерпан"]);
-            return;
+            // Проверка количества активных объявлений пользователя
+            $activeAdsCount = R::count('ads', 'user_id = ? AND status = 1', [$user->id]);
+
+            if ($activeAdsCount >= 6) {
+                http_response_code(400);
+                echo json_encode(["message" => "Лимит объявлений исчерпан"]);
+                return;
+            }
         }
 
         // Проверяем, есть ли загруженные фотографии в $_FILES
@@ -401,6 +391,7 @@ class AdController {
         $ad->title = $title; // Заголовок объявления
         $ad->description = $description; // Описание объявления
         $ad->category = $category; // Категория объявления
+        $ad->permanent = $permanent; // Срок действия не ограничен
 
         // Сохраняем фотографии в базе данных
         $ad->cover_photo = isset($adPhotos[0]) ? (string) $adPhotos[0] : null;
@@ -410,13 +401,13 @@ class AdController {
 
         $ad->contact = $contact; // Контактная информация
         $ad->status = 1; // Статус объявления
-        $ad->created_at = date('d.m.Y H:i:s'); // Дата создания
+        $ad->created_at = date('Y-m-d H:i:s'); // Дата создания
         $ad->viewed = 0; // Счетчик просмотров (изначально 0)
         R::store($ad); // Сохраняем объявление в базе данных
 
         // Возвращаем ответ с ID нового объявления
         header('Content-Type: application/json');
-        echo json_encode(["id" => $ad->id, "message" => "Объявление создано"]);
+        echo json_encode(["message" => "Объявление создано"]);
     }
 
     private function checkPhoto($isMultiple, $index) {
@@ -478,20 +469,22 @@ class AdController {
         $savedPhotos[] = $filePath . $photoName . '.jpg'; // Сохраняем путь к файлу
     }
 
-    // Пометить объявление как удалённое (статус = 0) и удалить связанные фотографии
-    public function deleteAd($id) {
-        // Получить тело запроса (например, JSON с hash_num)
-        $data = json_decode(file_get_contents("php://input"), true);
-
-        // Проверка наличия hash_num
-        if (!isset($data['password'])) {
+    // Пометить объявление как удалённое и удалить связанные фотографии
+    public function deleteAd($id, $password) {
+        // Проверка на наличие пароля и ID
+        if (empty($password) || empty($id) || strlen($password) > 20) {
+            // Выводим сообщение на экран
             http_response_code(400);
-            echo json_encode(["message" => "Не указан пароль"]);
+            echo json_encode(["message" => "Не достаточно данных"]);
             return;
         }
 
+        error_log('password: ' . $password);
+        // error_log('user: ' . $user);
         // Поиск пользователя по hash_num
-        $user = R::findOne('users', 'hash_num = ?', [$data['password']]);
+        $user = R::findOne('users', 'hash_num = ?', [$password]);
+
+        error_log('user: ' . $user);
 
         // Проверка, существует ли пользователь и активен ли он
         if (!$user || $user->status != 1) {
@@ -501,39 +494,42 @@ class AdController {
         }
 
         // Обновление даты последнего визита
-        $user->last_visit = date('d.m.Y H:i:s');
+        $user->last_visit = date('Y-m-d H:i:s');
         R::store($user);
 
         // Загрузить объявление по ID
         $ad = R::load('ads', $id);
 
         // Проверка, существует ли объявление и его статус
-        if ($ad->id && $ad->status == 1) {
-            if ($ad->user_id == $user->id) {
-                // Удалить связанные фотографии, если они существуют
-                $this->deletePhotoIfExists($ad->cover_photo);
-                $this->deletePhotoIfExists($ad->photo_1);
-                $this->deletePhotoIfExists($ad->photo_2);
-                $this->deletePhotoIfExists($ad->photo_3);
-
-                // Обновить статус объявления и дату
-                $ad->status = 0; // Статус объявления
-                $ad->closed_at = date('d.m.Y H:i:s'); // Дата удаления
-                R::store($ad);
-
-                // Ответ в формате JSON
-                header('Content-Type: application/json');
-                echo json_encode(["message" => "Объявление было успешно удалено"]);
-            } else {
-                // Если объявление не принадлежит пользователю, вернуть ошибку 403
-                http_response_code(403);
-                echo json_encode(["message" => "Доступ запрещён"]);
-            }
-        } else {
-            // Если объявление не найдено, вернуть ошибку 404
+        if (!$ad->id || ($ad->user_id != $user->id)) {
+            //
             http_response_code(404);
-            echo json_encode(["message" => "Объявление не найдено или уже было заблокировано"]);
+            echo json_encode(["message" => "Объявление не найдено или доступ запрещён"]);
+            return;
         }
+
+        //
+        if ($ad->status != 1) {
+            //
+            http_response_code(404);
+            echo json_encode(["message" => "Объявление уже было удалено ранее"]);
+            return;
+        }
+
+        // Удалить связанные фотографии, если они существуют
+        $this->deletePhotoIfExists($ad->cover_photo);
+        $this->deletePhotoIfExists($ad->photo_1);
+        $this->deletePhotoIfExists($ad->photo_2);
+        $this->deletePhotoIfExists($ad->photo_3);
+
+        // Обновить статус объявления и дату
+        $ad->status = 0; // Статус объявления
+        $ad->closed_at = date('Y-m-d H:i:s'); // Дата удаления
+        R::store($ad);
+
+        // Сообщение об успехе
+        header('Content-Type: application/json');
+        echo json_encode(["message" => "Объявление было успешно удалено"]);
     }
 
     // Вспомогательный метод для удаления фото, если оно существует
@@ -546,56 +542,83 @@ class AdController {
         }
     }
 
-    // Заблокировать обьявление по ID
-    public function blockAd($password, $id) {
+    // Заблокировать обьявление по ID и удалить связанные фотографии
+    public function blockAd($id, $password) {
         // Проверка на наличие пароля и ID
         if (empty($password) || empty($id) || strlen($password) > 20) {
-            http_response_code(400);
             // Выводим сообщение на экран
-            echo '<p>Не достаточно данных</p>';
+            http_response_code(400);
+            echo json_encode(["message" => "Не достаточно данных"]);
             return;
         }
-
-        // Загрузка пользователя с ID = 1
-        $user = R::load('users', 1);
 
         // Проверить введенный пароль
-        if ($user->hash_num != $password) {
-            // Пароль не правильный
-            http_response_code(400);
+        if ($password != $this->adm_pass) {
             // Выводим сообщение на экран
-            echo '<p>Неверный пароль</p>';
+            http_response_code(400);
+            echo json_encode(["message" => "Неверный пароль"]);
             return;
         }
-
-        // Обновление даты последнего визита
-        $user->last_visit = date('d.m.Y H:i:s');
-        R::store($user);
 
         // Загрузить объявление по ID
         $ad = R::load('ads', $id);
 
         // Проверка, существует ли объявление и его статус
-        if ($ad->id && $ad->status == 1) {
-            // Удалить связанные фотографии, если они существуют
-            $this->deletePhotoIfExists($ad->cover_photo);
-            $this->deletePhotoIfExists($ad->photo_1);
-            $this->deletePhotoIfExists($ad->photo_2);
-            $this->deletePhotoIfExists($ad->photo_3);
-
-            // Обновить статус объявления и дату
-            $ad->status = 0; // Статус объявления
-            $ad->closed_at = date('d.m.Y H:i:s'); // Дата удаления
-            R::store($ad);
-
-            // Сообщение об успехе
-            echo '<p>Объявление было успешно заблокировано</p>';
-        } else {
-            // Объявление не найдено или уже не активно
+        if (!$ad->id || ($ad->status != 1)) {
+            //
             http_response_code(404);
-            // Выводим сообщение на экран
-            echo '<p>Объявление не найдено или уже было заблокировано</p>';
+            echo json_encode(["message" => "Объявление не найдено или уже было заблокировано ранее"]);
+            return;
         }
+
+        // Удалить связанные фотографии, если они существуют
+        $this->deletePhotoIfExists($ad->cover_photo);
+        $this->deletePhotoIfExists($ad->photo_1);
+        $this->deletePhotoIfExists($ad->photo_2);
+        $this->deletePhotoIfExists($ad->photo_3);
+
+        // Обновить статус объявления и дату
+        $ad->status = 0; // Статус объявления
+        $ad->closed_at = date('Y-m-d H:i:s'); // Дата удаления
+        R::store($ad);
+
+        // Сообщение об успехе
+        header('Content-Type: application/json');
+        echo json_encode(["message" => "Объявление было успешно заблокировано"]);
+    }
+
+    // Пожаловаться на обьявление по ID
+    public function dislikeAd($id) {
+        // Присвоение данных
+        $text = trim($_POST['text']) ?? null;
+
+        if (empty($id) || empty($text)) {
+            // Выводим сообщение на экран
+            http_response_code(400);
+            echo json_encode(["message" => "Не достаточно данных"]);
+            return;
+        }
+
+        // Проверить введенный текст
+        if (strlen($text) > 1000) {
+            // Выводим сообщение на экран
+            http_response_code(400);
+            echo json_encode(["message" => "Слишком объемный текст"]);
+            return;
+        }
+
+        // Создаем новую жалобу
+        $dislike = R::dispense('dislikes'); // Используем RedBeanPHP для создания записи в таблице "dislikes"
+        $dislike->ad_id = $id; // ID объявления
+        $dislike->description = $text; // Описание жалобы
+
+        $dislike->status = 1; // Статус жалобы
+        $dislike->created_at = date('Y-m-d H:i:s'); // Дата создания
+        R::store($dislike); // Сохраняем жалобу в базе данных
+
+        // Возвращаем ответ
+        header('Content-Type: application/json');
+        echo json_encode(["message" => "Жалоба принята"]);
     }
 
 }

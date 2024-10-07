@@ -1,50 +1,49 @@
 <?php
 
 class UserController {
+    private $adm_pass;
+
+    public function __construct($adm_pass) {
+        $this->adm_pass = $adm_pass;
+    }    
+
     // Заблокировать пользователя по ID
-    public function blockUser($password, $id) {
+    public function blockUser($id, $password) {
         // Проверка на наличие пароля и ID
         if (empty($password) || empty($id) || strlen($password) > 20) {
-            http_response_code(400);
             // Выводим сообщение на экран
-            echo '<p>Не достаточно данных</p>';
+            http_response_code(400);
+            echo json_encode(["message" => "Не достаточно данных"]);
             return;
         }
-
-        // Загрузка пользователя с ID = 1
-        $user = R::load('users', 1);
 
         // Проверить введенный пароль
-        if ($user->hash_num != $password) {
-            // Пароль не правильный
-            http_response_code(400);
+        if ($password != $this->adm_pass) {
             // Выводим сообщение на экран
-            echo '<p>Неверный пароль</p>';
+            http_response_code(400);
+            echo json_encode(["message" => "Неверный пароль"]);
             return;
         }
 
-        // Обновление даты последнего визита
-        $user->last_visit = date('d.m.Y H:i:s');
-        R::store($user);
-
-        // Загрузить плохого пользователя по ID
-        $badUser = R::load('users', $id);
+        // Загрузить пользователя по ID
+        $user = R::load('users', $id);
 
         // Проверка, существует ли пользователь и его статус
-        if ($badUser->id && $badUser->status == 1) {
-            // Обновить статус пользователя и дату
-            $badUser->status = 0; // Статус пользователя
-            $badUser->closed_at = date('d.m.Y H:i:s'); // Дата удаления
-            R::store($badUser);
-
-            // Сообщение об успехе
-            echo '<p>Пользователь был успешно заблокирован</p>';
-        } else {
-            // Пользователь не найден или уже не активен
-            http_response_code(404);
+        if (!$user->id || $user->status != 1) {
             // Выводим сообщение на экран
-            echo '<p>Пользователь не найден или уже был заблокирован</p>';
+            http_response_code(404);
+            echo json_encode(["message" => "Пользователь не найден или уже был заблокирован ранее"]);
+            return;
         }
+
+        // Обновить статус пользователя и дату
+        $user->status = 0; // Статус пользователя
+        $user->closed_at = date('Y-m-d H:i:s'); // Дата удаления
+        R::store($user);
+
+        // Сообщение об успехе
+        header('Content-Type: application/json');
+        echo json_encode(["message" => "Пользователь был успешно заблокирован"]);
     }
 
 }

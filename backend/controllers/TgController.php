@@ -1,8 +1,14 @@
 <?php
 
 class TgController {
+    private $tg_key;
+
+    public function __construct($tg_key) {
+        $this->tg_key = $tg_key;
+    }
+
     // Объявление константы для токена
-    private const TELEGRAM_BOT_TOKEN = '12jlkj32lk3lk3lkjl23kj2l';
+    // private const TELEGRAM_BOT_TOKEN = '12jlkj32lk3lk3lkjl23kj2l';
 
     // Обработка вебхука
     public function handleWebhook() {
@@ -40,7 +46,7 @@ class TgController {
         if ($user) {
             // Пользователь найден, возвращаем его hash_num
             $hashNum = $user->hash_num;
-            $this->sendMessage($chatId, "Это ваш секретный код: $hashNum. Используйте его для работы со своими объявлениями в сервисе \"limonade.pro\" и никому не показывайте.");
+            $this->sendMessage($chatId, "Это ваш ID: $hashNum. Используйте его для работы со своими объявлениями в сервисе \"limonade.pro\" и никому не показывайте.");
         } else {
             // Пользователя нет, создаем новую запись
             $hashNum = $this->generateUniqueHash();
@@ -58,7 +64,7 @@ class TgController {
             R::store($user);
 
             // Возвращаем пользователю новый hash_num
-            $this->sendMessage($chatId, "Это ваш секретный код: $hashNum. Используйте его для работы со своими объявлениями в сервисе \"limonade.pro\" и никому не показывайте.");
+            $this->sendMessage($chatId, "Это ваш ID: $hashNum. Используйте его для работы со своими объявлениями в сервисе \"limonade.pro\" и никому не показывайте.");
         }
     }
 
@@ -84,7 +90,7 @@ class TgController {
 
     // Отправка сообщения пользователю через Telegram API
     private function sendMessage($chatId, $text) {
-        $url = "https://api.telegram.org/bot" . self::TELEGRAM_BOT_TOKEN . "/sendMessage";
+        $url = "https://api.telegram.org/bot" . $this->tg_key . "/sendMessage";
         $data = [
             'chat_id' => $chatId,
             'text' => $text,

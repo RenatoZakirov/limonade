@@ -18,7 +18,7 @@ require_once 'libraries/redbeanphp/rb.php';
 require_once 'libraries/imageeditorphp/ie.php';
 
 // Конфигурация базы данных
-require_once 'config/database.php';
+require_once 'config/config.php';
 
 // Базовая настройка RedBeanPHP
 R::setup($dsn, $username, $password);
@@ -35,6 +35,9 @@ require_once 'controllers/AdController.php';
 
 // Подключение контроллера пользователей
 require_once 'controllers/UserController.php';
+
+// Подключение контроллера новостей
+require_once 'controllers/NewsController.php';
 
 // Подключение контроллера ботов
 require_once 'controllers/TgController.php';
