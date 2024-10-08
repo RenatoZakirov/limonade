@@ -26,23 +26,29 @@ class Router {
                     $controller->getAllAds();
                 },
                 'api/ad/get_one/{id}' => function($params) {
-                    $id = intval($params[0]); // 
+                    // $id = intval($params[0]);
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
                     $controller = new AdController(ADM_PASS);
                     $controller->getAd($id, false);
                 },
                 'api/ad/get_list_by_user/{password}' => function($params) {
-                    $password = trim((string)$params[0]); // 
+                    $password = trim((string)$params[0]);
                     $controller = new AdController(ADM_PASS);
                     $controller->findAdsByUser($password);
                 },
                 'api/ad/delete/{id}/{password}' => function($params) {
-                    $id = intval($params[0]); // 
-                    $password = trim((string)$params[1]); // 
+                    // $id = intval($params[0]);
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
+                    $password = trim((string)$params[1]);
                     $controller = new AdController(ADM_PASS);
                     $controller->deleteAd($id, $password);
                 },
                 'api/ad/block/{id}/{password}' => function($params) {
-                    $id = intval($params[0]); // 
+                    // $id = intval($params[0]);
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
                     $password = trim((string)$params[1]); // 
                     $controller = new AdController(ADM_PASS);
                     $controller->blockAd($id, $password);
@@ -54,12 +60,16 @@ class Router {
                     $controller->getAllNews();
                 },
                 'api/news/get_one/{id}' => function($params) {
-                    $id = intval($params[0]); // 
+                    // $id = intval($params[0]);
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
                     $controller = new NewsController(ADM_PASS);
                     $controller->getNews($id);
                 },
                 'api/news/delete/{id}/{password}' => function($params) {
-                    $id = intval($params[0]); // 
+                    // $id = intval($params[0]);
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
                     $password = trim((string)$params[1]); // 
                     $controller = new NewsController(ADM_PASS);
                     $controller->deleteNews($id, $password);
@@ -67,7 +77,9 @@ class Router {
 
                 // Пользователи
                 'api/user/block/{id}/{password}' => function($params) {
-                    $id = intval($params[0]); // 
+                    // $id = intval($params[0]);
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
                     $password = trim((string)$params[1]); // 
                     $controller = new UserController(ADM_PASS);
                     $controller->blockUser($id, $password);
@@ -75,7 +87,9 @@ class Router {
 
                 // Запрос HTML
                 'html/ad/get_one/{id}' => function($params) {
-                    $id = intval($params[0]); // 
+                    // $id = intval($params[0]);
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
                     $controller = new AdController(ADM_PASS);
                     $controller->getAd($id, true);
                 },
@@ -92,7 +106,9 @@ class Router {
                     $controller->createAd();
                 },
                 'api/ad/dislike/{id}' => function($params) {
-                    $id = intval($params[0]); // 
+                    // $id = intval($params[0]);
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
                     $controller = new AdController(ADM_PASS);
                     $controller->dislikeAd($id);
                 },
@@ -157,9 +173,21 @@ class Router {
         }
     }
 
+    // Приватный статический метод для проверки ID
+    private static function validateId($id) {
+        $limit = 8;
+        // Проверяем, что $id является строкой, состоящей только из цифр и его длина не превышает лимит
+        if (!ctype_digit($id) || strlen($id) > $limit) {
+            http_response_code(400);
+            echo json_encode(['code' => 101]);
+            exit;  // Прекращаем выполнение скрипта при ошибке
+        }
+        return (int) $id;  // Приводим ID к целому числу и возвращаем
+    }
+
     private function notFound() {
         http_response_code(404);
-        echo json_encode(["message" => "Not Found"]);
+        echo json_encode(['code' => 100]);
     }
 }
 

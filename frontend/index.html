@@ -159,13 +159,17 @@
 														<!-- Найти все мои объявления -->
 														{{ getTranslation('menu.myAds.findStr') }}
 													</label>
-													<div class="col-4">
+													<div class="col-5">
 														<label for="inputPassword1" class="form-label">
 															<!-- Пароль -->
 															{{ getTranslation('menu.myAds.passwordStr') }}
-															<span class="text text-danger">*</span></label>
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																({{ getRemainingChars(authPassword, authPasswordLimit) }})
+															</span>
+														</label>
 													</div>
-													<div class="col-8">
+													<div class="col-7">
 														<input v-model="authPassword" type="password" id="inputPassword1" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
 													</div>
 													<div id="passwordHelpBlock" class="form-text">
@@ -248,7 +252,6 @@
 						</div>
 					</div>
 				</nav>
-
 
 				<nav>
 					<div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -398,26 +401,38 @@
 													{{ getTranslation('ads.adDetails.dislike.dislikeDescription') }}
 												</div>
 											</div>
-											<div class="row mb-3">
-												<div class="col">
-													<textarea v-model="dislikeText" class="form-control form-control-sm shadow-sm" id="FormControlTextarea11" rows="3" placeholder=""></textarea>
-												</div>
+
+											<div class="mb-3">
+												<label for="FormControlTextarea11" class="form-label">
+													<!-- Описание -->
+													{{ getTranslation('ads.adDetails.dislike.dislikeTitleStr') }}
+													<span class="text text-danger">*</span>
+													<span :class="getCharCountClass(dislikeText, dislikeTextLimit)">
+														({{ getRemainingChars(dislikeText, dislikeTextLimit) }})
+													</span>
+												</label>
+												<textarea v-model="dislikeText" class="form-control form-control-sm shadow-sm" id="FormControlTextarea11" rows="3" placeholder=""></textarea>
 											</div>
+
 											<button @click="dislikeAd(currentAd.id)" class="btn btn-sm btn-danger mb-2 shadow-sm" :disabled="dislikeText.length < 5">
-												<!-- Пожаловаться -->
+												<!-- Отправить жалобу -->
 												{{ getTranslation('ads.adDetails.dislike.dislikeButton') }}
 											</button>
 										</div>
 		
 										<div v-if="isAdOwner" class="card-footer">
 											<div class="row mb-3">
-												<div class="col-4">
+												<div class="col-5">
 													<label for="inputPassword3" class="form-label">
 														<!-- Пароль -->
 														{{ getTranslation('ads.adDetails.delete.passwordStr') }}
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+															({{ getRemainingChars(authPassword, authPasswordLimit) }})
+														</span>
 													</label>
 												</div>
-												<div class="col-8">
+												<div class="col-7">
 													<input v-model="authPassword" type="password" id="inputPassword3" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
 												</div>
 												<div id="passwordHelpBlock" class="form-text">
@@ -480,8 +495,14 @@
 												<label for="FormControlInput1" class="form-label">
 													<!-- Название -->
 													{{ getTranslation('ads.adCreate.adTitleStr') }}
-													<span class="text text-danger">*</span></label>
-												<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput1" placeholder="Студия, 3.5 млн...">
+													<span class="text text-danger">*</span>
+													<!-- Счетчик оставшихся символов для названия -->
+													<span :class="getCharCountClass(newAd.title, newAd.titleLimit)">
+														({{ getRemainingChars(newAd.title, newAd.titleLimit) }})
+													</span>
+												</label>
+												<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput1"
+													:placeholder="getTranslation('ads.adCreate.adTitlePlaceholderStr')">
 											</div>
 			
 											<div class="mb-3">
@@ -527,26 +548,40 @@
 												<label for="FormControlTextarea1" class="form-label">
 													<!-- Описание -->
 													{{ getTranslation('ads.adCreate.adDescriptionStr') }}
-													<span class="text text-danger">*</span></label>
-												<textarea v-model="newAd.description" class="form-control form-control-sm shadow-sm" id="FormControlTextarea1" rows="3" placeholder="Аренда, юг, 1 комн. кв., студия, 3.5 млн., 35 м2. Большая двухспальная кровать. Полностью меблированная. Отдельно вода, свет, уборка..."></textarea>
+													<span class="text text-danger">*</span>
+													<span :class="getCharCountClass(newAd.description, newAd.descriptionLimit)">
+														({{ getRemainingChars(newAd.description, newAd.descriptionLimit) }})
+													</span>
+												</label>
+												<textarea v-model="newAd.description" class="form-control form-control-sm shadow-sm" id="FormControlTextarea1" rows="3"
+													:placeholder="getTranslation('ads.adCreate.adDescriptionPlaceholderStr')"></textarea>
 											</div>
 						
 											<div class="mb-3">
 												<label for="FormControlInput3" class="form-label">
 													<!-- Контакт -->
 													{{ getTranslation('ads.adCreate.adContactStr') }}
-													<span class="text text-danger">*</span></label>
-												<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput3" placeholder="Николай, телеграм @nikolay_bro">
+													<span class="text text-danger">*</span>
+													<span :class="getCharCountClass(newAd.contact, newAd.contactLimit)">
+														({{ getRemainingChars(newAd.contact, newAd.contactLimit) }})
+													</span>
+												</label>
+												<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput3"
+													:placeholder="getTranslation('ads.adCreate.adContactPlaceholderStr')">
 											</div>
 											
 											<div class="row mb-3">
-												<div class="col-4">
+												<div class="col-5">
 													<label for="inputPassword2" class="form-label">
 														<!-- Пароль -->
 														{{ getTranslation('ads.adCreate.passwordStr') }}
-														<span class="text text-danger">*</span></label>
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+															({{ getRemainingChars(authPassword, authPasswordLimit) }})
+														</span>
+													</label>
 												</div>
-												<div class="col-8">
+												<div class="col-7">
 													<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
 												</div>
 												<div id="passwordHelpBlock" class="form-text">
@@ -566,7 +601,6 @@
 									</div>
 								</div>
 							</div>
-		
 		
 						</div>
 
@@ -714,8 +748,11 @@
 					// содержит объект нового объявления (ещё не созданного)
 					newAd: {
 						title: '',
+						titleLimit: 40,
           				description: '',
+						descriptionLimit: 1000,
 						contact: '',
+						contactLimit: 50,
 						category: ''
 					},
 					// управляет видимостью полей для фото
@@ -736,6 +773,8 @@
 					isAdOwner: false,
 					// содержит пароль для авторизации
 					authPassword: '',
+					//
+					authPasswordLimit: 16,
 					// язык интерфейса по умолчанию
 					currentLanguage: 'RU',
 					// словарь интерфейса
@@ -803,7 +842,8 @@
 									dislike: {
 										dislikeOpenButton: '',
 										dislikeDescription: 'Если вы считаете, что данное объявление содержит оскорбительные или неприемлемые материалы, пожалуйста, сообщите нам об этом.',
-										dislikeButton: 'Пожаловаться',
+										dislikeTitleStr: 'Описание',
+										dislikeButton: 'Отправить жалобу',
 									},
 									delete: {
 										passwordStr: 'Пароль',
@@ -819,14 +859,14 @@
 									photoTitleStr2: 'Фото 2',
 									photoTitleStr3: 'Фото 3',
 									adTitleStr: 'Название',
-									adTitlePlaceholderStr: '',
+									adTitlePlaceholderStr: 'Уроки йоги для домашних котов',
 									adCategoryStr: 'Категория',
 									adNotSelectedCategoryStr: 'Не выбрано',
 									adSubCategoryStr: 'Выберите подкатегорию',
 									adDescriptionStr: 'Описание',
-									adDescriptionPlaceholderStr: '',
+									adDescriptionPlaceholderStr: 'Помогите вашему пушистому другу достичь дзен! Специальные занятия йогой для котов: растяжка, медитация и умение балансировать на диване. Ваш кот будет мурчать от удовольствия!',
 									adContactStr: 'Контакт',
-									adContactPlaceholderStr: '',
+									adContactPlaceholderStr: 'Оксана, телеграм: @oxana_yoga',
 									passwordStr: 'Пароль',
 									createDescriptionStr3: 'Зайдите в наш Telegram-бот:',
 									createDescriptionStr4: ", нажмите 'старт', получите ваш ID номер, введите его сюда в качестве пароля.",
@@ -849,6 +889,120 @@
 									createdStr: 'Создано:',
 									backButton: 'Назад',
 								}
+							},
+							errors: {
+								// Общие ошибки
+								100: 'Страница не найдена',
+								101: 'Ошибка с ID',
+								102: '',
+								103: '',
+								104: '',
+								// Ошибки связанные со списком объявлений
+								200: 'Ошибка с номером страницы',
+								201: 'Ошибка со строкой категорий',
+								202: 'Не удалось найти активных объявлений',
+								203: 'Ошибка с паролем',
+								204: 'Не удалось найти активного пользователя. Возможно ошибка в пароле',
+								205: '',
+								206: '',
+								210: 'Пожалуйста, введите пароль',
+								211: 'Пароль слишком длинный',
+								212: '',
+								213: '',
+								214: '',
+								// Ошибки связанные со списком новостей
+								300: 'Ошибка с номером страницы',
+								301: '',
+								302: '',
+								303: '',
+								// Ошибки связанные с одним объявлением
+								400: 'Не удалось найти активного объявления',
+								401: 'Не удалось найти активного пользователя. Возможно ошибка в пароле',
+								402: '',
+								403: '',
+								404: '',
+								420: 'Ошибка с паролем или ID',
+								421: 'Не удалось найти объявление',
+								422: 'Ошибка доступа',
+								423: 'Объявление было удалено ранее',
+								424: '',
+								425: '',
+								430: 'Ошибка с текстом или ID',
+								431: 'Текст превышает допустимый лимит',
+								432: '',
+								433: '',
+								440: 'Пожалуйста, введите пароль',
+								441: 'Пароль слишком длинный',
+								442: '',
+								443: '',
+								450: 'Пожалуйста, введите текст жалобы',
+								451: 'Текст жалобы слишком длинный',
+								452: '',
+								453: '',
+								// Ошибки связанные с одной новостью
+								500: 'Не удалось найти активную новость',
+								501: '',
+								502: '',
+								503: '',
+								520: 'Ошибка с паролем или ID',
+								521: 'Не удалось найти новость',
+								522: 'Ошибка доступа',
+								523: 'Новость была удалена ранее',
+								524: '',
+								525: '',
+								// Ошибки связанные с созданием объявления
+								600: 'Не заполнены важные поля',
+								601: 'Некоторые поля нарушили лимит символов',
+								602: 'Не удалось найти активного пользователя. Возможно ошибка в пароле',
+								603: 'Превышен лимит объявлений. Максимум 3 шт',
+								604: '',
+								605: '',
+								606: '',
+								620: 'Ошибка при загрузке одного из файлов',
+								621: 'Один из файлов не является изображением',
+								622: 'Одно из фото не допустимого формата. Можно jpeg, png, gif',
+								623: 'Одно из фото превышает допустимый размер. Максимум 5 мБ',
+								624: 'Одно из фото слишком маленькое. Минимум 600 * 450 или наоборот',
+								625: '',
+								626: '',
+								630: 'Пожалуйста, напишите название',
+								631: 'Пожалуйста, выберите категорию',
+								632: 'Пожалуйста, напишите описание',
+								633: 'Пожалуйста, напишите свой контакт',
+								634: 'Пожалуйста, введите пароль',
+								635: 'Название слишком длинное',
+								636: 'Категория слишком длинная',
+								637: 'Описание слишком длинное',
+								638: 'Контакт слишком длинный',
+								639: 'Пароль слишком длинный',
+								640: 'Слишком много фото. Максимум 3 шт',
+								641: '',
+								642: '',
+								// Ошибки связанные с созданием новости
+								700: 'Не заполнены важные поля',
+								701: 'Некоторые поля нарушили лимит символов',
+								702: 'Ошибка доступа',
+								703: '',
+								704: '',
+								705: '',
+								720: 'Ошибка при загрузке одного из файлов',
+								721: 'Один из файлов не является изображением',
+								722: 'Одно из фото не допустимого формата. Можно jpeg, png, gif',
+								723: 'Одно из фото превышает допустимый размер. Максимум 5 мБ',
+								724: 'Одно из фото слишком маленькое. Минимум 600 * 450 или наоборот',
+								725: '',
+								726: '',
+								// Ошибки связанные с пользователем
+								800: '',
+								801: '',
+								802: '',
+								803: '',
+								820: 'Ошибка с паролем или ID',
+								821: 'Ошибка доступа',
+								822: 'Не удалось найти пользователя',
+								823: 'Пользователь был заблокирован ранее',
+								824: '',
+								825: '',
 							},
 						},
 						EN: {
@@ -914,7 +1068,8 @@
 									dislike: {
 										dislikeOpenButton: '',
 										dislikeDescription: 'If you believe this ad contains offensive or inappropriate material, please let us know.',
-										dislikeButton: 'Complain',
+										dislikeTitleStr: 'Description',
+										dislikeButton: 'Submit the complaint',
 									},
 									delete: {
 										passwordStr: 'Password',
@@ -930,14 +1085,14 @@
 									photoTitleStr2: 'Photo 2',
 									photoTitleStr3: 'Photo 3',
 									adTitleStr: 'Title',
-									adTitlePlaceholderStr: '',
+									adTitlePlaceholderStr: 'Yoga lessons for home cats',
 									adCategoryStr: 'Category',
 									adNotSelectedCategoryStr: 'Not selected',
 									adSubCategoryStr: 'Select a subcategory',
 									adDescriptionStr: 'Description',
-									adDescriptionPlaceholderStr: '',
+									adDescriptionPlaceholderStr: 'Help your furry friend achieve zen! Special yoga classes for cats: stretching, meditation and learning to balance on the couch. Your cat will purr with pleasure!',
 									adContactStr: 'Contact',
-									adContactPlaceholderStr: '',
+									adContactPlaceholderStr: 'Alexa, telegram: @alexa_yoga',
 									passwordStr: 'Password',
 									createDescriptionStr3: 'Go to our Telegram bot:',
 									createDescriptionStr4: ", press 'start', get your ID number, enter it here as a password.",
@@ -1379,6 +1534,8 @@
 					subcategories2: null,
 					// Строка с итоговым кодом категории
 					categoryCode: '',
+					//
+					categoryCodeLimit: 7,
 					// флаг указывающий скопирована ссылка в буфер или нет
 					copyIcon: false,
 					// Если phpAdId не передан, по умолчанию будет 0
@@ -1387,7 +1544,10 @@
 					inspect: '',
 					//
 					dislike: false,
+					//
 					dislikeText: '',
+					//
+					dislikeTextLimit: 400,
                 };
             },
             mounted() {
@@ -1404,7 +1564,7 @@
 			watch: {
 				// Наблюдаем за изменением второго уровня подкатегорий (третий выпадающий список)
 				selectedSubcategory2() {
-				this.updateCategoryCode();
+					this.updateCategoryCode();
 				}
 			},
 			computed: {
@@ -1439,7 +1599,6 @@
 					window.scrollTo({top: 0, behavior: 'smooth'});
 					this.showScreen('adList');
 					this.isLoading = true;
-					// this.cleanCategory();
 
 					this.isAdOwner = false;
 					this.authPassword = '';
@@ -1457,23 +1616,10 @@
 					axios.get(url)
                         .then(response => {
                             this.adsList = response.data;
-							// console.log(this.adsList)
                         })
                         .catch((error) => {
-                            this.errorMessage = 'Не удалось загрузить объявления';
-							console.error('Сообщение ошибки:', error.message);
-							if (error.response) {
-								// Сервер вернул ответ с ошибкой
-								console.error('Данные ответа с ошибкой:', error.response.data);
-								console.error('Код ответа:', error.response.status);
-								console.error('Заголовки ответа:', error.response.headers);
-							} else if (error.request) {
-								// Запрос был отправлен, но ответа не было
-								console.error('Запрос без ответа:', error.request);
-							} else {
-								// Другая ошибка, связанная с настройкой запроса
-								console.error('Ошибка настройки запроса:', error.message);
-							}
+							//
+                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })
@@ -1486,32 +1632,20 @@
 					// Плавная прокрутка страницы вверх после загрузки новостей
 					window.scrollTo({top: 0, behavior: 'smooth'});
 					this.showScreen('newsList');
-					this.isLoading = true;
-
 					this.isAdOwner = false;
 					this.authPassword = '';
 					this.phpAdId = 0;
 
+					// отправляем данные на сервер
+					this.isLoading = true;
                     axios.get(`api/news/get_list?page=${newsCurrentPage}`)
                         .then(response => {
                             this.newsList = response.data;
 							// console.log(this.newsList)
                         })
                         .catch((error) => {
-                            this.errorMessage = 'Не удалось загрузить новости';
-							console.error('Сообщение ошибки:', error.message);
-							if (error.response) {
-								// Сервер вернул ответ с ошибкой
-								console.error('Данные ответа с ошибкой:', error.response.data);
-								console.error('Код ответа:', error.response.status);
-								console.error('Заголовки ответа:', error.response.headers);
-							} else if (error.request) {
-								// Запрос был отправлен, но ответа не было
-								console.error('Запрос без ответа:', error.request);
-							} else {
-								// Другая ошибка, связанная с настройкой запроса
-								console.error('Ошибка настройки запроса:', error.message);
-							}
+							//
+                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })
@@ -1521,38 +1655,30 @@
                 },
                 // метод загрузки с сервера одного объявления по ID
                 loadAdDetail(id) {
-					this.showScreen('adDetail');
-					this.dislike = false;
-					this.dislikeText = '';
-
+					// this.showScreen('adDetail');
+					// this.dislike = false;
+					// this.dislikeText = '';
 					// отправляем данные на сервер
                     this.isLoading = true;
                     axios.get(`api/ad/get_one/${id}`)
                         .then(response => {
 							// загрузить данные по обьявлению
                             this.currentAd = response.data;
+							this.showScreen('adDetail');
+							this.dislike = false;
+							this.dislikeText = '';
 							// поместить в переменную для инспектирования
 							this.inspect = this.currentAd.user_id + '.' + this.currentAd.id;
 							// если это была загрузка по ссылке, нужно почистить url
 							if (this.phpAdId) {
 								// Изменить URL в адресной строке
 								window.history.replaceState(null, null, 'http://localhost/limonade/');
+								this.phpAdId = 0;
 							}
                         })
                         .catch((error) => {
-                            this.errorMessage = 'Не удалось загрузить объявление';
-							if (error.response) {
-								// Сервер вернул ответ с ошибкой
-								console.error('Данные ответа с ошибкой:', error.response.data);
-								console.error('Код ответа:', error.response.status);
-								console.error('Заголовки ответа:', error.response.headers);
-							} else if (error.request) {
-								// Запрос был отправлен, но ответа не было
-								console.error('Запрос без ответа:', error.request);
-							} else {
-								// Другая ошибка, связанная с настройкой запроса
-								console.error('Ошибка настройки запроса:', error.message);
-							}
+							//
+                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })
@@ -1562,29 +1688,20 @@
                 },
 				//
 				loadNewsDetail(id) {
-					this.showScreen('newsDetail');
+					// this.showScreen('newsDetail');
+					// отправляем данные на сервер
                     this.isLoading = true;
                     axios.get(`api/news/get_one/${id}`)
                         .then(response => {
 							// загрузить данные по новости
                             this.currentNews = response.data;
+							this.showScreen('newsDetail');
 							// поместить в переменную для инспектирования
 							this.inspect = this.currentNews.id;
                         })
                         .catch((error) => {
-                            this.errorMessage = 'Не удалось загрузить новость';
-							if (error.response) {
-								// Сервер вернул ответ с ошибкой
-								console.error('Данные ответа с ошибкой:', error.response.data);
-								console.error('Код ответа:', error.response.status);
-								console.error('Заголовки ответа:', error.response.headers);
-							} else if (error.request) {
-								// Запрос был отправлен, но ответа не было
-								console.error('Запрос без ответа:', error.request);
-							} else {
-								// Другая ошибка, связанная с настройкой запроса
-								console.error('Ошибка настройки запроса:', error.message);
-							}
+							//
+                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })
@@ -1608,19 +1725,30 @@
 				},
 				// метод загрузки с сервера только списка своих собственных объявлений
 				loadUserAds() {
-					// проверяем, введен ли пароль
-					if (!this.authPassword) {
-						this.errorMessage = 'Пожалуйста, введите пароль.';
+					// Плавная прокрутка вверх страницы после загрузки объявлений
+					window.scrollTo({top: 0, behavior: 'smooth'});
+					// Проверяем, введен ли пароль и его длина
+					if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.getTranslation('errors.' + 210);
+
+					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
+						// this.errorMessage = 'Пароль слишком длинный';
+						this.errorMessage = this.getTranslation('errors.' + 211);
+					}
+
+					this.showScreen('adList');
+					this.cleanCategory();
+
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
 						return;
 					}
-					// Плавная прокрутка вверх страницы после загрузки объявлений
-					window.scrollTo({top: 0, behavior: 'smooth'});
-					this.showScreen('adList');
-					this.isLoading = true;
-					this.cleanCategory();
-
+					
 					this.adCurrentPage = 1;
+					// отправляем данные на сервер
+					this.isLoading = true;
                     axios.get(`api/ad/get_list_by_user/${this.authPassword}`)
                         .then(response => {
 							// console.log(response.data);
@@ -1629,19 +1757,8 @@
 							this.authPassword = '';
                         })
                         .catch((error) => {
-                            this.errorMessage = 'Не удалось загрузить объявления';
-							if (error.response) {
-								// Сервер вернул ответ с ошибкой
-								console.error('Данные ответа с ошибкой:', error.response.data);
-								console.error('Код ответа:', error.response.status);
-								console.error('Заголовки ответа:', error.response.headers);
-							} else if (error.request) {
-								// Запрос был отправлен, но ответа не было
-								console.error('Запрос без ответа:', error.request);
-							} else {
-								// Другая ошибка, связанная с настройкой запроса
-								console.error('Ошибка настройки запроса:', error.message);
-							}
+							//
+                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })
@@ -1653,28 +1770,65 @@
 				createAd() {
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
-					// сначала проверяем обязательные поля
-					if (!this.newAd.title || !this.newAd.description || !this.newAd.contact || !this.categoryCode) {
-						this.errorMessage = 'Пожалуйста, заполните все обязательные поля.';
-						return;
+					// Проверяем, введены ли параметры объявления и их длина
+					if (this.newAd.title.length < 5) {
+						// this.errorMessage = 'Пожалуйста, напишите название';
+						this.errorMessage = this.getTranslation('errors.' + 630);
+
+					} else if (this.categoryCode.length < 1) {
+						// this.errorMessage = 'Пожалуйста, выберите категорию';
+						this.errorMessage = this.getTranslation('errors.' + 631);
+
+					} else if (this.newAd.description.length < 20) {
+						// this.errorMessage = 'Пожалуйста, напишите описание';
+						this.errorMessage = this.getTranslation('errors.' + 632);
+
+					} else if (this.newAd.contact.length < 5) {
+						// this.errorMessage = 'Пожалуйста, напишите свой контакт';
+						this.errorMessage = this.getTranslation('errors.' + 633);
+
+					} else if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.getTranslation('errors.' + 634);
+
+					} else if (this.getRemainingChars(this.newAd.title, this.newAd.titleLimit) < 0) {
+						// this.errorMessage = 'Название слишком длинное';
+						this.errorMessage = this.getTranslation('errors.' + 635);
+
+					} else if (this.getRemainingChars(this.categoryCode, this.categoryCodeLimit) < 0) {
+						// this.errorMessage = 'Категория слишком длинная';
+						this.errorMessage = this.getTranslation('errors.' + 636);
+
+					} else if (this.getRemainingChars(this.newAd.description, this.newAd.descriptionLimit) < 0) {
+						// this.errorMessage = 'Описание слишком длинное';
+						this.errorMessage = this.getTranslation('errors.' + 637);
+
+					} else if (this.getRemainingChars(this.newAd.contact, this.newAd.contactLimit) < 0) {
+						// this.errorMessage = 'Контакт слишком длинный';
+						this.errorMessage = this.getTranslation('errors.' + 638);
+
+					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
+						// this.errorMessage = 'Пароль слишком длинный';
+						this.errorMessage = this.getTranslation('errors.' + 639);
 					}
-					this.newAd.category = this.categoryCode;
-					// проверяем, введен ли пароль
-					if (!this.authPassword) {
-						this.errorMessage = 'Пожалуйста, введите пароль.';
-						return;
-					}
-					// проверяем наличие фотографий (максимум 3)
+					// Проверяем наличие фотографий (максимум 3)
 					if (this.photos.length > 3) {
-						this.errorMessage = 'Максимум можно загрузить 3 фотографии.';
+						// this.errorMessage = 'Слишком много фото. Максимум 3 шт';
+						this.errorMessage = this.getTranslation('errors.' + 640);
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
 						return;
 					}
+
+					this.newAd.category = this.categoryCode;
 					// формируем объект FormData для отправки данных на сервер
 					const formData = new FormData();
 					formData.append('title', this.newAd.title);
+					formData.append('category', this.newAd.category);
 					formData.append('description', this.newAd.description);
 					formData.append('contact', this.newAd.contact);
-					formData.append('category', this.newAd.category);
 					formData.append('password', this.authPassword);
 
 					// добавляем фотографии в FormData
@@ -1684,45 +1838,43 @@
 					
 					// отправляем данные на сервер
 					this.isLoading = true;
+					axios.post('api/ad/create', formData, {headers: {'Content-Type': 'multipart/form-data'}})
+						.then(response => {
+							this.successMessage = 'Объявление успешно создано!';
+							// очищаем форму
+							this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, category: '' };
+							this.cleanCategory();
+							this.loadAdsList();
+							// очищаем пароль
+							this.authPassword = '';
+							// очищаем массив фото
+							this.photos = [];
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.successMessage = ''; }, 3000);
+						})
+						.catch((error) => {
+							//
+							this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 
-					axios.post('api/ad/create', formData, {
-						headers: {
-							'Content-Type': 'multipart/form-data'
-						}
-					})
-					.then(response => {
-						this.successMessage = 'Объявление успешно создано!';
-						// очищаем форму
-						this.newAd = { title: '', description: '', contact: '', category: '' };
-						// очищаем пароль
-						this.authPassword = '';
-						// очищаем массив фото
-						this.photos = [];
-						this.cleanCategory();
-						this.loadAdsList();
-						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-						setTimeout(() => { this.successMessage = ''; }, 3000);
-					})
-					.catch((error) => {
-						this.errorMessage = 'Не удалось создать объявление';	
-						if (error.response) {
-							// Сервер вернул ответ с ошибкой
-							console.error('Данные ответа с ошибкой:', error.response.data);
-							console.error('Код ответа:', error.response.status);
-							console.error('Заголовки ответа:', error.response.headers);
-						} else if (error.request) {
-							// Запрос был отправлен, но ответа не было
-							console.error('Запрос без ответа:', error.request);
-						} else {
-							// Другая ошибка, связанная с настройкой запроса
-							console.error('Ошибка настройки запроса:', error.message);
-						}
-						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
-					})
-					.finally(() => {
-						this.isLoading = false;
-					});
+							// this.errorMessage = 'Не удалось создать объявление';	
+							// if (error.response) {
+							// 	// Сервер вернул ответ с ошибкой
+							// 	console.error('Данные ответа с ошибкой:', error.response.data);
+							// 	console.error('Код ответа:', error.response.status);
+							// 	console.error('Заголовки ответа:', error.response.headers);
+							// } else if (error.request) {
+							// 	// Запрос был отправлен, но ответа не было
+							// 	console.error('Запрос без ответа:', error.request);
+							// } else {
+							// 	// Другая ошибка, связанная с настройкой запроса
+							// 	console.error('Ошибка настройки запроса:', error.message);
+							// }
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.errorMessage = ''; }, 3000);
+						})
+						.finally(() => {
+							this.isLoading = false;
+						});
 				},
 				// метод обработки изменения файла в поле загрузки, обновляющий массив с фото
 				handleFileChange(event, index) {
@@ -1739,12 +1891,21 @@
 				deleteAd(id) {
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
-					// проверяем, введен ли пароль
-					if (!this.authPassword) {
-						this.errorMessage = 'Пожалуйста, введите пароль.';
+					// Проверяем, введен ли пароль и его длина
+					if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.getTranslation('errors.' + 440);
+
+					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
+						// this.errorMessage = 'Пароль слишком длинный';
+						this.errorMessage = this.getTranslation('errors.' + 441);
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
 						return;
 					}
+
 					// отправляем данные на сервер
 					this.isLoading = true;
 					axios.get(`api/ad/delete/${id}/${this.authPassword}`)
@@ -1753,30 +1914,17 @@
 							this.successMessage = 'Объявление успешно удалено!';
 							// удаляем объявление из массива adsList
 							this.adsList = this.adsList.filter(ad => ad.id !== id);
-							this.currentAd = {photo_1: null, created_at: ''};
 							this.showScreen('adList');
+							this.currentAd = {photo_1: null, created_at: ''};
+							this.authPassword = '';
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.successMessage = ''; }, 3000);
 						})
 						.catch((error) => {
-							this.errorMessage = 'Не удалось удалить объявление';
-							// console.error(error);
-							// console.error('Сообщение ошибки:', error.message);
-								if (error.response) {
-									// Сервер вернул ответ с ошибкой
-									console.error('Данные ответа с ошибкой:', error.response.data);
-									console.error('Код ответа:', error.response.status);
-									console.error('Заголовки ответа:', error.response.headers);
-								} else if (error.request) {
-									// Запрос был отправлен, но ответа не было
-									console.error('Запрос без ответа:', error.request);
-								} else {
-									// Другая ошибка, связанная с настройкой запроса
-									console.error('Ошибка настройки запроса:', error.message);
-								}
-								// console.error('Полный объект ошибки:', error);
-								// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-								setTimeout(() => { this.errorMessage = ''; }, 3000);
+							//
+                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.errorMessage = ''; }, 3000);
 						})
 						.finally(() => {
 							this.isLoading = false;
@@ -1786,9 +1934,17 @@
 				dislikeAd(id) {
 					// Плавная прокрутка страницы вверх после загрузки объявлений
 					window.scrollTo({top: 0, behavior: 'smooth'});
-					// проверяем, введен ли текст жалобы
-					if (this.dislikeText.length < 5) {
-						this.errorMessage = 'Пожалуйста, введите текст жалобы.';
+					// Проверяем, введен ли текст жалобы и ее длину
+					if (this.dislikeText.length < 20) {
+						// this.errorMessage = 'Пожалуйста, введите текст жалобы';
+						this.errorMessage = this.getTranslation('errors.' + 450);
+
+					} else if (this.getRemainingChars(this.dislikeText, this.dislikeTextLimit) < 0) {
+						// this.errorMessage = 'Текст жалобы слишком длинный';
+						this.errorMessage = this.getTranslation('errors.' + 451);
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
 						return;
 					}
@@ -1799,13 +1955,7 @@
 
 					// отправляем данные на сервер
 					this.isLoading = true;
-
-					axios.post(`api/ad/dislike/${id}`, formData, {
-						headers: {
-							'Content-Type': 'multipart/form-data'
-						}
-					})
-                    // axios.get(`api/ad/dislike/${id}/${this.dislikeText}`)
+					axios.post(`api/ad/dislike/${id}`, formData, {headers: {'Content-Type': 'multipart/form-data'}})
                         .then(response => {
 							//
 							this.successMessage = 'Жалоба на объявление принята!';
@@ -1816,19 +1966,8 @@
 							setTimeout(() => { this.successMessage = ''; }, 3000);
                         })
                         .catch((error) => {
-                            this.errorMessage = 'Не удалось отправить жалобу';
-							if (error.response) {
-								// Сервер вернул ответ с ошибкой
-								console.error('Данные ответа с ошибкой:', error.response.data);
-								console.error('Код ответа:', error.response.status);
-								console.error('Заголовки ответа:', error.response.headers);
-							} else if (error.request) {
-								// Запрос был отправлен, но ответа не было
-								console.error('Запрос без ответа:', error.request);
-							} else {
-								// Другая ошибка, связанная с настройкой запроса
-								console.error('Ошибка настройки запроса:', error.message);
-							}
+							//
+                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })
@@ -1840,10 +1979,8 @@
 				getCategoryNames(categoryCode) {
 					const categoryNames = [];
 					// let currentLevel = this.categories;
-
 					// Выбираем правильный массив категорий в зависимости от локали
     				let currentLevel = this.currentLanguage === 'RU' ? this.categoriesRu : this.categoriesEn;
-
 
 					// Проходим по каждому символу строки categoryCode
 					for (const char of categoryCode) {
@@ -1891,7 +2028,7 @@
 				},
 				// метод установки языка
 				setLanguage(lang) {
-                    this.currentLanguage = lang; // Устанавливаем текущий язык
+                    this.currentLanguage = lang;
                 },
 				// метод получения выбранного перевода
 				getTranslation(key) {
@@ -1934,7 +2071,7 @@
 					this.updateCategoryCode();
 					}
 				},
-				// 
+				// Обновить строку с категориями
 				updateCategoryCode() {
 					// формирование итогового кода на основе выбора
 					let mainCategoryCode = this.categories[this.selectedMainCategory]?.code || '';
@@ -1942,7 +2079,19 @@
 					let subCategory2Code = this.subcategories2?.[this.selectedSubcategory2]?.code || '';
 					this.categoryCode = `${mainCategoryCode}${subCategory1Code}${subCategory2Code}`;
 				},
-
+				// Универсальный метод для подсчета оставшихся символов с учетом многобайтовых символов
+				getRemainingChars(value, maxLength) {
+					const charCount = Array.from(value).length; // Точный подсчет количества символов
+    				return maxLength - charCount;
+				},
+				// Метод для динамического определения класса
+				getCharCountClass(value, maxLength) {
+					const remainingChars = this.getRemainingChars(value, maxLength);
+					return {
+						'text-danger': remainingChars < 0,  // если символов больше чем нужно
+						'text-success': remainingChars >= 0 // если символов достаточно
+					};
+				},
             }
         });
 		// Устанавливаем глобальный базовый URL для всех запросов axios

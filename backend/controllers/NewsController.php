@@ -19,7 +19,7 @@ class NewsController {
         if (!ctype_digit($page) || intval($page) < 1) {
             // Если параметр не является положительным целым числом, вернуть ошибку
             http_response_code(400);
-            echo json_encode(["message" => "Invalid page number"]);
+            echo json_encode(['code' => 300]);
             return;
         }
 
@@ -67,8 +67,8 @@ class NewsController {
         // Проверить, существует ли новость и ее статус равен 1 (активная новость)
         if (!$news->id || $news->status != 1) {
             // Если новость не найдена или статус не равен 1, вернуть ошибку 404
-            http_response_code(404);
-            echo json_encode(["message" => "Новость не найдена"]);
+            http_response_code(400);
+            echo json_encode(['code' => 500]);
         }
 
         // Подготовить массив для данных новости
@@ -101,68 +101,58 @@ class NewsController {
 
     // Создать новое объявление
     public function createNews() {
-        // Присвоение данных
-        $hash_num = $_POST['password'] ?? null;
-        $title_ru = $_POST['title_ru'] ?? null;
-        $description_ru = $_POST['description_ru'] ?? null;
-        $author_ru = $_POST['author_ru'] ?? null;
-        $title_en = $_POST['title_en'] ?? null;
-        $description_en = $_POST['description_en'] ?? null;
-        $author_en = $_POST['author_en'] ?? null;
+        // Поля и их значения по умолчанию
+        $fields = [
+            'hash_num' => $_POST['password'] ?? null,
+            'title_ru' => $_POST['title_ru'] ?? null,
+            'description_ru' => $_POST['description_ru'] ?? null,
+            'author_ru' => $_POST['author_ru'] ?? null,
+            'title_en' => $_POST['title_en'] ?? null,
+            'description_en' => $_POST['description_en'] ?? null,
+            'author_en' => $_POST['author_en'] ?? null,
+        ];
 
-        // Проверка наличия всех необходимых полей
-        if (
-            !isset($hash_num) ||
-            !isset($title_ru) ||
-            !isset($description_ru) ||
-            !isset($author_ru) ||
-            !isset($title_en) ||
-            !isset($description_en) ||
-            !isset($author_en)
-        ) {
-            http_response_code(400);
-            echo json_encode(["message" => "Недостаточно данных"]);
-            return;
+        // Проверка обязательных полей на наличие и пустоту
+        foreach ($fields as $key => $value) {
+            if (empty(trim($value))) {
+                http_response_code(400);
+                echo json_encode(['code' => 700]);
+                return;
+            }
         }
+
+        // Ограничения по длине полей
+        $fieldLimits = [
+            'hash_num' => 17,
+            'title_ru' => 51,
+            'description_ru' => 2001,
+            'author_ru' => 51,
+            'title_en' => 51,
+            'description_en' => 2001,
+            'author_en' => 51
+        ];
+
+        // Проверка длины полей
+        foreach ($fieldLimits as $field => $limit) {
+            if (mb_strlen($fields[$field], 'UTF-8') > $limit) {
+                http_response_code(400);
+                echo json_encode(['code' => 701]);
+                return;
+            }
+        }
+
+        // Присвоение переменных для дальнейшего использования
+        $hash_num = $fields['hash_num'];
+        $title_ru = $fields['title_ru'];
+        $description_ru = $fields['description_ru'];
+        $author_ru = $fields['author_ru'];
+        $title_en = $fields['title_en'];
+        $description_en = $fields['description_en'];
+        $author_en = $fields['author_en'];
 
         if ($hash_num != $this->adm_pass) {
             http_response_code(400);
-            echo json_encode(["message" => "Ошибка доступа"]);
-        }
-
-        // Проверка полей на пустоту
-        if (empty(trim($title_ru))
-            || empty(trim($description_ru))
-            || empty(trim($author_ru))
-            || empty(trim($title_en))
-            || empty(trim($description_en))
-            || empty(trim($author_en))
-            ) {
-            http_response_code(400);
-            echo json_encode(["message" => "Одно из обязательных полей пустое"]);
-            return;
-        }
-        
-        // Проверка длины полей
-        if (strlen($title_ru) > 100
-            || strlen($description_ru) > 2000
-            || strlen($author_ru) > 200
-            || strlen($title_en) > 100
-            || strlen($description_en) > 2000
-            || strlen($author_en) > 200
-            
-            ) {
-            http_response_code(400);
-            echo json_encode(["message" => "Длина данных превышает допустимые пределы"]);
-            echo json_encode([
-                "title_ru" => strlen($title_ru),
-                "description_ru" => strlen($description_ru),
-                "author_ru" => strlen($author_ru),
-                "title_en" => strlen($title_en),
-                "description_en" => strlen($description_en),
-                "author_en" => strlen($author_en)
-            ]);
-            return;
+            echo json_encode(['code' => 702]);
         }
 
         // Проверяем, есть ли загруженные фотографии в $_FILES
@@ -208,16 +198,16 @@ class NewsController {
                 // Проверяем тип файла
                 if (!$imageEditor->validateType($allowedTypes)) {
                     $this->deleteSavedPhotos($savedPhotos);
-                    http_response_code(415);
-                    echo json_encode(["message" => 'Недопустимый тип фото, порядковый номер фото: ' . $key + 1]);
+                    http_response_code(400);
+                    echo json_encode(['code' => 722]);
                     return;
                 }
 
                 // Проверяем размер файла
                 if (!$imageEditor->validateSize($maxSize)) {
                     $this->deleteSavedPhotos($savedPhotos);
-                    http_response_code(413);
-                    echo json_encode(["message" => 'Фото превышает допустимый размер, порядковый номер фото: ' . $key + 1]);
+                    http_response_code(400);
+                    echo json_encode(['code' => 723]);
                     return;
                 }
 
@@ -225,7 +215,7 @@ class NewsController {
                 if (!$imageEditor->validateResolution($minResolution)) {
                     $this->deleteSavedPhotos($savedPhotos);
                     http_response_code(400);
-                    echo json_encode(["message" => 'Фото имеет слишком маленькое разрешение, порядковый номер фото: ' . $key + 1 . '. Минимальное разрешение должно быть 600 * 450 пикселей (или наоборот)']);
+                    echo json_encode(['code' => 724]);
                     return;
                 }
 
@@ -284,14 +274,12 @@ class NewsController {
         $news->status = 1; // Статус новости
         $news->created_at = date('Y-m-d H:i:s'); // Дата создания
         $news->viewed = 0; // Счетчик просмотров (изначально 0)
-        $news->closed_at = null;
-
-        // error_log('массив фото: ' . json_encode($newsPhotos));
+        // $news->closed_at = null;
         R::store($news); // Сохраняем новость в базе данных
 
         // Возвращаем ответ
         header('Content-Type: application/json');
-        echo json_encode(["message" => "Новость создана"]);
+        echo json_encode(['success' => true]);
     }
 
     private function checkPhoto($isMultiple, $index) {
@@ -304,7 +292,7 @@ class NewsController {
         // Проверка на наличие ошибок при загрузке файла
         if ($error !== UPLOAD_ERR_OK) {
             http_response_code(400);
-            echo json_encode(["message" => 'Ошибка при загрузке файла, порядковый номер файла: ' . ($index + 1)]);
+            echo json_encode(['code' => 720]);
             return null;
         }
 
@@ -312,7 +300,7 @@ class NewsController {
         $imageInfo = getimagesize($tmpName);
         if ($imageInfo === false) {
             http_response_code(400);
-            echo json_encode(["message" => 'Файл не является фото, порядковый номер файла: ' . ($index + 1)]);
+            echo json_encode(['code' => 721]);
             return null;
         }
 
@@ -356,10 +344,21 @@ class NewsController {
     // Заблокировать новость по ID и удалить связанные фотографии
     public function deleteNews($id, $password) {
         // Проверка на наличие пароля и ID
-        if (empty($password) || empty($id) || strlen($password) > 20) {
+        if (empty($password) || empty($id) || mb_strlen($password, 'UTF-8') > 17) {
             // Выводим сообщение на экран
             http_response_code(400);
-            echo json_encode(["message" => "Не достаточно данных"]);
+            echo json_encode(['code' => 520]);
+            return;
+        }
+
+        // Загрузить новость по ID
+        $news = R::load('news', $id);
+
+        // Проверка новости
+        if (!$news->id) {
+            //
+            http_response_code(400);
+            echo json_encode(['code' => 521]);
             return;
         }
 
@@ -367,18 +366,15 @@ class NewsController {
         if ($password != $this->adm_pass) {
             // Выводим сообщение на экран
             http_response_code(400);
-            echo json_encode(["message" => "Неверный пароль"]);
+            echo json_encode(['code' => 522]);
             return;
         }
 
-        // Загрузить новость по ID
-        $news = R::load('news', $id);
-
-        // Проверка, существует ли новость и ее статус
-        if (!$news->id || ($news->status != 1)) {
+        // Проверка статуса новости
+        if ($news->status != 1) {
             //
-            http_response_code(404);
-            echo json_encode(["message" => "Новость не найдена или уже была заблокирована ранее"]);
+            http_response_code(400);
+            echo json_encode(['code' => 523]);
             return;
         }
 
@@ -395,7 +391,7 @@ class NewsController {
 
         // Сообщение об успехе
         header('Content-Type: application/json');
-        echo json_encode(["message" => "Новость была успешно заблокирована"]);
+        echo json_encode(['success' => true]);
     }
 
     // Вспомогательный метод для удаления фото, если оно существует

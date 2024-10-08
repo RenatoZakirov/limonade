@@ -18,8 +18,8 @@ class AdController {
         // Проверка на валидность номера страницы
         if (!ctype_digit($page) || intval($page) < 1) {
             // Если параметр не является положительным целым числом, вернуть ошибку
-            http_response_code(400); // Bad Request
-            echo json_encode(["message" => "Invalid page number"]);
+            http_response_code(400);
+            echo json_encode(['code' => 200]);
             return;
         }
 
@@ -37,9 +37,9 @@ class AdController {
 
         if ($category) {
             // Проверка, что категория — это строка и не длиннее 6 символов
-            if (!is_string($category) || strlen($category) > 4) {
-                http_response_code(400); // Bad Request
-                echo json_encode(["message" => "Ошибка в категориях"]);
+            if (!is_string($category) || mb_strlen($category, 'UTF-8') > 6) {
+                http_response_code(400);
+                echo json_encode(['code' => 201]);
                 return;
             }
 
@@ -47,8 +47,8 @@ class AdController {
             $ads = $this->findAdsByCategory($category, $perPage, $offset);
             if (empty($ads)) {
                 // Если ничего не найдено, вернуть сообщение
-                http_response_code(404);
-                echo json_encode(["message" => "Обьявления не найдены"]);
+                http_response_code(400);
+                echo json_encode(['code' => 202]);
                 return;
             }
         } else {
@@ -75,7 +75,7 @@ class AdController {
 
     // Метод для поиска объявлений с постепенным сокращением категории
     private function findAdsByCategory($category, $perPage, $offset) {
-        while (strlen($category) > 0) {
+        while (mb_strlen($category, 'UTF-8') > 0) {
             // Выполняем запрос с текущей категорией
             $query = 'WHERE status = 1 AND category = ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
             $ads = R::findAll('ads', $query, [$category, $perPage, $offset]);
@@ -95,7 +95,7 @@ class AdController {
 
     // Получить полный путь к фото, если оно существует
     private function getPhotoUrl($photoName) {
-        $baseUrl = 'http://localhost/limonade/'; // Базовый URL вашего проекта
+        $baseUrl = 'http://localhost/limonade/'; // Базовый URL проекта
         $filePath = 'backend/uploads/images/';
         return $photoName ? $baseUrl . $filePath . $photoName . '.jpg' : null;
     }
@@ -103,10 +103,10 @@ class AdController {
     // Найти все активные обьявления одного пользователя
     public function findAdsByUser($password) {
         // Проверка на наличие пароля и ID
-        if (empty($password) || strlen($password) > 20) {
+        if (empty($password) || mb_strlen($password, 'UTF-8') > 17) {
             // Выводим сообщение на экран
             http_response_code(400);
-            echo json_encode(["message" => "Не указан пароль"]);
+            echo json_encode(['code' => 203]);
             return;
         }
 
@@ -116,7 +116,7 @@ class AdController {
         // Проверка, существует ли пользователь и активен ли он
         if (!$user || $user->status != 1) {
             http_response_code(400);
-            echo json_encode(["message" => "Пользователь не найден или неактивен"]);
+            echo json_encode(['code' => 204]);
             return;
         }
 
@@ -130,8 +130,8 @@ class AdController {
 
         // Проверка, найдены ли объявления
         if (empty($ads)) {
-            http_response_code(404); // Not Found
-            echo json_encode(["message" => "Объявления не найдены"]);
+            http_response_code(400); // Not Found
+            echo json_encode(['code' => 202]);
             return;
         }
 
@@ -176,8 +176,8 @@ class AdController {
         // Проверить, существует ли объявление и его статус равен 1 (активное объявление)
         if (!$ad->id || $ad->status != 1) {
             // Если объявление не найдено или статус не равен 1, вернуть ошибку 404
-            http_response_code(404);
-            echo json_encode(["message" => "Объявление не найдено"]);
+            http_response_code(400);
+            echo json_encode(['code' => 400]);
         }
 
         // Подготовить массив для данных объявления
@@ -214,39 +214,39 @@ class AdController {
         $fields = [
             'hash_num' => $_POST['password'] ?? null,
             'title' => $_POST['title'] ?? null,
-            'description' => $_POST['description'] ?? null,
             'category' => $_POST['category'] ?? null,
+            'description' => $_POST['description'] ?? null,
             'contact' => $_POST['contact'] ?? null,
-            'permanent' => ($_POST['permanent'] === 'true') ? 1 : 0
         ];
 
-        // Проверка обязательных полей на наличие и непустоту
-        foreach (['title', 'description', 'category', 'contact'] as $field) {
-            if (empty(trim($fields[$field]))) {
+        // Проверка обязательных полей на наличие и пустоту
+        foreach ($fields as $key => $value) {
+            if (empty(trim($value))) {
                 http_response_code(400);
-                echo json_encode(["message" => "Поле $field пустое или отсутствует"]);
+                // echo json_encode(["message" => "Поле $field пустое или отсутствует"]);
+                echo json_encode(['code' => 600]);
                 return;
             }
         }
 
         // Ограничения по длине полей
         $fieldLimits = [
-            'title' => 100,
-            'description' => 1100,
-            'category' => 5,
-            'contact' => 200
+            'hash_num' => 17,
+            'title' => 41,
+            'category' => 6,
+            'description' => 1001,
+            'contact' => 51
         ];
 
         // Проверка длины полей
         foreach ($fieldLimits as $field => $limit) {
-            if (strlen($fields[$field]) > $limit) {
+            if (mb_strlen($fields[$field], 'UTF-8') > $limit) {
                 http_response_code(400);
-                echo json_encode([
-                    "message" => "Длина поля $field превышает $limit символов",
-                    "lengths" => [
-                        $field => strlen($fields[$field])
-                    ]
-                ]);
+                // echo json_encode([
+                //     "message" => "Длина поля $field превышает $limit символов",
+                //     "lengths" => [$field => strlen($fields[$field])]
+                // ]);
+                echo json_encode(['code' => 601]);
                 return;
             }
         }
@@ -254,17 +254,17 @@ class AdController {
         // Присвоение переменных для дальнейшего использования
         $hash_num = $fields['hash_num'];
         $title = $fields['title'];
-        $description = $fields['description'];
         $category = $fields['category'];
+        $description = $fields['description'];
         $contact = $fields['contact'];
-        $permanent = $fields['permanent'];
+        $permanent = ($_POST['permanent'] ?? 'false') === 'true';
 
         // Поиск пользователя по hash_num
         $user = R::findOne('users', 'hash_num = ?', [$hash_num]);
 
         if (!$user || $user->status != 1) {
             http_response_code(400);
-            echo json_encode(["message" => "Пользователь не найден или неактивен"]);
+            echo json_encode(['code' => 602]);
             return;
         }
 
@@ -275,11 +275,12 @@ class AdController {
         if ($hash_num != $this->adm_pass) {
 
             // Проверка количества активных объявлений пользователя
+            $ads_limit = 6;
             $activeAdsCount = R::count('ads', 'user_id = ? AND status = 1', [$user->id]);
 
-            if ($activeAdsCount >= 6) {
+            if ($activeAdsCount >= $ads_limit) {
                 http_response_code(400);
-                echo json_encode(["message" => "Лимит объявлений исчерпан"]);
+                echo json_encode(['code' => 603]);
                 return;
             }
         }
@@ -327,8 +328,9 @@ class AdController {
                 // Проверяем тип файла
                 if (!$imageEditor->validateType($allowedTypes)) {
                     $this->deleteSavedPhotos($savedPhotos);
-                    http_response_code(415);
-                    echo json_encode(["message" => 'Недопустимый тип фото, порядковый номер фото: ' . $key + 1]);
+                    http_response_code(400);
+                    // echo json_encode(["message" => 'Недопустимый тип фото, порядковый номер фото: ' . $key + 1]);
+                    echo json_encode(['code' => 622]);
                     return;
                 }
 
@@ -336,7 +338,8 @@ class AdController {
                 if (!$imageEditor->validateSize($maxSize)) {
                     $this->deleteSavedPhotos($savedPhotos);
                     http_response_code(413);
-                    echo json_encode(["message" => 'Фото превышает допустимый размер, порядковый номер фото: ' . $key + 1]);
+                    // echo json_encode(["message" => 'Фото превышает допустимый размер, порядковый номер фото: ' . $key + 1]);
+                    echo json_encode(['code' => 623]);
                     return;
                 }
 
@@ -344,7 +347,8 @@ class AdController {
                 if (!$imageEditor->validateResolution($minResolution)) {
                     $this->deleteSavedPhotos($savedPhotos);
                     http_response_code(400);
-                    echo json_encode(["message" => 'Фото имеет слишком маленькое разрешение, порядковый номер фото: ' . $key + 1 . '. Минимальное разрешение должно быть 600 * 450 пикселей (или наоборот)']);
+                    // echo json_encode(["message" => 'Фото имеет слишком маленькое разрешение, порядковый номер фото: ' . $key + 1 . '. Минимальное разрешение должно быть 600 * 450 пикселей (или наоборот)']);
+                    echo json_encode(['code' => 624]);
                     return;
                 }
 
@@ -389,9 +393,9 @@ class AdController {
         $ad = R::dispense('ads'); // Используем RedBeanPHP для создания записи в таблице "ads"
         $ad->user_id = $user->id;
         $ad->title = $title; // Заголовок объявления
-        $ad->description = $description; // Описание объявления
         $ad->category = $category; // Категория объявления
-        $ad->permanent = $permanent; // Срок действия не ограничен
+        $ad->description = $description; // Описание объявления
+        $ad->permanent = $permanent; // Флаг вечного объявления
 
         // Сохраняем фотографии в базе данных
         $ad->cover_photo = isset($adPhotos[0]) ? (string) $adPhotos[0] : null;
@@ -405,9 +409,9 @@ class AdController {
         $ad->viewed = 0; // Счетчик просмотров (изначально 0)
         R::store($ad); // Сохраняем объявление в базе данных
 
-        // Возвращаем ответ с ID нового объявления
+        // Возвращаем ответ
         header('Content-Type: application/json');
-        echo json_encode(["message" => "Объявление создано"]);
+        echo json_encode(['success' => true]);
     }
 
     private function checkPhoto($isMultiple, $index) {
@@ -420,7 +424,8 @@ class AdController {
         // Проверка на наличие ошибок при загрузке файла
         if ($error !== UPLOAD_ERR_OK) {
             http_response_code(400);
-            echo json_encode(["message" => 'Ошибка при загрузке файла, порядковый номер файла: ' . ($index + 1)]);
+            // echo json_encode(["message" => 'Ошибка при загрузке файла, порядковый номер файла: ' . ($index + 1)]);
+            echo json_encode(['code' => 620]);
             return null;
         }
 
@@ -428,7 +433,8 @@ class AdController {
         $imageInfo = getimagesize($tmpName);
         if ($imageInfo === false) {
             http_response_code(400);
-            echo json_encode(["message" => 'Файл не является фото, порядковый номер файла: ' . ($index + 1)]);
+            // echo json_encode(["message" => 'Файл не является фото, порядковый номер файла: ' . ($index + 1)]);
+            echo json_encode(['code' => 621]);
             return null;
         }
 
@@ -472,24 +478,20 @@ class AdController {
     // Пометить объявление как удалённое и удалить связанные фотографии
     public function deleteAd($id, $password) {
         // Проверка на наличие пароля и ID
-        if (empty($password) || empty($id) || strlen($password) > 20) {
+        if (empty($password) || empty($id) || mb_strlen($password, 'UTF-8') > 17) {
             // Выводим сообщение на экран
             http_response_code(400);
-            echo json_encode(["message" => "Не достаточно данных"]);
+            echo json_encode(['code' => 420]);
             return;
         }
 
-        error_log('password: ' . $password);
-        // error_log('user: ' . $user);
         // Поиск пользователя по hash_num
         $user = R::findOne('users', 'hash_num = ?', [$password]);
-
-        error_log('user: ' . $user);
 
         // Проверка, существует ли пользователь и активен ли он
         if (!$user || $user->status != 1) {
             http_response_code(400);
-            echo json_encode(["message" => "Пользователь не найден или неактивен"]);
+            echo json_encode(['code' => 401]);
             return;
         }
 
@@ -500,19 +502,27 @@ class AdController {
         // Загрузить объявление по ID
         $ad = R::load('ads', $id);
 
-        // Проверка, существует ли объявление и его статус
-        if (!$ad->id || ($ad->user_id != $user->id)) {
+        // Проверка объявления
+        if (!$ad->id) {
             //
-            http_response_code(404);
-            echo json_encode(["message" => "Объявление не найдено или доступ запрещён"]);
+            http_response_code(400);
+            echo json_encode(['code' => 421]);
             return;
         }
 
-        //
+        // Проверка id владельца
+        if ($ad->user_id != $user->id) {
+            //
+            http_response_code(400);
+            echo json_encode(['code' => 422]);
+            return;
+        }
+
+        // Проверка статуса объявления
         if ($ad->status != 1) {
             //
-            http_response_code(404);
-            echo json_encode(["message" => "Объявление уже было удалено ранее"]);
+            http_response_code(400);
+            echo json_encode(['code' => 423]);
             return;
         }
 
@@ -529,7 +539,8 @@ class AdController {
 
         // Сообщение об успехе
         header('Content-Type: application/json');
-        echo json_encode(["message" => "Объявление было успешно удалено"]);
+        // Объявление было успешно удалено
+        echo json_encode(['success' => true]);
     }
 
     // Вспомогательный метод для удаления фото, если оно существует
@@ -545,10 +556,21 @@ class AdController {
     // Заблокировать обьявление по ID и удалить связанные фотографии
     public function blockAd($id, $password) {
         // Проверка на наличие пароля и ID
-        if (empty($password) || empty($id) || strlen($password) > 20) {
+        if (empty($password) || empty($id) || mb_strlen($password, 'UTF-8') > 17) {
             // Выводим сообщение на экран
             http_response_code(400);
-            echo json_encode(["message" => "Не достаточно данных"]);
+            echo json_encode(['code' => 420]);
+            return;
+        }
+
+        // Загрузить объявление по ID
+        $ad = R::load('ads', $id);
+
+        // Проверка объявления
+        if (!$ad->id) {
+            //
+            http_response_code(400);
+            echo json_encode(['code' => 421]);
             return;
         }
 
@@ -556,18 +578,15 @@ class AdController {
         if ($password != $this->adm_pass) {
             // Выводим сообщение на экран
             http_response_code(400);
-            echo json_encode(["message" => "Неверный пароль"]);
+            echo json_encode(['code' => 422]);
             return;
         }
 
-        // Загрузить объявление по ID
-        $ad = R::load('ads', $id);
-
-        // Проверка, существует ли объявление и его статус
-        if (!$ad->id || ($ad->status != 1)) {
+        // Проверка статуса объявления
+        if ($ad->status != 1) {
             //
-            http_response_code(404);
-            echo json_encode(["message" => "Объявление не найдено или уже было заблокировано ранее"]);
+            http_response_code(400);
+            echo json_encode(['code' => 423]);
             return;
         }
 
@@ -584,7 +603,7 @@ class AdController {
 
         // Сообщение об успехе
         header('Content-Type: application/json');
-        echo json_encode(["message" => "Объявление было успешно заблокировано"]);
+        echo json_encode(['success' => true]);
     }
 
     // Пожаловаться на обьявление по ID
@@ -595,20 +614,20 @@ class AdController {
         if (empty($id) || empty($text)) {
             // Выводим сообщение на экран
             http_response_code(400);
-            echo json_encode(["message" => "Не достаточно данных"]);
+            echo json_encode(['code' => 430]);
             return;
         }
 
         // Проверить введенный текст
-        if (strlen($text) > 1000) {
+        if (mb_strlen($text, 'UTF-8') > 401) {
             // Выводим сообщение на экран
             http_response_code(400);
-            echo json_encode(["message" => "Слишком объемный текст"]);
+            echo json_encode(['code' => 431]);
             return;
         }
 
         // Создаем новую жалобу
-        $dislike = R::dispense('dislikes'); // Используем RedBeanPHP для создания записи в таблице "dislikes"
+        $dislike = R::dispense('dislikes');
         $dislike->ad_id = $id; // ID объявления
         $dislike->description = $text; // Описание жалобы
 
@@ -618,7 +637,7 @@ class AdController {
 
         // Возвращаем ответ
         header('Content-Type: application/json');
-        echo json_encode(["message" => "Жалоба принята"]);
+        echo json_encode(['success' => true]);
     }
 
 }
