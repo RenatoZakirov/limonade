@@ -72,6 +72,9 @@
 								<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 							</div>
 							<div class="offcanvas-body">
+
+								<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+								<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
 		
 								<div class="accordion shadow-sm rounded" id="accordionExample">
 									<div class="accordion-item" v-if="!phpAdId">
@@ -159,7 +162,7 @@
 														<!-- Найти все мои объявления -->
 														{{ getTranslation('menu.myAds.findStr') }}
 													</label>
-													<div class="col-5">
+													<div class="col-6">
 														<label for="inputPassword1" class="form-label">
 															<!-- Пароль -->
 															{{ getTranslation('menu.myAds.passwordStr') }}
@@ -169,7 +172,7 @@
 															</span>
 														</label>
 													</div>
-													<div class="col-7">
+													<div class="col">
 														<input v-model="authPassword" type="password" id="inputPassword1" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
 													</div>
 													<div id="passwordHelpBlock" class="form-text">
@@ -253,6 +256,9 @@
 					</div>
 				</nav>
 
+				<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+				<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
 				<nav>
 					<div class="nav nav-tabs" id="nav-tab" role="tablist">
 						<button @click="showScreen('adList')"
@@ -279,9 +285,8 @@
 							</div>
 						</div>
 						<div v-else class="mt-1">
-							<!-- <div v-if="isLoading">Загрузка объявлений...</div> -->
-							<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-							<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
+							<!-- <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+							<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div> -->
 						
 							<div v-if="showAdList" v-for="(ad, index) in adsList" :key="ad.id" class="row mb-3">
 								<div class="col">
@@ -422,7 +427,7 @@
 		
 										<div v-if="isAdOwner" class="card-footer">
 											<div class="row mb-3">
-												<div class="col-5">
+												<div class="col-6">
 													<label for="inputPassword3" class="form-label">
 														<!-- Пароль -->
 														{{ getTranslation('ads.adDetails.delete.passwordStr') }}
@@ -432,7 +437,7 @@
 														</span>
 													</label>
 												</div>
-												<div class="col-7">
+												<div class="col">
 													<input v-model="authPassword" type="password" id="inputPassword3" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
 												</div>
 												<div id="passwordHelpBlock" class="form-text">
@@ -472,6 +477,7 @@
 													<!-- Заглавное фото -->
 													{{ getTranslation('ads.adCreate.photoTitleStr1') }}
 												</label>
+												<span class="form-text"> // jpeg, png, gif, < 5mB</span>
 												<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm" id="formFile1" type="file">
 											</div>
 				
@@ -571,7 +577,7 @@
 											</div>
 											
 											<div class="row mb-3">
-												<div class="col-5">
+												<div class="col-6">
 													<label for="inputPassword2" class="form-label">
 														<!-- Пароль -->
 														{{ getTranslation('ads.adCreate.passwordStr') }}
@@ -581,7 +587,7 @@
 														</span>
 													</label>
 												</div>
-												<div class="col-7">
+												<div class="col">
 													<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
 												</div>
 												<div id="passwordHelpBlock" class="form-text">
@@ -617,9 +623,8 @@
 							</div>
 						</div>
 						<div v-else class="mt-1">
-							<!-- <div v-if="isLoading">Загрузка новостей...</div> -->
-							<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-							<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
+							<!-- <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+							<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div> -->
 						
 							<div v-if="showNewsList" v-for="(news, index) in newsList" :key="news.id" class="row mb-3">
 								<div class="col">
@@ -815,7 +820,7 @@
 									aboutUsTab: 'О нас',
 									descriptionStr1: 'Приветствуем вас на нашем сайте!',
 									descriptionStr2: 'Меня зовут Ренато, я из России, живу в Ня Чанге, Вьетнам.',
-									descriptionStr3: 'Я создал этот сайт для русскоязычного сообщества нашего города, чтобы упростить обмен информацией и помочь друг другу в повседневных делах. Здесь вы можете бесплатно разместить объявления о продаже, обмене вещей, предложении услуг, а также узнать о последних новостях Ня Чанга.',
+									descriptionStr3: 'Я создал этот сайт для русскоязычного и англоязычного сообщества нашего города, чтобы упростить обмен информацией и помочь друг другу в повседневных делах. Здесь вы можете бесплатно разместить объявления о продаже, обмене вещей, предложении услуг, а также узнать о последних новостях Ня Чанга.',
 									descriptionStr4: 'Наш сайт доступен как на русском, так и на английском языках, чтобы каждый мог легко воспользоваться его возможностями.',
 									descriptionStr5: 'Если у вас есть вопросы или пожелания, свяжитесь со мной через наш Telegram-бот:',
 									descriptionStr6: 'Спасибо, что вы с нами!',
@@ -939,6 +944,12 @@
 								451: 'Текст жалобы слишком длинный',
 								452: '',
 								453: '',
+								460: 'Объявление успешно удалено!',
+								461: '',
+								462: '',
+								470: 'Жалоба на объявление принята!',
+								471: '',
+								472: '',
 								// Ошибки связанные с одной новостью
 								500: 'Не удалось найти активную новость',
 								501: '',
@@ -978,6 +989,9 @@
 								640: 'Слишком много фото. Максимум 3 шт',
 								641: '',
 								642: '',
+								650: 'Объявление успешно создано!',
+								651: '',
+								652: '',
 								// Ошибки связанные с созданием новости
 								700: 'Не заполнены важные поля',
 								701: 'Некоторые поля нарушили лимит символов',
@@ -1041,7 +1055,7 @@
 									aboutUsTab: 'About Us',
 									descriptionStr1: 'Welcome to our website!',
 									descriptionStr2: 'My name is Renato, I am from Russia, living in Nha Trang, Vietnam.',
-									descriptionStr3: 'I created this site for the Russian-speaking community of our city to simplify the exchange of information and help each other in everyday affairs. Here you can post free ads for sale, exchange of things, offer of services, and also learn about the latest news of Nha Trang.',
+									descriptionStr3: 'I created this site for the Russian and English speaking community of our city to simplify the exchange of information and help each other in everyday affairs. Here you can post free ads for sale, exchange of things, offer of services, and also learn about the latest news of Nha Trang.',
 									descriptionStr4: 'Our site is available in both Russian and English so that everyone can easily use its capabilities.',
 									descriptionStr5: 'If you have any questions or suggestions, please contact me via our Telegram bot:',
 									descriptionStr6: 'Thank you for being with us!',
@@ -1737,8 +1751,8 @@
 						this.errorMessage = this.getTranslation('errors.' + 211);
 					}
 
-					this.showScreen('adList');
-					this.cleanCategory();
+					// this.showScreen('adList');
+					// this.cleanCategory();
 
 					// Если есть сообщение об ошибке, показываем его и выходим из метода
 					if (this.errorMessage) {
@@ -1753,6 +1767,8 @@
                         .then(response => {
 							// console.log(response.data);
                             this.adsList = response.data;
+							this.showScreen('adList');
+							this.cleanCategory();
 							this.isAdOwner = true;
 							this.authPassword = '';
                         })
@@ -1840,7 +1856,7 @@
 					this.isLoading = true;
 					axios.post('api/ad/create', formData, {headers: {'Content-Type': 'multipart/form-data'}})
 						.then(response => {
-							this.successMessage = 'Объявление успешно создано!';
+							this.successMessage = this.getTranslation('errors.' + 650);
 							// очищаем форму
 							this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, category: '' };
 							this.cleanCategory();
@@ -1911,7 +1927,7 @@
 					axios.get(`api/ad/delete/${id}/${this.authPassword}`)
 						.then(response => {
 							//
-							this.successMessage = 'Объявление успешно удалено!';
+							this.successMessage = this.getTranslation('errors.' + 460);
 							// удаляем объявление из массива adsList
 							this.adsList = this.adsList.filter(ad => ad.id !== id);
 							this.showScreen('adList');
@@ -1958,7 +1974,7 @@
 					axios.post(`api/ad/dislike/${id}`, formData, {headers: {'Content-Type': 'multipart/form-data'}})
                         .then(response => {
 							//
-							this.successMessage = 'Жалоба на объявление принята!';
+							this.successMessage = this.getTranslation('errors.' + 470);
 							//
 							this.dislike = false;
 							this.dislikeText = '';
