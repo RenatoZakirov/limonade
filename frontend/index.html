@@ -207,7 +207,7 @@
 													<div class="form-text">
 														<!-- Если у вас есть новости о нашем... -->
 														{{ getTranslation('menu.myNews.descriptionStr1') }}
-														<a href="https://t.me/limonade_news_bot" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_news_bot</a>
+														<a href="https://t.me/limonade_info" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_info</a>
 														<br>
 														<!-- Мы принимаем новости на русском... -->
 														{{ getTranslation('menu.myNews.descriptionStr2') }}
@@ -240,7 +240,7 @@
 															{{ getTranslation('menu.aboutUs.descriptionStr4') }}
 															<br>
 															{{ getTranslation('menu.aboutUs.descriptionStr5') }}
-															<a href="https://t.me/limonade_info_bot" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_info_bot</a>
+															<a href="https://t.me/limonade_info" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_info</a>
 															<br>
 															{{ getTranslation('menu.aboutUs.descriptionStr6') }}
 														</div>
@@ -477,7 +477,7 @@
 													<!-- Заглавное фото -->
 													{{ getTranslation('ads.adCreate.photoTitleStr1') }}
 												</label>
-												<span class="form-text"> // jpeg, png, gif, < 5mB</span>
+												<span class="form-text"> // jpeg, png, gif, < 5MB</span>
 												<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm" id="formFile1" type="file">
 											</div>
 				
@@ -753,10 +753,13 @@
 					// содержит объект нового объявления (ещё не созданного)
 					newAd: {
 						title: '',
+						// лимит названия
 						titleLimit: 40,
           				description: '',
+						// лимит описания
 						descriptionLimit: 1000,
 						contact: '',
+						// лимит контакта
 						contactLimit: 50,
 						category: ''
 					},
@@ -778,7 +781,7 @@
 					isAdOwner: false,
 					// содержит пароль для авторизации
 					authPassword: '',
-					//
+					// лимит пароля
 					authPasswordLimit: 16,
 					// язык интерфейса по умолчанию
 					currentLanguage: 'RU',
@@ -813,7 +816,7 @@
 								myNews: {
 									myNewsTab: 'Мои новости',
 									titleStr: 'Предложить новость',
-									descriptionStr1: 'Если у вас есть новости о нашем городе или вы хотите поделиться событиями, которые происходят в Ня Чанге, напишите об этом в наш Telegram-бот:',
+									descriptionStr1: 'Если у вас есть новости о нашем городе или вы хотите поделиться событиями, которые происходят в Ня Чанге, напишите об этом в наш Telegram:',
 									descriptionStr2: 'Мы принимаем новости на русском и английском языках. Также будем рады сопроводительным фотографиям для публикации.',
 								},
 								aboutUs: {
@@ -822,7 +825,7 @@
 									descriptionStr2: 'Меня зовут Ренато, я из России, живу в Ня Чанге, Вьетнам.',
 									descriptionStr3: 'Я создал этот сайт для русскоязычного и англоязычного сообщества нашего города, чтобы упростить обмен информацией и помочь друг другу в повседневных делах. Здесь вы можете бесплатно разместить объявления о продаже, обмене вещей, предложении услуг, а также узнать о последних новостях Ня Чанга.',
 									descriptionStr4: 'Наш сайт доступен как на русском, так и на английском языках, чтобы каждый мог легко воспользоваться его возможностями.',
-									descriptionStr5: 'Если у вас есть вопросы или пожелания, свяжитесь со мной через наш Telegram-бот:',
+									descriptionStr5: 'Если у вас есть вопросы или пожелания, свяжитесь со мной через наш Telegram:',
 									descriptionStr6: 'Спасибо, что вы с нами!',
 								},
 							},
@@ -915,11 +918,17 @@
 								212: '',
 								213: '',
 								214: '',
+								220: 'Вы достигли лимита объявлений',
+								221: '',
+								222: '',
 								// Ошибки связанные со списком новостей
 								300: 'Ошибка с номером страницы',
 								301: '',
 								302: '',
 								303: '',
+								310: 'Вы достигли лимита новостей',
+								311: '',
+								312: '',
 								// Ошибки связанные с одним объявлением
 								400: 'Не удалось найти активного объявления',
 								401: 'Не удалось найти активного пользователя. Возможно ошибка в пароле',
@@ -933,14 +942,14 @@
 								424: '',
 								425: '',
 								430: 'Ошибка с текстом или ID',
-								431: 'Текст превышает допустимый лимит',
+								431: 'Текст объявления слишком длинный',
 								432: '',
 								433: '',
 								440: 'Пожалуйста, введите пароль',
 								441: 'Пароль слишком длинный',
 								442: '',
 								443: '',
-								450: 'Пожалуйста, введите текст жалобы',
+								450: 'Пожалуйста, напишите текст жалобы',
 								451: 'Текст жалобы слишком длинный',
 								452: '',
 								453: '',
@@ -971,8 +980,8 @@
 								606: '',
 								620: 'Ошибка при загрузке одного из файлов',
 								621: 'Один из файлов не является изображением',
-								622: 'Одно из фото не допустимого формата. Можно jpeg, png, gif',
-								623: 'Одно из фото превышает допустимый размер. Максимум 5 мБ',
+								622: 'Одно из фото недопустимого формата. Можно jpeg, png, gif',
+								623: 'Одно из фото превышает допустимый размер. Максимум 5 МБ',
 								624: 'Одно из фото слишком маленькое. Минимум 600 * 450 или наоборот',
 								625: '',
 								626: '',
@@ -1001,8 +1010,8 @@
 								705: '',
 								720: 'Ошибка при загрузке одного из файлов',
 								721: 'Один из файлов не является изображением',
-								722: 'Одно из фото не допустимого формата. Можно jpeg, png, gif',
-								723: 'Одно из фото превышает допустимый размер. Максимум 5 мБ',
+								722: 'Одно из фото недопустимого формата. Можно jpeg, png, gif',
+								723: 'Одно из фото превышает допустимый размер. Максимум 5 МБ',
 								724: 'Одно из фото слишком маленькое. Минимум 600 * 450 или наоборот',
 								725: '',
 								726: '',
@@ -1048,7 +1057,7 @@
 								myNews: {
 									myNewsTab: 'My news',
 									titleStr: 'Suggest a news item',
-									descriptionStr1: 'If you have news about our city or want to share events that are happening in Nha Trang, write about it in our Telegram bot:',
+									descriptionStr1: 'If you have news about our city or want to share events that are happening in Nha Trang, write about it in our Telegram:',
 									descriptionStr2: 'We accept news in Russian and English. We will also be glad to receive accompanying photos for publication.',
 								},
 								aboutUs: {
@@ -1057,7 +1066,7 @@
 									descriptionStr2: 'My name is Renato, I am from Russia, living in Nha Trang, Vietnam.',
 									descriptionStr3: 'I created this site for the Russian and English speaking community of our city to simplify the exchange of information and help each other in everyday affairs. Here you can post free ads for sale, exchange of things, offer of services, and also learn about the latest news of Nha Trang.',
 									descriptionStr4: 'Our site is available in both Russian and English so that everyone can easily use its capabilities.',
-									descriptionStr5: 'If you have any questions or suggestions, please contact me via our Telegram bot:',
+									descriptionStr5: 'If you have any questions or suggestions, please contact me via our Telegram:',
 									descriptionStr6: 'Thank you for being with us!',
 								},
 							},
@@ -1129,6 +1138,135 @@
 									createdStr: 'Created:',
 									backButton: 'Back',
 								}
+							},
+							errors: {
+								// Общие ошибки
+								100: 'Page not found',
+								101: 'Error with ID',
+								102: '',
+								103: '',
+								104: '',
+								// Ошибки связанные со списком объявлений
+								200: 'Error with page number',
+								201: 'Error with category string',
+								202: 'Could not find active ads',
+								203: 'Password error',
+								204: 'Could not find active user. Possible password error',
+								205: '',
+								206: '',
+								210: 'Please enter your password',
+								211: 'The password is too long',
+								212: '',
+								213: '',
+								214: '',
+								220: 'You have reached the ads limit',
+								221: '',
+								222: '',
+								// Ошибки связанные со списком новостей
+								300: 'Error with page number',
+								301: '',
+								302: '',
+								303: '',
+								310: 'You have reached the news limit',
+								311: '',
+								312: '',
+								// Ошибки связанные с одним объявлением
+								400: 'Could not find active ad',
+								401: 'Could not find active user. Possible password error',
+								402: '',
+								403: '',
+								404: '',
+								420: 'Error with password or ID',
+								421: 'Could not find the ad',
+								422: 'Access error',
+								423: 'The ad was deleted earlier',
+								424: '',
+								425: '',
+								430: 'Error with text or ID',
+								431: 'The ad text is too long',
+								432: '',
+								433: '',
+								440: 'Please enter your password',
+								441: 'The password is too long',
+								442: '',
+								443: '',
+								450: 'Please write the complaint text',
+								451: 'The complaint text is too long',
+								452: '',
+								453: '',
+								460: 'The ad has been successfully removed!',
+								461: '',
+								462: '',
+								470: 'Complaint about the ad accepted!',
+								471: '',
+								472: '',
+								// Ошибки связанные с одной новостью
+								500: 'Could not find active news',
+								501: '',
+								502: '',
+								503: '',
+								520: 'Error with password or ID',
+								521: 'Could not find the news',
+								522: 'Access error',
+								523: 'The news was deleted earlier',
+								524: '',
+								525: '',
+								// Ошибки связанные с созданием объявления
+								600: 'Important fields are not filled in',
+								601: 'Some fields exceeded character limits',
+								602: 'Could not find active user. Possible password error',
+								603: 'Ad limit exceeded. Max 3 pcs',
+								604: '',
+								605: '',
+								606: '',
+								620: 'Error loading one of the files',
+								621: 'One of the files is not an image.',
+								622: 'One of the photos is not a valid format. Jpeg, png, gif are acceptable',
+								623: 'One of the photos exceeds the allowed size. Maximum 5 MB',
+								624: 'One of the photos is too small. Minimum 600 * 450 or vice versa',
+								625: '',
+								626: '',
+								630: 'Please write a title',
+								631: 'Please select a category',
+								632: 'Please write a description',
+								633: 'Please write your contact',
+								634: 'Please enter your password',
+								635: 'The title is too long',
+								636: 'The category is too long',
+								637: 'The description is too long',
+								638: 'The contact is too long',
+								639: 'The password is too long',
+								640: 'Too many photos. Maximum 3 pcs.',
+								641: '',
+								642: '',
+								650: 'The ad successfully created!',
+								651: '',
+								652: '',
+								// Ошибки связанные с созданием новости
+								700: 'Important fields are not filled in',
+								701: 'Some fields exceeded character limits',
+								702: 'Access error',
+								703: '',
+								704: '',
+								705: '',
+								720: 'Error loading one of the files',
+								721: 'One of the files is not an image.',
+								722: 'One of the photos is not a valid format. Jpeg, png, gif are acceptable',
+								723: 'One of the photos exceeds the allowed size. Maximum 5 MB',
+								724: 'One of the photos is too small. Minimum 600 * 450 or vice versa',
+								725: '',
+								726: '',
+								// Ошибки связанные с пользователем
+								800: '',
+								801: '',
+								802: '',
+								803: '',
+								820: 'Error with password or ID',
+								821: 'Access error',
+								822: 'Could not find the user',
+								823: 'The user was blocked earlier',
+								824: '',
+								825: '',
 							},
 						},
 					},
@@ -1548,7 +1686,7 @@
 					subcategories2: null,
 					// Строка с итоговым кодом категории
 					categoryCode: '',
-					//
+					// лимит строки категории
 					categoryCodeLimit: 7,
 					// флаг указывающий скопирована ссылка в буфер или нет
 					copyIcon: false,
@@ -1556,11 +1694,11 @@
 					phpAdId: 0,
 					// переменная для инспектирования
 					inspect: '',
-					//
+					// указатель открытия панели жалобы
 					dislike: false,
-					//
+					// текст жалобы
 					dislikeText: '',
-					//
+					// лимит текста жалобы
 					dislikeTextLimit: 400,
                 };
             },
@@ -1612,8 +1750,6 @@
 					// Плавная прокрутка страницы вверх после загрузки объявлений
 					window.scrollTo({top: 0, behavior: 'smooth'});
 					this.showScreen('adList');
-					this.isLoading = true;
-
 					this.isAdOwner = false;
 					this.authPassword = '';
 					this.phpAdId = 0;
@@ -1626,10 +1762,20 @@
 						url += `&category=${this.categoryCode}`;
 					}
 
+					// отправляем данные на сервер
+					this.isLoading = true;
                     // axios.get(`api/get_list?page=${adCurrentPage}`)
 					axios.get(url)
                         .then(response => {
-                            this.adsList = response.data;
+							//
+							if (Array.isArray(response.data) && response.data.length == 0) {
+								this.errorMessage = this.getTranslation('errors.' + 220);
+								setTimeout(() => { this.errorMessage = ''; }, 3000);
+
+							} else {
+								this.adsList = response.data;
+							}
+							this.cleanCategory();
                         })
                         .catch((error) => {
 							//
@@ -1654,8 +1800,14 @@
 					this.isLoading = true;
                     axios.get(`api/news/get_list?page=${newsCurrentPage}`)
                         .then(response => {
-                            this.newsList = response.data;
-							// console.log(this.newsList)
+							//
+							if (Array.isArray(response.data) && response.data.length == 0) {
+								this.errorMessage = this.getTranslation('errors.' + 310);
+								setTimeout(() => { this.errorMessage = ''; }, 3000);
+
+							} else {
+								this.newsList = response.data;
+							}
                         })
                         .catch((error) => {
 							//
@@ -1859,6 +2011,7 @@
 							this.successMessage = this.getTranslation('errors.' + 650);
 							// очищаем форму
 							this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, category: '' };
+							this.adCurrentPage = 1;
 							this.cleanCategory();
 							this.loadAdsList();
 							// очищаем пароль
@@ -2045,6 +2198,7 @@
 				// метод установки языка
 				setLanguage(lang) {
                     this.currentLanguage = lang;
+					this.cleanCategory();
                 },
 				// метод получения выбранного перевода
 				getTranslation(key) {
