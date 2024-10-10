@@ -27,7 +27,7 @@
 			</div>
         </div>
 
-		<div class="d-block d-md-none big-top-margin">
+		<div class="d-block d-md-none big-top-margin"></div>
 
 			<div class="container">
 
@@ -47,21 +47,26 @@
 					</div>
 				</nav>
 
+				<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+				<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
 				<nav>
 					<div class="nav nav-tabs" id="nav-tab" role="tablist">
-					  <button class="nav-link active" id="nav-ad-tab" data-bs-toggle="tab"
-					  	data-bs-target="#nav-ad" type="button" role="tab"
-						aria-controls="nav-ad" aria-selected="true">Объявления</button>
-					  <button class="nav-link" id="nav-news-tab" data-bs-toggle="tab"
-					  	data-bs-target="#nav-news" type="button" role="tab"
-						aria-controls="nav-news" aria-selected="false">Новости</button>
+						<button @click="showScreen('showAd')" :class="{'nav-link': true, 'active': showAd}"
+						id="nav-ad-tab" type="button" role="tab"
+						aria-controls="nav-ad" aria-selected="showAd">Объявления</button>
+						<button @click="showScreen('showNews')" :class="{'nav-link': true, 'active': showNews}"
+						id="nav-news-tab" type="button" role="tab"
+						aria-controls="nav-news" aria-selected="showNews">Новости</button>
+						<button @click="showScreen('showUser')" :class="{'nav-link': true, 'active': showUser}"
+						id="nav-user-tab" type="button" role="tab"
+						aria-controls="nav-user" aria-selected="showUser">Пользователи</button>
 					</div>
 				</nav>
-				<div class="tab-content mb-3" id="nav-tabContent">
-					<div class="tab-pane fade show active" id="nav-ad" role="tabpanel" aria-labelledby="nav-ad-tab" tabindex="0">
 
-						<div v-if="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
-						<div v-if="successMessage" class="alert alert-success mt-3">{{ successMessage }}</div>
+				<div class="tab-content mb-3" id="nav-tabContent">
+					<div :class="{'tab-pane': true, 'fade': true, 'show active': showAd}"
+						id="nav-ad" role="tabpanel" aria-labelledby="nav-ad-tab" tabindex="0">
 
 						<div class="accordion mt-3" id="accordionExample">
 							<div class="accordion-item">
@@ -84,28 +89,38 @@
 													<label for="formFile1" class="form-label">
 														Заглавное фото
 													</label>
-													<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm" id="formFile1" type="file">
+													<span class="form-text"> // jpeg, png, gif, < 5MB</span>
+													<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm"
+														id="formFile1" type="file" ref="fileInput">
 												</div>
 					
 												<div v-if="photoInputs[1]" class="mb-2">
 													<label for="formFile2" class="form-label">
 														Фото 2
 													</label>
-													<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm" id="formFile2" type="file">
+													<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm"
+														id="formFile2" type="file" ref="fileInput">
 												</div>
 												
 												<div v-if="photoInputs[2]" class="mb-2">
 													<label for="formFile3" class="form-label">
 														Фото 3
 													</label>
-													<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm" id="formFile3" type="file">
+													<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm"
+														id="formFile3" type="file" ref="fileInput">
 												</div>
 											
 												<div class="mb-3">
 													<label for="FormControlInput1" class="form-label">
 														Название
-														<span class="text text-danger">*</span></label>
-													<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput1" placeholder="">
+														<span class="text text-danger">*</span>
+														<!-- Счетчик оставшихся символов для названия -->
+														<span :class="getCharCountClass(newAd.title, newAd.titleLimit)">
+															({{ getRemainingChars(newAd.title, newAd.titleLimit) }})
+														</span>
+													</label>
+													<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm"
+														id="FormControlInput1">
 												</div>
 				
 												<div class="mb-3">
@@ -142,33 +157,48 @@
 												<div class="mb-3">
 													<label for="FormControlTextarea1" class="form-label">
 														Описание
-														<span class="text text-danger">*</span></label>
-													<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm" id="FormControlTextarea1" rows="3" placeholder=""></textarea>
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newAd.description, newAd.descriptionLimit)">
+															({{ getRemainingChars(newAd.description, newAd.descriptionLimit) }})
+														</span>
+													</label>
+													<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm"
+														id="FormControlTextarea1" rows="3"></textarea>
 												</div>
 							
 												<div class="mb-3">
 													<label for="FormControlInput3" class="form-label">
 														Контакт
-														<span class="text text-danger">*</span></label>
-													<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput3"
-														placeholder="">
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newAd.contact, newAd.contactLimit)">
+															({{ getRemainingChars(newAd.contact, newAd.contactLimit) }})
+														</span>
+													</label>
+													<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm"
+														id="FormControlInput3">
 												</div>
 			
 												<div class="form-check form-switch mb-3">
-													<input v-model="newAd.permanent" class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+													<input v-model="newAd.permanent" class="form-check-input" type="checkbox" role="switch"
+														id="flexSwitchCheckDefault">
 													<label class="form-check-label" for="flexSwitchCheckDefault">
 														Сделать объявление вечным
 													</label>
 												</div>
 												
 												<div class="row mb-3">
-													<div class="col-4">
+													<div class="col-6">
 														<label for="inputPassword2" class="form-label">
 															Пароль
-															<span class="text text-danger">*</span></label>
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																({{ getRemainingChars(authPassword, authPasswordLimit) }})
+															</span>
+														</label>
 													</div>
-													<div class="col-8">
-														<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+													<div class="col">
+														<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm"
+															aria-describedby="passwordHelpBlock">
 													</div>
 												</div>
 												<button @click="createAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
@@ -197,24 +227,32 @@
 													Заблокировать объявление
 												</h5>
 												<div class="mb-3 row">
-													<div class="col">
+													<div class="col-7">
 														<label for="FormControlInput11" class="form-label">
 															ID объявления
-															<span class="text text-danger">*</span></label>
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(adId, adIdLimit)">
+																({{ getRemainingChars(adId, adIdLimit) }})
+															</span>
+														</label>
 													</div>
 													<div class="col">
-														<input v-model="adId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput11"
-														placeholder="">
+														<input v-model="adId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput11">
 													</div>
 												</div>
 												<div class="row mb-3">
-													<div class="col-4">
+													<div class="col-6">
 														<label for="inputPassword21" class="form-label">
 															Пароль
-															<span class="text text-danger">*</span></label>
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																({{ getRemainingChars(authPassword, authPasswordLimit) }})
+															</span>
+														</label>
 													</div>
-													<div class="col-8">
-														<input v-model="authPassword" type="password" id="inputPassword21" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+													<div class="col">
+														<input v-model="authPassword" type="password" id="inputPassword21" class="form-control form-control-sm shadow-sm"
+															aria-describedby="passwordHelpBlock">
 													</div>
 												</div>
 												<button @click="blockAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
@@ -227,58 +265,12 @@
 								</div>
 							  </div>
 							</div>
-							<div class="accordion-item">
-							  <h2 class="accordion-header">
-								<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-									Заблокировать пользователя
-								</button>
-							  </h2>
-							  <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-								<div class="accordion-body">
-									
-									<div class="col mt-1"></div>
-										<div class="card shadow-sm">
-											<div class="card-body">
-												<h5 class="card-title mb-3">
-													Заблокировать пользователя
-												</h5>
-												<div class="mb-3 row">
-													<div class="col">
-														<label for="FormControlInput21" class="form-label">
-															ID пользователя
-															<span class="text text-danger">*</span></label>
-													</div>
-													<div class="col">
-														<input v-model="userId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput21"
-														placeholder="">
-													</div>
-												</div>
-												<div class="row mb-3">
-													<div class="col-4">
-														<label for="inputPassword31" class="form-label">
-															Пароль
-															<span class="text text-danger">*</span></label>
-													</div>
-													<div class="col-8">
-														<input v-model="authPassword" type="password" id="inputPassword31" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
-													</div>
-												</div>
-												<button @click="blockUser()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
-													Заблокировать пользователя
-												</button>
-											</div>
-										</div>
-									</div>
-
-								</div>
-							</div>
 						</div>
 
 					</div>
-					<div class="tab-pane fade" id="nav-news" role="tabpanel" aria-labelledby="nav-news-tab" tabindex="0">
 
-						<div v-if="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
-						<div v-if="successMessage" class="alert alert-success mt-3">{{ successMessage }}</div>
+					<div :class="{'tab-pane': true, 'fade': true, 'show active': showNews}"
+						id="nav-news" role="tabpanel" aria-labelledby="nav-news-tab" tabindex="0">
 
 						<div class="accordion mt-3" id="accordionExample2">
 							<div class="accordion-item">
@@ -302,6 +294,7 @@
 													<label for="formFile4" class="form-label">
 														Заглавное фото
 													</label>
+													<span class="form-text"> // jpeg, png, gif, < 5MB</span>
 													<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm"
 														id="formFile4" type="file" ref="fileInput">
 												</div>
@@ -325,59 +318,83 @@
 												<div class="mb-3">
 													<label for="FormControlInput7" class="form-label">
 														Заголовок (ru)
-														<span class="text text-danger">*</span></label>
-													<input v-model="newNews.title_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput7"
-														placeholder="">
+														<span class="text text-danger">*</span>
+														<!-- Счетчик оставшихся символов для названия -->
+														<span :class="getCharCountClass(newNews.title_ru, newNews.title_ruLimit)">
+															({{ getRemainingChars(newNews.title_ru, newNews.title_ruLimit) }})
+														</span>
+													</label>
+													<input v-model="newNews.title_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput7">
 												</div>
 				
 												<div class="mb-3">
 													<label for="FormControlTextarea3" class="form-label">
 														Текст (ru)
-														<span class="text text-danger">*</span></label>
-													<textarea v-model="newNews.description_ru" class="form-control form-select-sm shadow-sm" id="FormControlTextarea3" rows="3"
-														placeholder=""></textarea>
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newNews.description_ru, newNews.description_ruLimit)">
+															({{ getRemainingChars(newNews.description_ru, newNews.description_ruLimit) }})
+														</span>
+													</label>
+													<textarea v-model="newNews.description_ru" class="form-control form-select-sm shadow-sm" id="FormControlTextarea3" rows="3"></textarea>
 												</div>
 							
 												<div class="mb-3">
 													<label for="FormControlInput8" class="form-label">
 														Автор (ru)
-														<span class="text text-danger">*</span></label>
-													<input v-model="newNews.author_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput8"
-														placeholder="">
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newNews.author_ru, newNews.author_ruLimit)">
+															({{ getRemainingChars(newNews.author_ru, newNews.author_ruLimit) }})
+														</span>
+													</label>
+													<input v-model="newNews.author_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput8">
 												</div>
 
 												<div class="mb-3">
 													<label for="FormControlInput17" class="form-label">
 														Заголовок (en)
-														<span class="text text-danger">*</span></label>
-													<input v-model="newNews.title_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput17"
-														placeholder="">
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newNews.title_en, newNews.title_ruLimit)">
+															({{ getRemainingChars(newNews.title_en, newNews.title_ruLimit) }})
+														</span>
+													</label>
+													<input v-model="newNews.title_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput17">
 												</div>
 				
 												<div class="mb-3">
 													<label for="FormControlTextarea13" class="form-label">
 														Текст (en)
-														<span class="text text-danger">*</span></label>
-													<textarea v-model="newNews.description_en" class="form-control form-select-sm shadow-sm" id="FormControlTextarea13" rows="3"
-														placeholder=""></textarea>
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newNews.description_en, newNews.description_ruLimit)">
+															({{ getRemainingChars(newNews.description_en, newNews.description_ruLimit) }})
+														</span>
+													</label>
+													<textarea v-model="newNews.description_en" class="form-control form-select-sm shadow-sm" id="FormControlTextarea13" rows="3"></textarea>
 												</div>
 							
 												<div class="mb-3">
 													<label for="FormControlInput18" class="form-label">
 														Автор (en)
-														<span class="text text-danger">*</span></label>
-													<input v-model="newNews.author_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput18"
-														placeholder="">
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newNews.author_en, newNews.author_ruLimit)">
+															({{ getRemainingChars(newNews.author_en, newNews.author_ruLimit) }})
+														</span>
+													</label>
+													<input v-model="newNews.author_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput18">
 												</div>
 												
 												<div class="row mb-3">
-													<div class="col-4">
+													<div class="col-6">
 														<label for="inputPassword4" class="form-label">
 															Пароль
-															<span class="text text-danger">*</span></label>
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																({{ getRemainingChars(authPassword, authPasswordLimit) }})
+															</span>
+														</label>
 													</div>
-													<div class="col-8">
-														<input v-model="authPassword" type="password" id="inputPassword4" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+													<div class="col">
+														<input v-model="authPassword" type="password" id="inputPassword4" class="form-control form-control-sm shadow-sm"
+															aria-describedby="passwordHelpBlock">
 													</div>
 												</div>
 												<button @click="createNews()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
@@ -406,24 +423,32 @@
 													Удалить новость
 												</h5>
 												<div class="mb-3 row">
-													<div class="col">
+													<div class="col-7">
 														<label for="FormControlInput41" class="form-label">
 															ID новости
-															<span class="text text-danger">*</span></label>
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(newsId, newsIdLimit)">
+																({{ getRemainingChars(newsId, newsIdLimit) }})
+															</span>
+														</label>
 													</div>
 													<div class="col">
-														<input v-model="newsId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput41"
-														placeholder="">
+														<input v-model="newsId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput41">
 													</div>
 												</div>
 												<div class="row mb-3">
-													<div class="col-4">
+													<div class="col-6">
 														<label for="inputPassword41" class="form-label">
 															Пароль
-															<span class="text text-danger">*</span></label>
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																({{ getRemainingChars(authPassword, authPasswordLimit) }})
+															</span>
+														</label>
 													</div>
-													<div class="col-8">
-														<input v-model="authPassword" type="password" id="inputPassword41" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+													<div class="col">
+														<input v-model="authPassword" type="password" id="inputPassword41" class="form-control form-control-sm shadow-sm"
+															aria-describedby="passwordHelpBlock">
 													</div>
 												</div>
 												<button @click="deleteNews()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
@@ -440,6 +465,68 @@
 						</div>
 						
 					</div>
+
+					<div :class="{'tab-pane': true, 'fade': true, 'show active': showUser}"
+						id="nav-user" role="tabpanel" aria-labelledby="nav-user-tab" tabindex="0">
+
+						<div class="accordion mt-3" id="accordionExample">
+							
+							<div class="accordion-item">
+							  <h2 class="accordion-header">
+								<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+									Заблокировать пользователя
+								</button>
+							  </h2>
+							  <div id="collapseThree" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+								<div class="accordion-body">
+									
+									<div class="col mt-1">
+										<div class="card shadow-sm">
+											<div class="card-body">
+												<h5 class="card-title mb-3">
+													Заблокировать пользователя
+												</h5>
+												<div class="mb-3 row">
+													<div class="col-7">
+														<label for="FormControlInput21" class="form-label">
+															ID пользователя
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(userId, userIdLimit)">
+																({{ getRemainingChars(userId, userIdLimit) }})
+															</span>
+														</label>
+													</div>
+													<div class="col">
+														<input v-model="userId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput21">
+													</div>
+												</div>
+												<div class="row mb-3">
+													<div class="col-6">
+														<label for="inputPassword31" class="form-label">
+															Пароль
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																({{ getRemainingChars(authPassword, authPasswordLimit) }})
+															</span>
+														</label>
+													</div>
+													<div class="col">
+														<input v-model="authPassword" type="password" id="inputPassword31" class="form-control form-control-sm shadow-sm"
+															aria-describedby="passwordHelpBlock">
+													</div>
+												</div>
+												<button @click="blockUser()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+													Заблокировать пользователя
+												</button>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+
+					</div>
 				</div>
 			</div>
 		</div>
@@ -455,26 +542,64 @@
         const app = Vue.createApp({
             data() {
                 return {
+					//
+					showAd: true,
+					//
+					showNews: false,
+					//
+					showUser: false,
 					// содержит объект нового объявления (ещё не созданного)
 					newAd: {
+						//
 						title: '',
+						// лимит названия
+						titleLimit: 40,
+						//
           				description: '',
+						// лимит описания
+						descriptionLimit: 1000,
+						//
 						contact: '',
+						// лимит контакта
+						contactLimit: 50,
+						//
 						category: '',
+						//
 						permanent: false
 					},
 					// содержит объект новой новости (ещё не созданной)
 					newNews: {
+						//
 						title_ru: '',
+						// лимит заголовка
+						title_ruLimit: 50,
+						//
           				description_ru: '',
+						// лимит описания
+						description_ruLimit: 2000,
+						//
 						author_ru: '',
+						// лимит автора
+						author_ruLimit: 50,
+						//
 						title_en: '',
+						//
           				description_en: '',
+						//
 						author_en: ''
 					},
-					adId: null,
-					userId: null,
-					newsId: null,
+					//
+					adId: '',
+					//
+					adIdLimit: 6,
+					//
+					newsId: '',
+					//
+					newsIdLimit: 6,
+					//
+					userId: '',
+					//
+					userIdLimit: 6,
 					// управляет видимостью полей для фото
 					photoInputs: [true, false, false], // скрываем фото 2 и фото 3
 					// содержит массив загруженных фото
@@ -483,8 +608,193 @@
 					successMessage: null,
 					// содержит текст всплывающей подсказки в случае ошибки
                     errorMessage: null,
+					//
+					messages: {
+						// Общие ошибки
+						100: 'Страница не найдена',
+						101: 'Ошибка с ID',
+						102: '',
+						103: '',
+						104: '',
+						110: 'Меню временно отключено',
+						111: 'Переключение языков временно отключено',
+						112: '',
+						113: '',
+						// Ошибки связанные со списком объявлений
+						200: 'Ошибка с номером страницы',
+						201: 'Ошибка со строкой категорий',
+						202: 'Не удалось найти активных объявлений',
+						203: 'Ошибка с паролем',
+						204: 'Не удалось найти активного пользователя. Возможно ошибка в пароле',
+						205: '',
+						206: '',
+						210: 'Пожалуйста, введите пароль',
+						211: 'Пароль слишком длинный',
+						212: '',
+						213: '',
+						214: '',
+						220: 'Вы достигли лимита объявлений',
+						221: '',
+						222: '',
+						// Ошибки связанные со списком новостей
+						300: 'Ошибка с номером страницы',
+						301: '',
+						302: '',
+						303: '',
+						310: 'Вы достигли лимита новостей',
+						311: '',
+						312: '',
+						// Ошибки связанные с одним объявлением
+						400: 'Не удалось найти активного объявления',
+						401: 'Не удалось найти активного пользователя. Возможно ошибка в пароле',
+						402: '',
+						403: '',
+						404: '',
+						420: 'Ошибка с паролем или ID',
+						421: 'Не удалось найти объявление',
+						422: 'Ошибка доступа',
+						423: 'Объявление было удалено ранее',
+						424: '',
+						425: '',
+						430: 'Ошибка с текстом или ID',
+						431: 'Текст объявления слишком длинный',
+						432: '',
+						433: '',
+						440: 'Пожалуйста, введите пароль',
+						441: 'Пароль слишком длинный',
+						442: '',
+						443: '',
+						450: 'Пожалуйста, напишите текст жалобы',
+						451: 'Текст жалобы слишком длинный',
+						452: '',
+						453: '',
+						460: 'Объявление успешно удалено!',
+						461: '',
+						462: '',
+						470: 'Жалоба на объявление принята!',
+						471: '',
+						472: '',
+						480: 'Пожалуйста, напишите ID объявления',
+						481: 'Пожалуйста, введите пароль',
+						482: 'ID слишком длинный',
+						483: 'Пароль слишком длинный',
+						484: '',
+						485: '',
+						486: '',
+						487: '',
+						490: 'Объявление успешно заблокировано!',
+						491: '',
+						492: '',
+						// Ошибки связанные с одной новостью
+						500: 'Не удалось найти активную новость',
+						501: '',
+						502: '',
+						503: '',
+						520: 'Ошибка с паролем или ID',
+						521: 'Не удалось найти новость',
+						522: 'Ошибка доступа',
+						523: 'Новость была удалена ранее',
+						524: '',
+						525: '',
+						530: 'Пожалуйста, напишите ID новости',
+						531: 'Пожалуйста, введите пароль',
+						532: 'ID слишком длинный',
+						533: 'Пароль слишком длинный',
+						534: '',
+						535: '',
+						540: 'Новость успешно удалена!',
+						541: '',
+						542: '',
+						// Ошибки связанные с созданием объявления
+						600: 'Не заполнены важные поля',
+						601: 'Некоторые поля нарушили лимит символов',
+						602: 'Не удалось найти активного пользователя. Возможно ошибка в пароле',
+						603: 'Превышен лимит объявлений. Максимум 3 шт',
+						604: '',
+						605: '',
+						606: '',
+						620: 'Ошибка при загрузке одного из файлов',
+						621: 'Один из файлов не является изображением',
+						622: 'Одно из фото недопустимого формата. Можно jpeg, png, gif',
+						623: 'Одно из фото превышает допустимый размер. Максимум 5 МБ',
+						624: 'Одно из фото слишком маленькое. Минимум 600 * 450 или наоборот',
+						625: '',
+						626: '',
+						630: 'Пожалуйста, напишите название',
+						631: 'Пожалуйста, выберите категорию',
+						632: 'Пожалуйста, напишите описание',
+						633: 'Пожалуйста, напишите свой контакт',
+						634: 'Пожалуйста, введите пароль',
+						635: 'Название слишком длинное',
+						636: 'Категория слишком длинная',
+						637: 'Описание слишком длинное',
+						638: 'Контакт слишком длинный',
+						639: 'Пароль слишком длинный',
+						640: 'Слишком много фото. Максимум 3 шт',
+						641: '',
+						642: '',
+						650: 'Объявление успешно создано!',
+						651: '',
+						652: '',
+						// Ошибки связанные с созданием новости
+						700: 'Не заполнены важные поля',
+						701: 'Некоторые поля нарушили лимит символов',
+						702: 'Ошибка доступа',
+						703: '',
+						704: '',
+						705: '',
+						720: 'Ошибка при загрузке одного из файлов',
+						721: 'Один из файлов не является изображением',
+						722: 'Одно из фото недопустимого формата. Можно jpeg, png, gif',
+						723: 'Одно из фото превышает допустимый размер. Максимум 5 МБ',
+						724: 'Одно из фото слишком маленькое. Минимум 600 * 450 или наоборот',
+						725: '',
+						726: '',
+						730: 'Пожалуйста, напишите заголовок (ru)',
+						731: 'Пожалуйста, напишите текст новости (ru)',
+						732: 'Пожалуйста, укажите автора (ru)',
+						733: 'Пожалуйста, напишите заголовок (en)',
+						734: 'Пожалуйста, напишите текст новости (en)',
+						735: 'Пожалуйста, укажите автора (en)',
+						736: 'Пожалуйста, введите пароль',
+						737: 'Заголовок слишком длинный (ru)',
+						738: 'Текст новости слишком длинный (ru)',
+						739: 'Имя автора слишком длинное (ru)',
+						740: 'Заголовок слишком длинный (en)',
+						741: 'Текст новости слишком длинный (en)',
+						742: 'Имя автора слишком длинное (en)',
+						743: 'Пароль слишком длинный',
+						744: 'Слишком много фото. Максимум 3 шт',
+						745: '',
+						746: '',
+						750: 'Новость успешно создана!',
+						751: '',
+						752: '',
+						// Ошибки связанные с пользователем
+						800: '',
+						801: '',
+						802: '',
+						803: '',
+						820: 'Ошибка с паролем или ID',
+						821: 'Ошибка доступа',
+						822: 'Не удалось найти пользователя',
+						823: 'Пользователь был заблокирован ранее',
+						824: '',
+						825: '',
+						830: 'Пожалуйста, напишите ID пользователя',
+						831: 'Пожалуйста, введите пароль',
+						832: 'ID слишком длинный',
+						833: 'Пароль слишком длинный',
+						834: '',
+						835: '',
+						840: 'Пользователь успешно заблокирован!',
+						841: '',
+						842: '',
+					},
 					// содержит пароль для авторизации
 					authPassword: '',
+					//
+					authPasswordLimit: 16,
 					// содержит весь список категорий с кодами на русском
 					categories: {
 						'Жильё': { code: '1', subcategories: {
@@ -699,6 +1009,8 @@
 					subcategories2: null,
 					// Строка с итоговым кодом категории
 					categoryCode: '',
+					// лимит строки категории
+					categoryCodeLimit: 7,
                 };
             },
 			watch: {
@@ -708,24 +1020,37 @@
 				}
 			},
             methods: {
+				// метод выбора, какой экран показать в данный момент
+				showScreen(screen) {
+					this.showAd = screen === 'showAd';
+					this.showNews = screen === 'showNews';
+					this.showUser = screen === 'showUser';
+				},
 				//
 				notAvailableMenu() {
-					this.errorMessage = 'Меню временно отключено';
+					this.errorMessage = this.messages[110];
 					setTimeout(() => { this.errorMessage = ''; }, 2000);
 				},
 				//
 				notAvailableLang() {
-					this.errorMessage = 'Переключение языков временно отключено';
+					this.errorMessage = this.messages[111];
 					setTimeout(() => { this.errorMessage = ''; }, 2000);
 				},
 				//
 				cleanForm() {
 					// очищаем форму 1
-					this.newAd = { title: '', description: '', contact: '', category: '', permanent: false };
+					this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, category: '', permanent: false };
 					// очищаем форму 2
-					this.newNews = { title_ru: '', description_ru: '', author_ru: '', title_en: '', description_en: '', author_en: '' };
+					this.newNews = { title_ru: '', title_ruLimit: 50, description_ru: '', description_ruLimit: 2000, author_ru: '', author_ruLimit: 50,
+						title_en: '', description_en: '', author_en: '' };
 					// очищаем пароль
 					this.authPassword = '';
+					//
+					this.adId = '';
+					//
+					this.newsId = '';
+					//
+					this.userId = '';
 					//
 					this.photoInputs = [true, false, false];
 					// Очистить поле файла через ref
@@ -748,31 +1073,65 @@
 				createAd() {
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
-					// проверяем обязательные поля
-					if (!this.newAd.title || !this.newAd.description || !this.newAd.contact || !this.categoryCode) {
-						this.errorMessage = 'Пожалуйста, заполните все обязательные поля';
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
-						return;
+					// Проверяем, введены ли параметры объявления и их длина
+					if (this.newAd.title.length < 5) {
+						// this.errorMessage = 'Пожалуйста, напишите название';
+						this.errorMessage = this.messages[630];
+
+					} else if (this.categoryCode.length < 1) {
+						// this.errorMessage = 'Пожалуйста, выберите категорию';
+						this.errorMessage = this.messages[631];
+
+					} else if (this.newAd.description.length < 20) {
+						// this.errorMessage = 'Пожалуйста, напишите описание';
+						this.errorMessage = this.messages[632];
+
+					} else if (this.newAd.contact.length < 5) {
+						// this.errorMessage = 'Пожалуйста, напишите свой контакт';
+						this.errorMessage = this.messages[633];
+
+					} else if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.messages[634];
+
+					} else if (this.getRemainingChars(this.newAd.title, this.newAd.titleLimit) < 0) {
+						// this.errorMessage = 'Название слишком длинное';
+						this.errorMessage = this.messages[635];
+
+					} else if (this.getRemainingChars(this.categoryCode, this.categoryCodeLimit) < 0) {
+						// this.errorMessage = 'Категория слишком длинная';
+						this.errorMessage = this.messages[636];
+
+					} else if (this.getRemainingChars(this.newAd.description, this.newAd.descriptionLimit) < 0) {
+						// this.errorMessage = 'Описание слишком длинное';
+						this.errorMessage = this.messages[637];
+
+					} else if (this.getRemainingChars(this.newAd.contact, this.newAd.contactLimit) < 0) {
+						// this.errorMessage = 'Контакт слишком длинный';
+						this.errorMessage = this.messages[638];
+
+					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
+						// this.errorMessage = 'Пароль слишком длинный';
+						this.errorMessage = this.messages[639];
 					}
-					this.newAd.category = this.categoryCode;
-					// проверяем, введен ли пароль
-					if (!this.authPassword) {
-						this.errorMessage = 'Пожалуйста, введите пароль';
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
-						return;
-					}
-					// проверяем наличие фотографий (максимум 3)
+					// Проверяем наличие фотографий (максимум 3)
 					if (this.photos.length > 3) {
-						this.errorMessage = 'Максимум можно загрузить 3 фотографии';
+						// this.errorMessage = 'Слишком много фото. Максимум 3 шт';
+						this.errorMessage = this.messages[640];
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
 						return;
 					}
+
+					this.newAd.category = this.categoryCode;
 					// формируем объект FormData для отправки данных на сервер
 					const formData = new FormData();
 					formData.append('title', this.newAd.title);
+					formData.append('category', this.newAd.category);
 					formData.append('description', this.newAd.description);
 					formData.append('contact', this.newAd.contact);
-					formData.append('category', this.newAd.category);
 					formData.append('permanent', this.newAd.permanent);
 					formData.append('password', this.authPassword);
 
@@ -785,26 +1144,16 @@
 					this.isLoading = true;
 					axios.post('api/ad/create', formData, {headers: {'Content-Type': 'multipart/form-data'}})
 						.then(response => {
-							this.successMessage = 'Объявление успешно создано!';
+							//
+							this.successMessage = this.messages[650];
 							// очищаем форму
 							this.cleanForm();
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.successMessage = ''; }, 3000);
 						})
 						.catch((error) => {
-							this.errorMessage = 'Не удалось создать объявление';	
-							if (error.response) {
-								// Сервер вернул ответ с ошибкой
-								console.error('Данные ответа с ошибкой:', error.response.data);
-								console.error('Код ответа:', error.response.status);
-								console.error('Заголовки ответа:', error.response.headers);
-							} else if (error.request) {
-								// Запрос был отправлен, но ответа не было
-								console.error('Запрос без ответа:', error.request);
-							} else {
-								// Другая ошибка, связанная с настройкой запроса
-								console.error('Ошибка настройки запроса:', error.message);
-							}
+							//
+							this.errorMessage = this.messages[error.response.data['code']];
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.errorMessage = ''; }, 3000);
 						})
@@ -816,30 +1165,74 @@
 				createNews() {
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
-					// проверяем обязательные поля
-					if (!this.newNews.title_ru
-						|| !this.newNews.description_ru
-						|| !this.newNews.author_ru
-						|| !this.newNews.title_en
-						|| !this.newNews.description_en
-						|| !this.newNews.author_en
-					) {
-						this.errorMessage = 'Пожалуйста, заполните все обязательные поля.';
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
-						return;
+					// Проверяем, введены ли параметры новости и их длина
+					if (this.newNews.title_ru.length < 5) {
+						// this.errorMessage = 'Пожалуйста, напишите заголовок (ru)';
+						this.errorMessage = this.messages[730];
+
+					} else if (this.newNews.description_ru.length < 20) {
+						// this.errorMessage = 'Пожалуйста, напишите текст новости (ru)';
+						this.errorMessage = this.messages[731];
+
+					} else if (this.newNews.author_ru.length < 5) {
+						// this.errorMessage = 'Пожалуйста, укажите автора (ru)';
+						this.errorMessage = this.messages[732];
+
+					} else if (this.newNews.title_en.length < 5) {
+						// this.errorMessage = 'Пожалуйста, напишите заголовок (en)';
+						this.errorMessage = this.messages[733];
+
+					} else if (this.newNews.description_en.length < 20) {
+						// this.errorMessage = 'Пожалуйста, напишите текст новости (en)';
+						this.errorMessage = this.messages[734];
+
+					} else if (this.newNews.author_en.length < 5) {
+						// this.errorMessage = 'Пожалуйста, укажите автора (en)';
+						this.errorMessage = this.messages[735];
+
+					} else if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.messages[736];
+
+					} else if (this.getRemainingChars(this.newNews.title_ru, this.newNews.title_ruLimit) < 0) {
+						// this.errorMessage = 'Заголовок слишком длинный (ru)';
+						this.errorMessage = this.messages[737];
+
+					} else if (this.getRemainingChars(this.newNews.description_ru, this.newNews.description_ruLimit) < 0) {
+						// this.errorMessage = 'Текст новости слишком длинный (ru)';
+						this.errorMessage = this.messages[738];
+
+					} else if (this.getRemainingChars(this.newNews.author_ru, this.newNews.author_ruLimit) < 0) {
+						// this.errorMessage = 'Имя автора слишком длинное (ru)';
+						this.errorMessage = this.messages[739];
+
+					} else if (this.getRemainingChars(this.newNews.title_en, this.newNews.title_ruLimit) < 0) {
+						// this.errorMessage = 'Заголовок слишком длинный (en)';
+						this.errorMessage = this.messages[740];
+
+					} else if (this.getRemainingChars(this.newNews.description_en, this.newNews.description_ruLimit) < 0) {
+						// this.errorMessage = 'Текст новости слишком длинный (en)';
+						this.errorMessage = this.messages[741];
+
+					} else if (this.getRemainingChars(this.newNews.author_en, this.newNews.author_ruLimit) < 0) {
+						// this.errorMessage = 'Имя автора слишком длинное (en)';
+						this.errorMessage = this.messages[742];
+
+					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
+						// this.errorMessage = 'Пароль слишком длинный';
+						this.errorMessage = this.messages[743];
 					}
-					// проверяем, введен ли пароль
-					if (!this.authPassword) {
-						this.errorMessage = 'Пожалуйста, введите пароль.';
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
-						return;
-					}
-					// проверяем наличие фотографий (максимум 3)
+					// Проверяем наличие фотографий (максимум 3)
 					if (this.photos.length > 3) {
-						this.errorMessage = 'Максимум можно загрузить 3 фотографии.';
+						// this.errorMessage = 'Слишком много фото. Максимум 3 шт';
+						this.errorMessage = this.messages[744];
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
 						return;
 					}
+
 					// формируем объект FormData для отправки данных на сервер
 					const formData = new FormData();
 					formData.append('title_ru', this.newNews.title_ru);
@@ -857,32 +1250,18 @@
 					
 					// отправляем данные на сервер
 					this.isLoading = true;
-					axios.post('api/news/create', formData, {
-						headers: {
-							'Content-Type': 'multipart/form-data'
-						} 
-					})
+					axios.post('api/news/create', formData, {headers: {'Content-Type': 'multipart/form-data'}})
 					.then(response => {
-						this.successMessage = 'Новость успешно создана!';
+						//
+						this.successMessage = this.messages[750];
 						// очищаем форму
 						this.cleanForm();
 						// очищаем сообщение
 						setTimeout(() => { this.successMessage = ''; }, 3000);
 					})
 					.catch((error) => {
-						this.errorMessage = 'Не удалось создать новость';	
-						if (error.response) {
-							// Сервер вернул ответ с ошибкой
-							console.error('Данные ответа с ошибкой:', error.response.data);
-							console.error('Код ответа:', error.response.status);
-							console.error('Заголовки ответа:', error.response.headers);
-						} else if (error.request) {
-							// Запрос был отправлен, но ответа не было
-							console.error('Запрос без ответа:', error.request);
-						} else {
-							// Другая ошибка, связанная с настройкой запроса
-							console.error('Ошибка настройки запроса:', error.message);
-						}
+						//
+						this.errorMessage = this.messages[error.response.data['code']];
 						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
 					})
@@ -894,47 +1273,44 @@
 				blockAd() {
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
-					// проверяем обязательные поля
-					if (!this.adId) {
-						this.errorMessage = 'Пожалуйста, введите ID объявления.';
+					// Проверяем, введен ли параметры объявления и их длина
+					if (this.adId.length < 1) {
+						// this.errorMessage = 'Пожалуйста, напишите ID объявления';
+						this.errorMessage = this.messages[480];
+
+					} else if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.messages[481];
+
+					} else if (this.getRemainingChars(this.adId, this.adIdLimit) < 0) {
+						// this.errorMessage = 'ID слишком длинный';
+						this.errorMessage = this.messages[482];
+
+					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
+						// this.errorMessage = 'Пароль слишком длинный';
+						this.errorMessage = this.messages[483];
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
 						return;
 					}
 
-					// сделать проверку id на число
-
-					// проверяем, введен ли пароль
-					if (!this.authPassword) {
-						this.errorMessage = 'Пожалуйста, введите пароль.';
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
-						return;
-					}
 					// отправляем данные на сервер
 					this.isLoading = true;
 					axios.get(`api/ad/block/${this.adId}/${this.authPassword}`)
 					.then(response => {
-						this.successMessage = 'Объявление успешно заблокировано!';
+						this.successMessage = this.messages[490];
 						// очищаем id
-						this.adId = null;
+						this.adId = '';
 						// очищаем пароль
 						this.authPassword = '';
 						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 						setTimeout(() => { this.successMessage = ''; }, 3000);
 					})
 					.catch((error) => {
-						this.errorMessage = 'Не удалось заблокировать объявление';	
-						if (error.response) {
-							// Сервер вернул ответ с ошибкой
-							console.error('Данные ответа с ошибкой:', error.response.data);
-							console.error('Код ответа:', error.response.status);
-							console.error('Заголовки ответа:', error.response.headers);
-						} else if (error.request) {
-							// Запрос был отправлен, но ответа не было
-							console.error('Запрос без ответа:', error.request);
-						} else {
-							// Другая ошибка, связанная с настройкой запроса
-							console.error('Ошибка настройки запроса:', error.message);
-						}
+						//
+						this.errorMessage = this.messages[error.response.data['code']];
 						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
 					})
@@ -946,48 +1322,44 @@
 				blockUser() {
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
-					// проверяем обязательные поля
-					if (!this.userId) {
-						this.errorMessage = 'Пожалуйста, введите ID пользователя.';
+					// Проверяем, введен ли параметры объявления и их длина
+					if (this.userId.length < 1) {
+						// this.errorMessage = 'Пожалуйста, напишите ID пользователя';
+						this.errorMessage = this.messages[830];
+
+					} else if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.messages[831];
+
+					} else if (this.getRemainingChars(this.userId, this.userIdLimit) < 0) {
+						// this.errorMessage = 'ID слишком длинный';
+						this.errorMessage = this.messages[832];
+
+					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
+						// this.errorMessage = 'Пароль слишком длинный';
+						this.errorMessage = this.messages[833];
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
 						return;
 					}
 
-					// сделать проверку id на число
-
-
-					// проверяем, введен ли пароль
-					if (!this.authPassword) {
-						this.errorMessage = 'Пожалуйста, введите пароль.';
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
-						return;
-					}
 					// отправляем данные на сервер
 					this.isLoading = true;
 					axios.get(`api/user/block/${this.userId}/${this.authPassword}`)
 					.then(response => {
-						this.successMessage = 'Пользователь успешно заблокирован!';
+						this.successMessage = this.messages[840];
 						// очищаем id
-						this.userId = null;
+						this.userId = '';
 						// очищаем пароль
 						this.authPassword = '';
 						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 						setTimeout(() => { this.successMessage = ''; }, 3000);
 					})
 					.catch((error) => {
-						this.errorMessage = 'Не удалось заблокировать пользователя';	
-						if (error.response) {
-							// Сервер вернул ответ с ошибкой
-							console.error('Данные ответа с ошибкой:', error.response.data);
-							console.error('Код ответа:', error.response.status);
-							console.error('Заголовки ответа:', error.response.headers);
-						} else if (error.request) {
-							// Запрос был отправлен, но ответа не было
-							console.error('Запрос без ответа:', error.request);
-						} else {
-							// Другая ошибка, связанная с настройкой запроса
-							console.error('Ошибка настройки запроса:', error.message);
-						}
+						//
+						this.errorMessage = this.messages[error.response.data['code']];
 						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
 					})
@@ -999,48 +1371,45 @@
 				deleteNews() {
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
-					// проверяем обязательные поля
-					if (!this.newsId) {
-						this.errorMessage = 'Пожалуйста, введите ID новости.';
+					// Проверяем, введен ли параметры объявления и их длина
+					if (this.newsId.length < 1) {
+						// this.errorMessage = 'Пожалуйста, напишите ID новости';
+						this.errorMessage = this.messages[530];
+
+					} else if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.messages[531];
+
+					} else if (this.getRemainingChars(this.newsId, this.newsIdLimit) < 0) {
+						// this.errorMessage = 'ID слишком длинный';
+						this.errorMessage = this.messages[532];
+
+					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
+						// this.errorMessage = 'Пароль слишком длинный';
+						this.errorMessage = this.messages[533];
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
 						return;
 					}
 
-					// сделать проверку id на число
-
-					
-					// проверяем, введен ли пароль
-					if (!this.authPassword) {
-						this.errorMessage = 'Пожалуйста, введите пароль.';
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
-						return;
-					}
 					// отправляем данные на сервер
 					this.isLoading = true;
 					axios.get(`api/news/delete/${this.newsId}/${this.authPassword}`)
 					.then(response => {
-						this.successMessage = 'Новость успешно удалена!';
+						//
+						this.successMessage = this.messages[540];
 						// очищаем id
-						this.newsId = null;
+						this.newsId = '';
 						// очищаем пароль
 						this.authPassword = '';
 						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 						setTimeout(() => { this.successMessage = ''; }, 3000);
 					})
 					.catch((error) => {
-						this.errorMessage = 'Не удалось удалить новость';
-						if (error.response) {
-							// Сервер вернул ответ с ошибкой
-							console.error('Данные ответа с ошибкой:', error.response.data);
-							console.error('Код ответа:', error.response.status);
-							console.error('Заголовки ответа:', error.response.headers);
-						} else if (error.request) {
-							// Запрос был отправлен, но ответа не было
-							console.error('Запрос без ответа:', error.request);
-						} else {
-							// Другая ошибка, связанная с настройкой запроса
-							console.error('Ошибка настройки запроса:', error.message);
-						}
+						//
+						this.errorMessage = this.messages[error.response.data['code']];
 						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
 					})
@@ -1092,6 +1461,19 @@
 					let subCategory1Code = this.subcategories1?.[this.selectedSubcategory1]?.code || '';
 					let subCategory2Code = this.subcategories2?.[this.selectedSubcategory2]?.code || '';
 					this.categoryCode = `${mainCategoryCode}${subCategory1Code}${subCategory2Code}`;
+				},
+				// Универсальный метод для подсчета оставшихся символов с учетом многобайтовых символов
+				getRemainingChars(value, maxLength) {
+					const charCount = Array.from(value).length; // Точный подсчет количества символов
+    				return maxLength - charCount;
+				},
+				// Метод для динамического определения класса
+				getCharCountClass(value, maxLength) {
+					const remainingChars = this.getRemainingChars(value, maxLength);
+					return {
+						'text-danger': remainingChars < 0,  // если символов больше чем нужно
+						'text-success': remainingChars >= 0 // если символов достаточно
+					};
 				},
 
             }

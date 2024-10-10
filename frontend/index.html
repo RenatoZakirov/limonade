@@ -588,7 +588,8 @@
 													</label>
 												</div>
 												<div class="col">
-													<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
+													<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm"
+														aria-describedby="passwordHelpBlock">
 												</div>
 												<div id="passwordHelpBlock" class="form-text">
 													<!-- Зайдите в Telegram-бот: -->
@@ -2016,6 +2017,10 @@
 							this.loadAdsList();
 							// очищаем пароль
 							this.authPassword = '';
+							//
+							this.photoInputs = [true, false, false];
+							// Очистить поле файла через ref
+							this.$refs.fileInput.value = '';
 							// очищаем массив фото
 							this.photos = [];
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение

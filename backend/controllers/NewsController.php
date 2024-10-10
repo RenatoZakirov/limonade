@@ -153,6 +153,7 @@ class NewsController {
         if ($hash_num != $this->adm_pass) {
             http_response_code(400);
             echo json_encode(['code' => 702]);
+            return;
         }
 
         // Проверяем, есть ли загруженные фотографии в $_FILES
