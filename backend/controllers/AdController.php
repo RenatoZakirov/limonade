@@ -95,7 +95,7 @@ class AdController {
 
     // Получить полный путь к фото, если оно существует
     private function getPhotoUrl($photoName) {
-        $baseUrl = 'http://localhost/limonade/'; // Базовый URL проекта
+        $baseUrl = 'https://www.limonade.pro/'; // Базовый URL проекта
         $filePath = 'backend/uploads/images/';
         return $photoName ? $baseUrl . $filePath . $photoName . '.jpg' : null;
     }

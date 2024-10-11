@@ -54,7 +54,7 @@ class NewsController {
 
     // Получить полный путь к фото, если оно существует
     private function getPhotoUrl($photoName) {
-        $baseUrl = 'http://localhost/limonade/'; // Базовый URL вашего проекта
+        $baseUrl = 'https://www.limonade.pro/'; // Базовый URL вашего проекта
         $filePath = 'backend/uploads/images/';
         return $photoName ? $baseUrl . $filePath . $photoName . '.jpg' : null;
     }

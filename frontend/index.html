@@ -6,6 +6,7 @@
 	<title>Объявления</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+	<link rel="icon" type="image/png" href="https://www.limonade.pro/backend/uploads/images/templates/icon.png">
 	<style>
 		[v-cloak] {
 			display: none;
@@ -47,21 +48,32 @@
 
 				<nav class="navbar bg-body-tertiary fixed-top shadow-sm">
 					<div class="container-fluid">
-						<button @click="cleanCategory(); loadAdsList()" class=" btn btn-sm btn-success shadow-sm">LIMONADE.PRO</button>
+						
+						<button @click="cleanCategory(); loadAdsList()" class=" btn btn-sm btn-success shadow-sm">
+							<img src="/backend/uploads/images/templates/icon.png" class="rounded me-1" alt="Limonade" width="24" height="24">
+							LIMONADE
+						</button>
 						<button type="button" class="btn btn-sm btn-warning shadow-sm">
 							<!-- НЯ ЧАНГ -->
+							<!-- <i class="bi bi-building"></i> -->
+							<i class="bi bi-building-fill"></i>
 							{{ getTranslation('navBar.cityButton') }}
 						</button>
 						<div class="btn-group btn-group-sm shadow-sm" role="group" aria-label="Small button group">
 							<button @click="setLanguage('RU')" type="button" 
-									:class="['btn', 'btn-sm', currentLanguage === 'RU' ? 'btn-warning' : 'btn-outline-warning']">RU</button>
+									:class="['btn', 'btn-sm', currentLanguage === 'RU' ? 'btn-warning' : 'btn-outline-warning']">
+									<i class="bi bi-translate"></i>
+									RU
+								</button>
 							<button @click="setLanguage('EN')" type="button" 
 									:class="['btn', 'btn-sm', currentLanguage === 'EN' ? 'btn-warning' : 'btn-outline-warning']">EN</button>
 							<!-- <button type="button" class="btn btn-outline-warning">VN</button> -->
 						</div>
-						<button class="btn btn-sm btn-primary shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+						<button class="btn btn-sm btn-primary shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+							aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
 							<!-- Меню -->
-							{{ getTranslation('navBar.menuButton') }}
+							<i class="bi bi-list"></i>
+							<!-- {{ getTranslation('navBar.menuButton') }} -->
 						</button>
 						<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
 							<div class="offcanvas-header">
@@ -79,7 +91,8 @@
 								<div class="accordion shadow-sm rounded" id="accordionExample">
 									<div class="accordion-item" v-if="!phpAdId">
 										<h2 class="accordion-header">
-											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true"
+												aria-controls="collapseOne">
 												<!-- Фильтровать поиск -->
 												{{ getTranslation('menu.searchAd.searchAdTab') }}
 											</button>
@@ -121,6 +134,7 @@
 											
 												<button @click="adCurrentPage = 1; loadAdsList()" class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="categoryCode.length < 1">
 													<!-- Искать -->
+													<i class="bi bi-search"></i>
 													{{ getTranslation('menu.searchAd.searchButton') }}
 												</button>
 			
@@ -129,7 +143,8 @@
 									</div>
 									<div class="accordion-item" v-if="!phpAdId">
 										<h2 class="accordion-header">
-										<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+										<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
+											aria-controls="collapseTwo">
 											<!-- Мои объявления -->
 											{{ getTranslation('menu.myAds.myAdsTab') }}
 										</button>
@@ -152,6 +167,7 @@
 												</div>
 												<div @click="cleanCategory(); showScreen('create')" class="btn btn-sm btn-primary mb-2 shadow-sm">
 													<!-- Создать -->
+													<i class="bi bi-wrench-adjustable"></i>
 													{{ getTranslation('menu.myAds.createButton') }}
 												</div>
 			
@@ -183,6 +199,7 @@
 												</div>
 												<button @click="loadUserAds()" class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="authPassword.length < 5">
 													<!-- Искать -->
+													<i class="bi bi-search"></i>
 													{{ getTranslation('menu.myAds.findButton') }}
 												</button>
 											</div>
@@ -191,7 +208,8 @@
 									</div>
 									<div class="accordion-item" v-if="!phpAdId">
 										<h2 class="accordion-header">
-										<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+										<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false"
+											aria-controls="collapseThree">
 											<!-- Мои новости -->
 											{{ getTranslation('menu.myNews.myNewsTab') }}
 										</button>
@@ -207,7 +225,7 @@
 													<div class="form-text">
 														<!-- Если у вас есть новости о нашем... -->
 														{{ getTranslation('menu.myNews.descriptionStr1') }}
-														<a href="https://t.me/limonade_info" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_info</a>
+														<a href="https://t.me/limonade_pro" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_pro</a>
 														<br>
 														<!-- Мы принимаем новости на русском... -->
 														{{ getTranslation('menu.myNews.descriptionStr2') }}
@@ -220,7 +238,8 @@
 									</div>
 									<div class="accordion-item">
 										<h2 class="accordion-header">
-										<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+										<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false"
+											aria-controls="collapseFour">
 											<!-- О нас -->
 											{{ getTranslation('menu.aboutUs.aboutUsTab') }}
 										</button>
@@ -230,7 +249,7 @@
 												<div class="container">
 													<div class="row mb-2">
 														<div class="form-text">
-															<img src="http://localhost/limonade/backend/uploads/images/templates/face.jpg" class="rounded float-start shadow-sm me-2 mb-2" alt="...">
+															<img src="https://www.limonade.pro/backend/uploads/images/templates/face.jpg" class="rounded float-start shadow-sm me-2 mb-2" alt="...">
 															{{ getTranslation('menu.aboutUs.descriptionStr1') }}
 															<br>
 															{{ getTranslation('menu.aboutUs.descriptionStr2') }}
@@ -240,7 +259,7 @@
 															{{ getTranslation('menu.aboutUs.descriptionStr4') }}
 															<br>
 															{{ getTranslation('menu.aboutUs.descriptionStr5') }}
-															<a href="https://t.me/limonade_info" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_info</a>
+															<a href="https://t.me/limonade_pro" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_pro</a>
 															<br>
 															{{ getTranslation('menu.aboutUs.descriptionStr6') }}
 														</div>
@@ -285,8 +304,6 @@
 							</div>
 						</div>
 						<div v-else class="mt-1">
-							<!-- <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-							<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div> -->
 						
 							<div v-if="showAdList" v-for="(ad, index) in adsList" :key="ad.id" class="row mb-3">
 								<div class="col">
@@ -304,12 +321,16 @@
 													<p class="card-text">
 														<small class="text-body-secondary text-truncate">
 															<!-- Создано  -->
+															<!-- <i class="bi bi-calendar-date"></i> -->
+															<i class="bi bi-calendar-date-fill"></i>
 															{{ getTranslation('ads.createdStr') }}
 															{{ ad.created_at.split(' ')[0] }}
 														</small>
 													</p>
 													<div class="btn btn-sm btn-primary shadow-sm" @click="loadAdDetail(ad.id)">
 														<!-- Посмотреть -->
+														<!-- <i class="bi bi-eye"></i> -->
+														<i class="bi bi-eye-fill"></i>
 														{{ getTranslation('ads.viewDetailsButton') }}
 													</div>
 												</div>
@@ -323,12 +344,16 @@
 								<div v-if="adCurrentPage > 1" class="col">
 									<div @click="adCurrentPage = 1; loadAdsList(adCurrentPage)" class="btn btn-sm btn-secondary shadow-sm">
 										<!-- В начало -->
+										<!-- <i class="bi bi-skip-backward"></i> -->
+										<i class="bi bi-skip-backward-fill"></i>
 										{{ getTranslation('ads.backToTopButton') }}
 									</div>
 								</div>
 								<div v-if="adsList.length >= 10" class="col">
 									<div @click="adCurrentPage += 1; loadAdsList(adCurrentPage)" class="btn btn-sm btn-primary shadow-sm">
 										<!-- Показать еще... -->
+										<!-- <i class="bi bi-fast-forward"></i> -->
+										<i class="bi bi-fast-forward-fill"></i>
 										{{ getTranslation('ads.showMoreButton') }}
 									</div>
 								</div>
@@ -350,6 +375,8 @@
 											</div>
 											<p class="card-text">{{ currentAd.description }}</p>
 											<h6 class="card-subtitle mb-2 text-body-secondary">
+												<!-- <i class="bi bi-send"></i> -->
+												<i class="bi bi-send-fill"></i>
 												{{ currentAd.contact }}
 											</h6>
 		
@@ -357,43 +384,49 @@
 												<div class="col">
 													<p class="card-text"><small class="text-body-secondary">
 														<!-- Создано  -->
+														<!-- <i class="bi bi-calendar-date"></i> -->
+														<i class="bi bi-calendar-date-fill"></i>
 														{{ getTranslation('ads.adDetails.createdStr') }}
 														{{ currentAd.created_at.split(' ')[0] }}</small> <span v-if="!isAdOwner" class="inspect-text fw-light opacity-25">{{ inspect }}</span></p>
 												</div>
 												<div v-if="isAdOwner" class="col">
 													<p class="card-text"><small class="text-body-secondary">
 														<!-- Просмотрено  -->
+														<i class="bi bi-eye-fill"></i>
 														{{ getTranslation('ads.adDetails.viewedStr') }}
 														{{ currentAd.viewed }}</small></p>
 												</div>
 											</div>
 											
 											<div class="row">
-												<div v-if="!phpAdId" class="col-3">
-													<div class="btn btn-sm btn-secondary shadow-sm" @click="returnToAdList()">
+												<div v-if="!phpAdId" class="col-4">
+													<button class="btn btn-sm btn-secondary shadow-sm" @click="returnToAdList()">
 														<!-- Назад -->
+														<!-- <i class="bi bi-skip-backward"></i> -->
+														<i class="bi bi-skip-backward-fill"></i>
 														{{ getTranslation('ads.adDetails.backButton') }}
-													</div>
+													</button>
 												</div>
 												<div v-if="phpAdId" class="col-6">
-													<div class="btn btn-sm btn-primary shadow-sm" @click="loadNewsList(); loadAdsList()">
+													<button class="btn btn-sm btn-primary shadow-sm" @click="loadNewsList(); loadAdsList()">
 														<!-- Показать другие... -->
 														{{ getTranslation('ads.adDetails.showOthersButton') }}
-													</div>
+													</button>
 												</div>
 												<div v-if="!isAdOwner" class="col-2">
-													<div class="btn btn-sm btn-danger shadow-sm" @click="openDislike()">
+													<button @click="openDislike()" :class="['btn', 'btn-sm', 'shadow-sm', dislike ? 'btn-danger' : 'btn-outline-danger']">
 														<!-- Пожаловаться -->
-														<i class="bi bi-emoji-angry"></i>
-														<!-- <i class="bi bi-emoji-frown"></i> -->
-													</div>
+														<!-- <i class="bi bi-hand-thumbs-down"></i> -->
+														<i class="bi bi-hand-thumbs-down-fill"></i>
+													</button>
 												</div>
-												<div v-if="!phpAdId" class="col">
-													<div class="btn btn-sm btn-primary shadow-sm" @click="copyLink(currentAd.id)">
+												<div v-if="!phpAdId" class="col-6">
+													<button class="btn btn-sm btn-primary shadow-sm" @click="copyLink(currentAd.id)">
 														<!-- Скопировать ссылку -->
-														<i class="bi bi-clipboard"></i> 
+														<!-- <i class="bi bi-clipboard"></i>  -->
+														<i class="bi bi-clipboard-fill"></i>
 														{{ copyIcon ? getTranslation('ads.adDetails.copiedLinkButton') : getTranslation('ads.adDetails.copyLinkButton') }}
-													</div>
+													</button>
 												</div>
 											</div>
 		
@@ -421,6 +454,7 @@
 
 											<button @click="dislikeAd(currentAd.id)" class="btn btn-sm btn-danger mb-2 shadow-sm" :disabled="dislikeText.length < 5">
 												<!-- Отправить жалобу -->
+												<i class="bi bi-envelope-open-fill"></i>
 												{{ getTranslation('ads.adDetails.dislike.dislikeButton') }}
 											</button>
 										</div>
@@ -448,6 +482,8 @@
 											</div>
 											<button @click="deleteAd(currentAd.id)" class="btn btn-sm btn-danger mb-2 shadow-sm" :disabled="authPassword.length < 5">
 												<!-- Удалить объявление -->
+												<!-- <i class="bi bi-trash"></i> -->
+												<i class="bi bi-trash3-fill"></i>
 												{{ getTranslation('ads.adDetails.delete.deleteButton') }}
 											</button>
 										</div>
@@ -469,6 +505,7 @@
 											</h6>
 											<div class="form-text mb-3">
 												<!-- 'Фото' не обязательно, но это... -->
+												<i class="bi bi-camera-fill"></i>
 												{{ getTranslation('ads.adCreate.createDescriptionStr2') }}
 											</div>
 											
@@ -601,6 +638,8 @@
 											</div>
 											<button @click="createAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
 												<!-- Опубликовать объявление -->
+												<!-- <i class="bi bi-envelope"></i> -->
+												<i class="bi bi-envelope-open-fill"></i>
 												{{ getTranslation('ads.adCreate.createButton') }}
 											</button>
 						
@@ -624,8 +663,6 @@
 							</div>
 						</div>
 						<div v-else class="mt-1">
-							<!-- <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-							<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div> -->
 						
 							<div v-if="showNewsList" v-for="(news, index) in newsList" :key="news.id" class="row mb-3">
 								<div class="col">
@@ -649,6 +686,8 @@
 													</p>
 													<div class="btn btn-sm btn-primary shadow-sm" @click="loadNewsDetail(news.id)">
 														<!-- Посмотреть -->
+														<!-- <i class="bi bi-eye"></i> -->
+														<i class="bi bi-eye-fill"></i>
 														{{ getTranslation('news.viewDetailsButton') }}
 													</div>
 												</div>
@@ -662,12 +701,16 @@
 								<div v-if="newsCurrentPage > 1" class="col">
 									<div @click="newsCurrentPage = 1; loadNewsList(newsCurrentPage)" class="btn btn-sm btn-secondary shadow-sm">
 										<!-- В начало -->
+										<!-- <i class="bi bi-skip-backward"></i> -->
+										<i class="bi bi-skip-backward-fill"></i>
 										{{ getTranslation('news.backToTopButton') }}
 									</div>
 								</div>
 								<div v-if="newsList.length >= 10" class="col">
 									<div @click="newsCurrentPage += 1; loadNewsList(newsCurrentPage)" class="btn btn-sm btn-primary shadow-sm">
 										<!-- Показать еще... -->
+										<!-- <i class="bi bi-fast-forward"></i> -->
+										<i class="bi bi-fast-forward-fill"></i>
 										{{ getTranslation('news.showMoreButton') }}
 									</div>
 								</div>
@@ -690,6 +733,8 @@
 												<div class="col">
 													<p class="card-text"><small class="text-body-secondary">
 														<!-- Создано  -->
+														<!-- <i class="bi bi-calendar-date"></i> -->
+														<i class="bi bi-calendar-date-fill"></i>
 														{{ getTranslation('news.newsDetails.createdStr') }}
 														{{ currentNews.created_at.split(' ')[0] }}</small> <span class="inspect-text fw-light opacity-25">{{ inspect }}</span></p>
 												</div>
@@ -697,10 +742,12 @@
 											
 											<div class="row">
 												<div class="col-4">
-													<div class="btn btn-sm btn-secondary shadow-sm" @click="returnToNewsList()">
+													<button class="btn btn-sm btn-secondary shadow-sm" @click="returnToNewsList()">
 														<!-- Назад -->
+														<!-- <i class="bi bi-skip-backward"></i> -->
+														<i class="bi bi-skip-backward-fill"></i>
 														{{ getTranslation('news.newsDetails.backButton') }}
-													</div>
+													</button>
 												</div>
 											</div>
 										</div>
@@ -720,7 +767,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 
-	<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 	<script>
@@ -846,8 +893,8 @@
 									viewedStr: 'Просмотрено:',
 									backButton: 'Назад',
 									showOthersButton: 'Показать другие...',
-									copyLinkButton: 'Копировать ссылку',
-									copiedLinkButton: 'Ссылка скопирована',
+									copyLinkButton: 'Получить ссылку',
+									copiedLinkButton: 'Ссылка в памяти',
 									dislike: {
 										dislikeOpenButton: '',
 										dislikeDescription: 'Если вы считаете, что данное объявление содержит оскорбительные или неприемлемые материалы, пожалуйста, сообщите нам об этом.',
@@ -863,7 +910,7 @@
 								adCreate: {
 									createStr: 'Создать новое объявление',
 									createDescriptionStr1: 'Объявление будет размещено бесплатно на 10 дней. Опубликованное объявление нельзя отредактировать, только удалить и создать новое.',
-									createDescriptionStr2: "'Фото' не обязательно, но это поможет вашему объявлению выделиться на фоне других.",
+									createDescriptionStr2: "Фото не обязательно, но это поможет вашему объявлению выделиться на фоне других.",
 									photoTitleStr1: 'Заглавное фото',
 									photoTitleStr2: 'Фото 2',
 									photoTitleStr3: 'Фото 3',
@@ -1104,7 +1151,7 @@
 								adCreate: {
 									createStr: 'Create a new ad',
 									createDescriptionStr1: 'The ad will be posted for free for 10 days. The published ad cannot be edited, only deleted and a new one created.',
-									createDescriptionStr2: "'Photos' are not required, but they will help your listing stand out from the crowd.",
+									createDescriptionStr2: "Photos are not required, but they will help your listing stand out from the crowd.",
 									photoTitleStr1: 'Main photo',
 									photoTitleStr2: 'Photo 2',
 									photoTitleStr3: 'Photo 3',
@@ -1713,7 +1760,13 @@
 					this.loadNewsList();
                     this.loadAdsList();
                 }
+				// Устанавливаем обработчик события popstate, когда компонент монтируется
+				window.onpopstate = this.handlePopState;
             },
+			beforeDestroy() {
+				// Очищаем обработчик события, когда компонент уничтожается
+				window.onpopstate = null;
+			},
 			watch: {
 				// Наблюдаем за изменением второго уровня подкатегорий (третий выпадающий список)
 				selectedSubcategory2() {
@@ -1836,7 +1889,7 @@
 							// если это была загрузка по ссылке, нужно почистить url
 							if (this.phpAdId) {
 								// Изменить URL в адресной строке
-								window.history.replaceState(null, null, 'http://localhost/limonade/');
+								window.history.replaceState(null, null, 'https://www.limonade.pro/');
 								// this.phpAdId = 0;
 							}
                         })
@@ -2194,7 +2247,7 @@
 				},
 				// метод копирования ссылки в буфер обмена
 				copyLink(id) {
-					const url = `http://localhost/limonade/html/ad/get_one/${id}`;
+					const url = `https://www.limonade.pro/html/ad/get_one/${id}`;
 					navigator.clipboard.writeText(url)
 						.then(() => {
 							this.copyIcon = true;
@@ -2272,10 +2325,18 @@
 						'text-success': remainingChars >= 0 // если символов достаточно
 					};
 				},
+				// Новый метод для обработки события popstate
+				handlePopState(event) {
+					if (confirm("Вы уверены что хотите покинуть сайт? Если вы хотите вернуться на предыдущую страницу, используйте кнопку 'Назад'")) {
+						window.history.back();  // Если пользователь подтвердил
+					} else {
+						window.history.go(1);   // Если отменил, остаёмся на текущей странице
+					}
+				},
             }
         });
 		// Устанавливаем глобальный базовый URL для всех запросов axios
-        axios.defaults.baseURL = 'http://localhost/limonade/';
+        axios.defaults.baseURL = 'https://www.limonade.pro/';
 
         app.mount('#app');
     </script>
