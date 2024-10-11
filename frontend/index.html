@@ -375,17 +375,17 @@
 														{{ getTranslation('ads.adDetails.backButton') }}
 													</div>
 												</div>
+												<div v-if="phpAdId" class="col-6">
+													<div class="btn btn-sm btn-primary shadow-sm" @click="loadNewsList(); loadAdsList()">
+														<!-- Показать другие... -->
+														{{ getTranslation('ads.adDetails.showOthersButton') }}
+													</div>
+												</div>
 												<div v-if="!isAdOwner" class="col-2">
-													<div class="btn btn-sm btn-danger shadow-sm" @click="dislike = !dislike">
+													<div class="btn btn-sm btn-danger shadow-sm" @click="openDislike()">
 														<!-- Пожаловаться -->
 														<i class="bi bi-emoji-angry"></i>
 														<!-- <i class="bi bi-emoji-frown"></i> -->
-													</div>
-												</div>
-												<div v-if="phpAdId" class="col">
-													<div class="btn btn-sm btn-primary shadow-sm" @click="loadAdsList()">
-														<!-- Показать другие... -->
-														{{ getTranslation('ads.adDetails.showOthersButton') }}
 													</div>
 												</div>
 												<div v-if="!phpAdId" class="col">
@@ -1822,9 +1822,6 @@
                 },
                 // метод загрузки с сервера одного объявления по ID
                 loadAdDetail(id) {
-					// this.showScreen('adDetail');
-					// this.dislike = false;
-					// this.dislikeText = '';
 					// отправляем данные на сервер
                     this.isLoading = true;
                     axios.get(`api/ad/get_one/${id}`)
@@ -1840,7 +1837,7 @@
 							if (this.phpAdId) {
 								// Изменить URL в адресной строке
 								window.history.replaceState(null, null, 'http://localhost/limonade/');
-								this.phpAdId = 0;
+								// this.phpAdId = 0;
 							}
                         })
                         .catch((error) => {
@@ -2020,7 +2017,7 @@
 							//
 							this.photoInputs = [true, false, false];
 							// Очистить поле файла через ref
-							this.$refs.fileInput.value = '';
+							// this.$refs.fileInput.value = '';
 							// очищаем массив фото
 							this.photos = [];
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
@@ -2103,6 +2100,14 @@
 						.finally(() => {
 							this.isLoading = false;
 						});
+				},
+				//
+				openDislike() {
+					this.dislike = !this.dislike;
+					// Гарантируем, что прокрутка произойдет после обновления DOM
+					this.$nextTick(() => {
+						window.scrollBy({ top: 200, behavior: 'smooth' });
+					});
 				},
 				//
 				dislikeAd(id) {
