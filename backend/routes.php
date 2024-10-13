@@ -97,7 +97,6 @@ class Router {
                     header('Content-Type: text/html');
                     readfile(__DIR__ . '/../frontend/index_adm.html');
                 },
-
             ],
             'POST' => [
                 // Объявления

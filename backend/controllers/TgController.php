@@ -26,15 +26,15 @@ class TgController {
                 $this->handleStartCommand($chatId);
             } else {
                 // Ответ на некорректные запросы
-                $this->sendMessage($chatId, "Бот не понимает ваш запрос и не может его обработать.");
+                $this->sendMessage($chatId, 'Я не понимаю ваш запрос и не могу его обработать');
             }
         } elseif (isset($update['callback_query'])) {
             // Заглушка для обработки callback запросов
             $this->handleCallbackQuery($update['callback_query']);
         } else {
-            // http_response_code(400); // Некорректный запрос
+            http_response_code(400);
             // Ответ на некорректные запросы
-            $this->sendMessage($chatId, "Бот не понимает ваш запрос и не может его обработать.");
+            // $this->sendMessage($chatId, 'Я не понимаю ваш запрос и не могу его обработать');
         }
     }
 
@@ -46,7 +46,10 @@ class TgController {
         if ($user) {
             // Пользователь найден, возвращаем его hash_num
             $hashNum = $user->hash_num;
-            $this->sendMessage($chatId, "Это ваш ID: $hashNum. Используйте его для работы со своими объявлениями в сервисе \"limonade.pro\" и никому не показывайте.");
+            $this->sendMessage($chatId, "$hashNum\n\n" . 
+                "Это ваш ID. Используйте его для работы с сервисом www.limonade.pro и никому не показывайте\n\n" . 
+                "This is your ID. Use it to work with the www.limonade.pro service and do not show it to anyone", 'Markdown');
+
         } else {
             // Пользователя нет, создаем новую запись
             $hashNum = $this->generateUniqueHash();
@@ -56,15 +59,17 @@ class TgController {
             $user->chat_id = $chatId;
             $user->hash_num = $hashNum;
             $user->status = 1; // Статус активен
-            $user->created_at = date('d.m.Y H:i:s');
-            $user->last_visit = date('d.m.Y H:i:s');
+            $user->created_at = date('Y-m-d H:i:s'); // Дата создания
+            $user->last_visit = date('Y-m-d H:i:s'); // Дата последнего посещения
             $user->closed_at = null;
 
             // Сохраняем нового пользователя в базу данных
             R::store($user);
 
             // Возвращаем пользователю новый hash_num
-            $this->sendMessage($chatId, "Это ваш ID: $hashNum. Используйте его для работы со своими объявлениями в сервисе \"limonade.pro\" и никому не показывайте.");
+            $this->sendMessage($chatId, "$hashNum\n\n" . 
+                "Это ваш ID. Используйте его для работы с сервисом www.limonade.pro и никому не показывайте\n\n" . 
+                "This is your ID. Use it to work with the www.limonade.pro service and do not show it to anyone", 'Markdown');
         }
     }
 
@@ -85,7 +90,7 @@ class TgController {
     // Обработка callback-запросов (заглушка)
     private function handleCallbackQuery($callbackQuery) {
         $chatId = $callbackQuery['message']['chat']['id'];
-        $this->sendMessage($chatId, "Обработка callback запроса временно не поддерживается.");
+        $this->sendMessage($chatId, 'Обработка callback запроса временно не поддерживается');
     }
 
     // Отправка сообщения пользователю через Telegram API
