@@ -76,9 +76,14 @@ class AdController {
     // Метод для поиска объявлений с постепенным сокращением категории
     private function findAdsByCategory($category, $perPage, $offset) {
         while (mb_strlen($category, 'UTF-8') > 0) {
+            // Добавляем символ % к категории
+            $categoryParam = $category . '%';
+
             // Выполняем запрос с текущей категорией
-            $query = 'WHERE status = 1 AND category = ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
-            $ads = R::findAll('ads', $query, [$category, $perPage, $offset]);
+            // $query = 'WHERE status = 1 AND category = ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
+            // $ads = R::findAll('ads', $query, [$category, $perPage, $offset]);
+            $query = 'WHERE status = 1 AND category LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
+            $ads = R::findAll('ads', $query, [$categoryParam, $perPage, $offset]);
 
             // Если объявления найдены, возвращаем их
             if (!empty($ads)) {

@@ -7,9 +7,6 @@ class TgController {
         $this->tg_key = $tg_key;
     }
 
-    // Объявление константы для токена
-    // private const TELEGRAM_BOT_TOKEN = '12jlkj32lk3lk3lkjl23kj2l';
-
     // Обработка вебхука
     public function handleWebhook() {
         // Получение данных из вебхука
@@ -46,8 +43,8 @@ class TgController {
         if ($user) {
             // Пользователь найден, возвращаем его hash_num
             $hashNum = $user->hash_num;
-            $this->sendMessage($chatId, "$hashNum\n\n" . 
-                "Это ваш ID. Используйте его для работы с сервисом www.limonade.pro и никому не показывайте\n\n" . 
+            $this->sendMessage($chatId, $hashNum);
+            $this->sendMessage($chatId, "Это ваш ID. Используйте его для работы с сервисом www.limonade.pro и никому не показывайте\n\n" . 
                 "This is your ID. Use it to work with the www.limonade.pro service and do not show it to anyone", 'Markdown');
 
         } else {
@@ -67,8 +64,8 @@ class TgController {
             R::store($user);
 
             // Возвращаем пользователю новый hash_num
-            $this->sendMessage($chatId, "$hashNum\n\n" . 
-                "Это ваш ID. Используйте его для работы с сервисом www.limonade.pro и никому не показывайте\n\n" . 
+            $this->sendMessage($chatId, $hashNum);
+            $this->sendMessage($chatId, "Это ваш ID. Используйте его для работы с сервисом www.limonade.pro и никому не показывайте\n\n" . 
                 "This is your ID. Use it to work with the www.limonade.pro service and do not show it to anyone", 'Markdown');
         }
     }

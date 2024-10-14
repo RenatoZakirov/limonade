@@ -40,10 +40,24 @@
 							LIMONADE
 						</button>
 						<!-- <button @click="cleanForm()" class=" btn btn-sm btn-success shadow-sm">LIMONADE.PRO</button> -->
-						<button type="button" class="btn btn-sm btn-warning shadow-sm">
+						<!-- <button type="button" class="btn btn-sm btn-warning shadow-sm">
 							<i class="bi bi-building-fill"></i>
 							НЯ ЧАНГ
-						</button>
+						</button> -->
+
+						<div class="dropdown">
+							<button class="btn btn-sm btn-warning shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+								<i class="bi bi-building-fill"></i>
+								НЯЧАНГ
+							</button>
+							<ul class="dropdown-menu">
+								<li><h6 class="dropdown-header">Выберите город</h6></li>
+								<li><a class="dropdown-item active" href="#">НЯЧАНГ</a></li>
+								<li><a class="dropdown-item disabled" href="#">// ДАНАНГ</a></li>
+								<li><a class="dropdown-item disabled" href="#">// ДАЛАТ</a></li>
+							</ul>
+						</div>
+
 						<div class="btn-group btn-group-sm shadow-sm" role="group" aria-label="Small button group">
 							<button @click="notAvailableLang()" type="button" class="btn btn-sm btn-warning">
 								<i class="bi bi-translate"></i>
@@ -75,208 +89,217 @@
 					</div>
 				</nav>
 
-				<div class="tab-content mb-3" id="nav-tabContent">
+				<div v-if="isLoading" class="d-flex justify-content-center p-5">
+					<div class="spinner-grow text-warning" role="status">
+						<span class="visually-hidden">
+							Загружается...
+						</span>
+					</div>
+				</div>
+
+				<div v-if="!isLoading" class="tab-content mb-3" id="nav-tabContent">
 					<div :class="{'tab-pane': true, 'fade': true, 'show active': showAd}"
 						id="nav-ad" role="tabpanel" aria-labelledby="nav-ad-tab" tabindex="0">
 
 						<div class="accordion mt-3" id="accordionExample">
 							<div class="accordion-item">
-							  <h2 class="accordion-header">
-								<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-									Создать новое объявление
-								</button>
-							  </h2>
-							  <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
-								<div class="accordion-body">
-									
-									<div class="col mt-1">
-										<div class="card shadow-sm">
-											<div class="card-body">
-												<h5 class="card-title">
-													Создать новое объявление
-												</h5>
+								<h2 class="accordion-header">
+									<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+										Создать новое объявление
+									</button>
+								</h2>
+								<div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+									<div class="accordion-body">
+										
+										<div class="col mt-1">
+											<div class="card shadow-sm">
+												<div class="card-body">
+													<h5 class="card-title">
+														Создать новое объявление
+													</h5>
+													
+													<div class="mb-3">
+														<label for="formFile1" class="form-label">
+															Заглавное фото
+														</label>
+														<span class="form-text"> // jpeg, png, gif, < 5MB</span>
+														<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm"
+															id="formFile1" type="file" ref="fileInput">
+													</div>
+						
+													<div v-if="photoInputs[1]" class="mb-2">
+														<label for="formFile2" class="form-label">
+															Фото 2
+														</label>
+														<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm"
+															id="formFile2" type="file" ref="fileInput">
+													</div>
+													
+													<div v-if="photoInputs[2]" class="mb-2">
+														<label for="formFile3" class="form-label">
+															Фото 3
+														</label>
+														<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm"
+															id="formFile3" type="file" ref="fileInput">
+													</div>
 												
-												<div class="mb-3">
-													<label for="formFile1" class="form-label">
-														Заглавное фото
-													</label>
-													<span class="form-text"> // jpeg, png, gif, < 5MB</span>
-													<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm"
-														id="formFile1" type="file" ref="fileInput">
-												</div>
-					
-												<div v-if="photoInputs[1]" class="mb-2">
-													<label for="formFile2" class="form-label">
-														Фото 2
-													</label>
-													<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm"
-														id="formFile2" type="file" ref="fileInput">
-												</div>
-												
-												<div v-if="photoInputs[2]" class="mb-2">
-													<label for="formFile3" class="form-label">
-														Фото 3
-													</label>
-													<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm"
-														id="formFile3" type="file" ref="fileInput">
-												</div>
-											
-												<div class="mb-3">
-													<label for="FormControlInput1" class="form-label">
-														Название
-														<span class="text text-danger">*</span>
-														<!-- Счетчик оставшихся символов для названия -->
-														<span :class="getCharCountClass(newAd.title, newAd.titleLimit)">
-															({{ getRemainingChars(newAd.title, newAd.titleLimit) }})
-														</span>
-													</label>
-													<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm"
-														id="FormControlInput1">
-												</div>
-				
-												<div class="mb-3">
-													<label for="categorySelect" class="form-label">
-														Категория
-													<span class="text text-danger">*</span> {{ categoryCode }}
-													</label>
-													<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm shadow-sm" id="categorySelect" aria-label="Small select example">
-														<option value="">
-															Не выбрано
-														</option>
-														<option v-for="(cat, key) in categories" :key="key" :value="key">{{ key }}</option>
-													</select>
-												</div>
-												
-												<div v-if="selectedMainCategory && subcategories1" class="mb-3">
-													<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm shadow-sm" id="subcategory1Select" aria-label="Small select example">
-														<option value="">
-															Выберите подкатегорию
-														</option>
-														<option v-for="(sub, key) in subcategories1" :key="key" :value="key">{{ key }}</option>
-													</select>
-												</div>
-												
-												<div v-if="selectedSubcategory1 && subcategories2" class="mb-3">
-													<select v-model="selectedSubcategory2" class="form-select form-select-sm shadow-sm" id="subcategory2Select" aria-label="Small select example">
-														<option value="">
-															Выберите подкатегорию
-														</option>
-														<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
-													</select>
-												</div>
-				
-												<div class="mb-3">
-													<label for="FormControlTextarea1" class="form-label">
-														Описание
-														<span class="text text-danger">*</span>
-														<span :class="getCharCountClass(newAd.description, newAd.descriptionLimit)">
-															({{ getRemainingChars(newAd.description, newAd.descriptionLimit) }})
-														</span>
-													</label>
-													<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm"
-														id="FormControlTextarea1" rows="3"></textarea>
-												</div>
-							
-												<div class="mb-3">
-													<label for="FormControlInput3" class="form-label">
-														Контакт
-														<span class="text text-danger">*</span>
-														<span :class="getCharCountClass(newAd.contact, newAd.contactLimit)">
-															({{ getRemainingChars(newAd.contact, newAd.contactLimit) }})
-														</span>
-													</label>
-													<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm"
-														id="FormControlInput3">
-												</div>
-			
-												<div class="form-check form-switch mb-3">
-													<input v-model="newAd.permanent" class="form-check-input" type="checkbox" role="switch"
-														id="flexSwitchCheckDefault">
-													<label class="form-check-label" for="flexSwitchCheckDefault">
-														Сделать объявление вечным
-													</label>
-												</div>
-												
-												<div class="row mb-3">
-													<div class="col-6">
-														<label for="inputPassword2" class="form-label">
-															Пароль
+													<div class="mb-3">
+														<label for="FormControlInput1" class="form-label">
+															Название
 															<span class="text text-danger">*</span>
-															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
-																({{ getRemainingChars(authPassword, authPasswordLimit) }})
+															<!-- Счетчик оставшихся символов для названия -->
+															<span :class="getCharCountClass(newAd.title, newAd.titleLimit)">
+																({{ getRemainingChars(newAd.title, newAd.titleLimit) }})
 															</span>
 														</label>
+														<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm"
+															id="FormControlInput1">
 													</div>
-													<div class="col">
-														<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm"
-															aria-describedby="passwordHelpBlock">
+					
+													<div class="mb-3">
+														<label for="categorySelect" class="form-label">
+															Категория
+															<span class="text text-danger">*</span>
+															<!-- {{ categoryCode }} -->
+														</label>
+														<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm shadow-sm" id="categorySelect" aria-label="Small select example">
+															<option value="">
+																Не выбрано
+															</option>
+															<option v-for="(cat, key) in categories" :key="key" :value="key">{{ key }}</option>
+														</select>
 													</div>
+													
+													<div v-if="selectedMainCategory && subcategories1" class="mb-3">
+														<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm shadow-sm" id="subcategory1Select" aria-label="Small select example">
+															<option value="">
+																Выберите подкатегорию
+															</option>
+															<option v-for="(sub, key) in subcategories1" :key="key" :value="key">{{ key }}</option>
+														</select>
+													</div>
+													
+													<div v-if="selectedSubcategory1 && subcategories2" class="mb-3">
+														<select v-model="selectedSubcategory2" class="form-select form-select-sm shadow-sm" id="subcategory2Select" aria-label="Small select example">
+															<option value="">
+																Выберите подкатегорию
+															</option>
+															<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
+														</select>
+													</div>
+					
+													<div class="mb-3">
+														<label for="FormControlTextarea1" class="form-label">
+															Описание
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(newAd.description, newAd.descriptionLimit)">
+																({{ getRemainingChars(newAd.description, newAd.descriptionLimit) }})
+															</span>
+														</label>
+														<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm"
+															id="FormControlTextarea1" rows="3"></textarea>
+													</div>
+								
+													<div class="mb-3">
+														<label for="FormControlInput3" class="form-label">
+															Контакт
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(newAd.contact, newAd.contactLimit)">
+																({{ getRemainingChars(newAd.contact, newAd.contactLimit) }})
+															</span>
+														</label>
+														<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm"
+															id="FormControlInput3">
+													</div>
+				
+													<div class="form-check form-switch mb-3">
+														<input v-model="newAd.permanent" class="form-check-input" type="checkbox" role="switch"
+															id="flexSwitchCheckDefault">
+														<label class="form-check-label" for="flexSwitchCheckDefault">
+															Сделать объявление вечным
+														</label>
+													</div>
+													
+													<div class="row mb-3">
+														<div class="col-6">
+															<label for="inputPassword2" class="form-label">
+																Пароль
+																<span class="text text-danger">*</span>
+																<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																	({{ getRemainingChars(authPassword, authPasswordLimit) }})
+																</span>
+															</label>
+														</div>
+														<div class="col">
+															<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm"
+																aria-describedby="passwordHelpBlock">
+														</div>
+													</div>
+													<button @click="createAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+														<i class="bi bi-envelope-open-fill"></i>
+														Опубликовать объявление
+													</button>
 												</div>
-												<button @click="createAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
-													<i class="bi bi-envelope-open-fill"></i>
-													Опубликовать объявление
-												</button>
 											</div>
 										</div>
-									</div>
 
+									</div>
 								</div>
-							  </div>
 							</div>
 							<div class="accordion-item">
-							  <h2 class="accordion-header">
-								<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-									Заблокировать объявление
-								</button>
-							  </h2>
-							  <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-								<div class="accordion-body">
-									
-									<div class="col mt-1">
-										<div class="card shadow-sm">
-											<div class="card-body">
-												<h5 class="card-title mb-3">
-													Заблокировать объявление
-												</h5>
-												<div class="mb-3 row">
-													<div class="col-7">
-														<label for="FormControlInput11" class="form-label">
-															ID объявления
-															<span class="text text-danger">*</span>
-															<span :class="getCharCountClass(adId, adIdLimit)">
-																({{ getRemainingChars(adId, adIdLimit) }})
-															</span>
-														</label>
+								<h2 class="accordion-header">
+									<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+										Заблокировать объявление
+									</button>
+								</h2>
+								<div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+									<div class="accordion-body">
+										
+										<div class="col mt-1">
+											<div class="card shadow-sm">
+												<div class="card-body">
+													<h5 class="card-title mb-3">
+														Заблокировать объявление
+													</h5>
+													<div class="mb-3 row">
+														<div class="col-7">
+															<label for="FormControlInput11" class="form-label">
+																ID объявления
+																<span class="text text-danger">*</span>
+																<span :class="getCharCountClass(adId, adIdLimit)">
+																	({{ getRemainingChars(adId, adIdLimit) }})
+																</span>
+															</label>
+														</div>
+														<div class="col">
+															<input v-model="adId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput11">
+														</div>
 													</div>
-													<div class="col">
-														<input v-model="adId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput11">
+													<div class="row mb-3">
+														<div class="col-6">
+															<label for="inputPassword21" class="form-label">
+																Пароль
+																<span class="text text-danger">*</span>
+																<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																	({{ getRemainingChars(authPassword, authPasswordLimit) }})
+																</span>
+															</label>
+														</div>
+														<div class="col">
+															<input v-model="authPassword" type="password" id="inputPassword21" class="form-control form-control-sm shadow-sm"
+																aria-describedby="passwordHelpBlock">
+														</div>
 													</div>
+													<button @click="blockAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+														<i class="bi bi-pause-btn-fill"></i>
+														Заблокировать объявление
+													</button>
 												</div>
-												<div class="row mb-3">
-													<div class="col-6">
-														<label for="inputPassword21" class="form-label">
-															Пароль
-															<span class="text text-danger">*</span>
-															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
-																({{ getRemainingChars(authPassword, authPasswordLimit) }})
-															</span>
-														</label>
-													</div>
-													<div class="col">
-														<input v-model="authPassword" type="password" id="inputPassword21" class="form-control form-control-sm shadow-sm"
-															aria-describedby="passwordHelpBlock">
-													</div>
-												</div>
-												<button @click="blockAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
-													<i class="bi bi-pause-btn-fill"></i>
-													Заблокировать объявление
-												</button>
 											</div>
 										</div>
-									</div>
 
+									</div>
 								</div>
-							  </div>
 							</div>
 						</div>
 
@@ -287,194 +310,194 @@
 
 						<div class="accordion mt-3" id="accordionExample2">
 							<div class="accordion-item">
-							  <h2 class="accordion-header">
-								<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
-									Создать новую новость
-								</button>
-							  </h2>
-							  <div id="collapseFour" class="accordion-collapse collapse show" data-bs-parent="#accordionExample2">
-								<div class="accordion-body">
-									
-									<div class="col mt-1">
-										<div class="card shadow-sm">
-											<!-- style="background-color: #f0f0f0" -->
-											<div class="card-body">
-												<h5 class="card-title">
-													Создать новую новость
-												</h5>
+								<h2 class="accordion-header">
+									<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
+										Создать новую новость
+									</button>
+								</h2>
+								<div id="collapseFour" class="accordion-collapse collapse show" data-bs-parent="#accordionExample2">
+									<div class="accordion-body">
+										
+										<div class="col mt-1">
+											<div class="card shadow-sm">
+												<!-- style="background-color: #f0f0f0" -->
+												<div class="card-body">
+													<h5 class="card-title">
+														Создать новую новость
+													</h5>
+													
+													<div class="mb-3">
+														<label for="formFile4" class="form-label">
+															Заглавное фото
+														</label>
+														<span class="form-text"> // jpeg, png, gif, < 5MB</span>
+														<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm"
+															id="formFile4" type="file" ref="fileInput">
+													</div>
+						
+													<div v-if="photoInputs[1]" class="mb-2">
+														<label for="formFile5" class="form-label">
+															Фото 2
+														</label>
+														<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm"
+															id="formFile5" type="file" ref="fileInput">
+													</div>
+													
+													<div v-if="photoInputs[2]" class="mb-2">
+														<label for="formFile6" class="form-label">
+															Фото 3
+														</label>
+														<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm"
+															id="formFile6" type="file" ref="fileInput">
+													</div>
 												
-												<div class="mb-3">
-													<label for="formFile4" class="form-label">
-														Заглавное фото
-													</label>
-													<span class="form-text"> // jpeg, png, gif, < 5MB</span>
-													<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm"
-														id="formFile4" type="file" ref="fileInput">
-												</div>
-					
-												<div v-if="photoInputs[1]" class="mb-2">
-													<label for="formFile5" class="form-label">
-														Фото 2
-													</label>
-													<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm"
-														id="formFile5" type="file" ref="fileInput">
-												</div>
-												
-												<div v-if="photoInputs[2]" class="mb-2">
-													<label for="formFile6" class="form-label">
-														Фото 3
-													</label>
-													<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm"
-														id="formFile6" type="file" ref="fileInput">
-												</div>
-											
-												<div class="mb-3">
-													<label for="FormControlInput7" class="form-label">
-														Заголовок (ru)
-														<span class="text text-danger">*</span>
-														<!-- Счетчик оставшихся символов для названия -->
-														<span :class="getCharCountClass(newNews.title_ru, newNews.title_ruLimit)">
-															({{ getRemainingChars(newNews.title_ru, newNews.title_ruLimit) }})
-														</span>
-													</label>
-													<input v-model="newNews.title_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput7">
-												</div>
-				
-												<div class="mb-3">
-													<label for="FormControlTextarea3" class="form-label">
-														Текст (ru)
-														<span class="text text-danger">*</span>
-														<span :class="getCharCountClass(newNews.description_ru, newNews.description_ruLimit)">
-															({{ getRemainingChars(newNews.description_ru, newNews.description_ruLimit) }})
-														</span>
-													</label>
-													<textarea v-model="newNews.description_ru" class="form-control form-select-sm shadow-sm" id="FormControlTextarea3" rows="3"></textarea>
-												</div>
-							
-												<div class="mb-3">
-													<label for="FormControlInput8" class="form-label">
-														Автор (ru)
-														<span class="text text-danger">*</span>
-														<span :class="getCharCountClass(newNews.author_ru, newNews.author_ruLimit)">
-															({{ getRemainingChars(newNews.author_ru, newNews.author_ruLimit) }})
-														</span>
-													</label>
-													<input v-model="newNews.author_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput8">
-												</div>
-
-												<div class="mb-3">
-													<label for="FormControlInput17" class="form-label">
-														Заголовок (en)
-														<span class="text text-danger">*</span>
-														<span :class="getCharCountClass(newNews.title_en, newNews.title_ruLimit)">
-															({{ getRemainingChars(newNews.title_en, newNews.title_ruLimit) }})
-														</span>
-													</label>
-													<input v-model="newNews.title_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput17">
-												</div>
-				
-												<div class="mb-3">
-													<label for="FormControlTextarea13" class="form-label">
-														Текст (en)
-														<span class="text text-danger">*</span>
-														<span :class="getCharCountClass(newNews.description_en, newNews.description_ruLimit)">
-															({{ getRemainingChars(newNews.description_en, newNews.description_ruLimit) }})
-														</span>
-													</label>
-													<textarea v-model="newNews.description_en" class="form-control form-select-sm shadow-sm" id="FormControlTextarea13" rows="3"></textarea>
-												</div>
-							
-												<div class="mb-3">
-													<label for="FormControlInput18" class="form-label">
-														Автор (en)
-														<span class="text text-danger">*</span>
-														<span :class="getCharCountClass(newNews.author_en, newNews.author_ruLimit)">
-															({{ getRemainingChars(newNews.author_en, newNews.author_ruLimit) }})
-														</span>
-													</label>
-													<input v-model="newNews.author_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput18">
-												</div>
-												
-												<div class="row mb-3">
-													<div class="col-6">
-														<label for="inputPassword4" class="form-label">
-															Пароль
+													<div class="mb-3">
+														<label for="FormControlInput7" class="form-label">
+															Заголовок (ru)
 															<span class="text text-danger">*</span>
-															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
-																({{ getRemainingChars(authPassword, authPasswordLimit) }})
+															<!-- Счетчик оставшихся символов для названия -->
+															<span :class="getCharCountClass(newNews.title_ru, newNews.title_ruLimit)">
+																({{ getRemainingChars(newNews.title_ru, newNews.title_ruLimit) }})
 															</span>
 														</label>
+														<input v-model="newNews.title_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput7">
 													</div>
-													<div class="col">
-														<input v-model="authPassword" type="password" id="inputPassword4" class="form-control form-control-sm shadow-sm"
-															aria-describedby="passwordHelpBlock">
+					
+													<div class="mb-3">
+														<label for="FormControlTextarea3" class="form-label">
+															Текст (ru)
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(newNews.description_ru, newNews.description_ruLimit)">
+																({{ getRemainingChars(newNews.description_ru, newNews.description_ruLimit) }})
+															</span>
+														</label>
+														<textarea v-model="newNews.description_ru" class="form-control form-select-sm shadow-sm" id="FormControlTextarea3" rows="3"></textarea>
 													</div>
+								
+													<div class="mb-3">
+														<label for="FormControlInput8" class="form-label">
+															Автор (ru)
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(newNews.author_ru, newNews.author_ruLimit)">
+																({{ getRemainingChars(newNews.author_ru, newNews.author_ruLimit) }})
+															</span>
+														</label>
+														<input v-model="newNews.author_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput8">
+													</div>
+
+													<div class="mb-3">
+														<label for="FormControlInput17" class="form-label">
+															Заголовок (en)
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(newNews.title_en, newNews.title_ruLimit)">
+																({{ getRemainingChars(newNews.title_en, newNews.title_ruLimit) }})
+															</span>
+														</label>
+														<input v-model="newNews.title_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput17">
+													</div>
+					
+													<div class="mb-3">
+														<label for="FormControlTextarea13" class="form-label">
+															Текст (en)
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(newNews.description_en, newNews.description_ruLimit)">
+																({{ getRemainingChars(newNews.description_en, newNews.description_ruLimit) }})
+															</span>
+														</label>
+														<textarea v-model="newNews.description_en" class="form-control form-select-sm shadow-sm" id="FormControlTextarea13" rows="3"></textarea>
+													</div>
+								
+													<div class="mb-3">
+														<label for="FormControlInput18" class="form-label">
+															Автор (en)
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(newNews.author_en, newNews.author_ruLimit)">
+																({{ getRemainingChars(newNews.author_en, newNews.author_ruLimit) }})
+															</span>
+														</label>
+														<input v-model="newNews.author_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput18">
+													</div>
+													
+													<div class="row mb-3">
+														<div class="col-6">
+															<label for="inputPassword4" class="form-label">
+																Пароль
+																<span class="text text-danger">*</span>
+																<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																	({{ getRemainingChars(authPassword, authPasswordLimit) }})
+																</span>
+															</label>
+														</div>
+														<div class="col">
+															<input v-model="authPassword" type="password" id="inputPassword4" class="form-control form-control-sm shadow-sm"
+																aria-describedby="passwordHelpBlock">
+														</div>
+													</div>
+													<button @click="createNews()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+														<i class="bi bi-envelope-open-fill"></i>
+														Опубликовать новость
+													</button>
 												</div>
-												<button @click="createNews()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
-													<i class="bi bi-envelope-open-fill"></i>
-													Опубликовать новость
-												</button>
 											</div>
 										</div>
-									</div>
 
+									</div>
 								</div>
-							  </div>
 							</div>
 							<div class="accordion-item">
-							  <h2 class="accordion-header">
-								<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
-									Удалить новость
-								</button>
-							  </h2>
-							  <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#accordionExample2">
-								<div class="accordion-body">
-									
-									<div class="col mt-1">
-										<div class="card shadow-sm">
-											<div class="card-body">
-												<h5 class="card-title mb-3">
-													Удалить новость
-												</h5>
-												<div class="mb-3 row">
-													<div class="col-7">
-														<label for="FormControlInput41" class="form-label">
-															ID новости
-															<span class="text text-danger">*</span>
-															<span :class="getCharCountClass(newsId, newsIdLimit)">
-																({{ getRemainingChars(newsId, newsIdLimit) }})
-															</span>
-														</label>
+								<h2 class="accordion-header">
+									<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+										Удалить новость
+									</button>
+								</h2>
+								<div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#accordionExample2">
+									<div class="accordion-body">
+										
+										<div class="col mt-1">
+											<div class="card shadow-sm">
+												<div class="card-body">
+													<h5 class="card-title mb-3">
+														Удалить новость
+													</h5>
+													<div class="mb-3 row">
+														<div class="col-7">
+															<label for="FormControlInput41" class="form-label">
+																ID новости
+																<span class="text text-danger">*</span>
+																<span :class="getCharCountClass(newsId, newsIdLimit)">
+																	({{ getRemainingChars(newsId, newsIdLimit) }})
+																</span>
+															</label>
+														</div>
+														<div class="col">
+															<input v-model="newsId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput41">
+														</div>
 													</div>
-													<div class="col">
-														<input v-model="newsId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput41">
+													<div class="row mb-3">
+														<div class="col-6">
+															<label for="inputPassword41" class="form-label">
+																Пароль
+																<span class="text text-danger">*</span>
+																<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																	({{ getRemainingChars(authPassword, authPasswordLimit) }})
+																</span>
+															</label>
+														</div>
+														<div class="col">
+															<input v-model="authPassword" type="password" id="inputPassword41" class="form-control form-control-sm shadow-sm"
+																aria-describedby="passwordHelpBlock">
+														</div>
 													</div>
+													<button @click="deleteNews()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+														<i class="bi bi-trash3-fill"></i>
+														Удалить новость
+													</button>
 												</div>
-												<div class="row mb-3">
-													<div class="col-6">
-														<label for="inputPassword41" class="form-label">
-															Пароль
-															<span class="text text-danger">*</span>
-															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
-																({{ getRemainingChars(authPassword, authPasswordLimit) }})
-															</span>
-														</label>
-													</div>
-													<div class="col">
-														<input v-model="authPassword" type="password" id="inputPassword41" class="form-control form-control-sm shadow-sm"
-															aria-describedby="passwordHelpBlock">
-													</div>
-												</div>
-												<button @click="deleteNews()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
-													<i class="bi bi-trash3-fill"></i>
-													Удалить новость
-												</button>
 											</div>
 										</div>
-									</div>
 
+									</div>
 								</div>
-							  </div>
 							</div>
 							
 						</div>
@@ -484,66 +507,69 @@
 					<div :class="{'tab-pane': true, 'fade': true, 'show active': showUser}"
 						id="nav-user" role="tabpanel" aria-labelledby="nav-user-tab" tabindex="0">
 
-						<div class="accordion mt-3" id="accordionExample">
+						<div class="accordion mt-3" id="accordionExample3">
 							
 							<div class="accordion-item">
-							  <h2 class="accordion-header">
-								<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
-									Заблокировать пользователя
-								</button>
-							  </h2>
-							  <div id="collapseThree" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
-								<div class="accordion-body">
-									
-									<div class="col mt-1">
-										<div class="card shadow-sm">
-											<div class="card-body">
-												<h5 class="card-title mb-3">
-													Заблокировать пользователя
-												</h5>
-												<div class="mb-3 row">
-													<div class="col-7">
-														<label for="FormControlInput21" class="form-label">
-															ID пользователя
-															<span class="text text-danger">*</span>
-															<span :class="getCharCountClass(userId, userIdLimit)">
-																({{ getRemainingChars(userId, userIdLimit) }})
-															</span>
-														</label>
+								<h2 class="accordion-header">
+									<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+										Заблокировать пользователя
+									</button>
+								</h2>
+								<div id="collapseThree" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+									<div class="accordion-body">
+										
+										<div class="col mt-1">
+											<div class="card shadow-sm">
+												<div class="card-body">
+													<h5 class="card-title mb-3">
+														Заблокировать пользователя
+													</h5>
+													<div class="mb-3 row">
+														<div class="col-7">
+															<label for="FormControlInput21" class="form-label">
+																ID пользователя
+																<span class="text text-danger">*</span>
+																<span :class="getCharCountClass(userId, userIdLimit)">
+																	({{ getRemainingChars(userId, userIdLimit) }})
+																</span>
+															</label>
+														</div>
+														<div class="col">
+															<input v-model="userId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput21">
+														</div>
 													</div>
-													<div class="col">
-														<input v-model="userId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput21">
+													<div class="row mb-3">
+														<div class="col-6">
+															<label for="inputPassword31" class="form-label">
+																Пароль
+																<span class="text text-danger">*</span>
+																<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																	({{ getRemainingChars(authPassword, authPasswordLimit) }})
+																</span>
+															</label>
+														</div>
+														<div class="col">
+															<input v-model="authPassword" type="password" id="inputPassword31" class="form-control form-control-sm shadow-sm"
+																aria-describedby="passwordHelpBlock">
+														</div>
 													</div>
+													<button @click="blockUser()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+														<i class="bi bi-pause-btn-fill"></i>
+														Заблокировать пользователя
+													</button>
 												</div>
-												<div class="row mb-3">
-													<div class="col-6">
-														<label for="inputPassword31" class="form-label">
-															Пароль
-															<span class="text text-danger">*</span>
-															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
-																({{ getRemainingChars(authPassword, authPasswordLimit) }})
-															</span>
-														</label>
-													</div>
-													<div class="col">
-														<input v-model="authPassword" type="password" id="inputPassword31" class="form-control form-control-sm shadow-sm"
-															aria-describedby="passwordHelpBlock">
-													</div>
-												</div>
-												<button @click="blockUser()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
-													<i class="bi bi-pause-btn-fill"></i>
-													Заблокировать пользователя
-												</button>
 											</div>
 										</div>
-									</div>
 
+									</div>
 								</div>
 							</div>
+
 						</div>
 
 					</div>
 				</div>
+
 			</div>
 		</div>
 	</div>
@@ -551,7 +577,9 @@
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 
-	<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script> -->
+	<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+	<!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 	<script>
@@ -620,6 +648,8 @@
 					photoInputs: [true, false, false], // скрываем фото 2 и фото 3
 					// содержит массив загруженных фото
         			photos: [],
+					// показывает, что данные в процессе загрузки с сервера
+                    isLoading: false,
 					// содержит текст всплывающей подсказки в случае успеха
 					successMessage: null,
 					// содержит текст всплывающей подсказки в случае ошибки
@@ -918,10 +948,10 @@
 									// '': { code: '4' },
 									'Другое': { code: '5' }
 							}},
-								'Еда, кулинария': { code: 'L', subcategories: {
+								'Еда, напитки, кулинария': { code: 'L', subcategories: {
 									'Еда': { code: '1' },
-									'Кулинария': { code: '2' },
-									// '': { code: '3' },
+									'Напитки': { code: '2' },
+									'Кулинария': { code: '3' },
 									// '': { code: '4' },
 									'Другое': { code: '5' }
 							}},
@@ -994,8 +1024,8 @@
 								'Электроника': { code: 'A' },
 								'Мебель': { code: 'B' },
 								'Бытовые товары': { code: 'C' },
-								'Одежда': { code: 'D' },
-								'Еда': { code: 'E' },
+								'Одежда, обувь': { code: 'D' },
+								'Еда, напитки': { code: 'E' },
 								'Детские товары': { code: 'F' },
 								'Животные': { code: 'G' },
 								'Хобби и отдых': { code: 'H' },
@@ -1094,37 +1124,37 @@
 						// this.errorMessage = 'Пожалуйста, напишите название';
 						this.errorMessage = this.messages[630];
 
-					} else if (this.categoryCode.length < 1) {
-						// this.errorMessage = 'Пожалуйста, выберите категорию';
-						this.errorMessage = this.messages[631];
-
-					} else if (this.newAd.description.length < 20) {
-						// this.errorMessage = 'Пожалуйста, напишите описание';
-						this.errorMessage = this.messages[632];
-
-					} else if (this.newAd.contact.length < 5) {
-						// this.errorMessage = 'Пожалуйста, напишите свой контакт';
-						this.errorMessage = this.messages[633];
-
-					} else if (this.authPassword.length < 5) {
-						// this.errorMessage = 'Пожалуйста, введите пароль';
-						this.errorMessage = this.messages[634];
-
 					} else if (this.getRemainingChars(this.newAd.title, this.newAd.titleLimit) < 0) {
 						// this.errorMessage = 'Название слишком длинное';
 						this.errorMessage = this.messages[635];
+
+					} else if (this.categoryCode.length < 1) {
+						// this.errorMessage = 'Пожалуйста, выберите категорию';
+						this.errorMessage = this.messages[631];
 
 					} else if (this.getRemainingChars(this.categoryCode, this.categoryCodeLimit) < 0) {
 						// this.errorMessage = 'Категория слишком длинная';
 						this.errorMessage = this.messages[636];
 
+					} else if (this.newAd.description.length < 20) {
+						// this.errorMessage = 'Пожалуйста, напишите описание';
+						this.errorMessage = this.messages[632];
+
 					} else if (this.getRemainingChars(this.newAd.description, this.newAd.descriptionLimit) < 0) {
 						// this.errorMessage = 'Описание слишком длинное';
 						this.errorMessage = this.messages[637];
 
+					} else if (this.newAd.contact.length < 5) {
+						// this.errorMessage = 'Пожалуйста, напишите свой контакт';
+						this.errorMessage = this.messages[633];
+
 					} else if (this.getRemainingChars(this.newAd.contact, this.newAd.contactLimit) < 0) {
 						// this.errorMessage = 'Контакт слишком длинный';
 						this.errorMessage = this.messages[638];
+
+					} else if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.messages[634];
 
 					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
 						// this.errorMessage = 'Пароль слишком длинный';
@@ -1162,10 +1192,10 @@
 						.then(response => {
 							//
 							this.successMessage = this.messages[650];
-							// очищаем форму
-							this.cleanForm();
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.successMessage = ''; }, 3000);
+							// очищаем форму
+							this.cleanForm();
 						})
 						.catch((error) => {
 							//
@@ -1186,53 +1216,53 @@
 						// this.errorMessage = 'Пожалуйста, напишите заголовок (ru)';
 						this.errorMessage = this.messages[730];
 
-					} else if (this.newNews.description_ru.length < 20) {
-						// this.errorMessage = 'Пожалуйста, напишите текст новости (ru)';
-						this.errorMessage = this.messages[731];
-
-					} else if (this.newNews.author_ru.length < 5) {
-						// this.errorMessage = 'Пожалуйста, укажите автора (ru)';
-						this.errorMessage = this.messages[732];
-
-					} else if (this.newNews.title_en.length < 5) {
-						// this.errorMessage = 'Пожалуйста, напишите заголовок (en)';
-						this.errorMessage = this.messages[733];
-
-					} else if (this.newNews.description_en.length < 20) {
-						// this.errorMessage = 'Пожалуйста, напишите текст новости (en)';
-						this.errorMessage = this.messages[734];
-
-					} else if (this.newNews.author_en.length < 5) {
-						// this.errorMessage = 'Пожалуйста, укажите автора (en)';
-						this.errorMessage = this.messages[735];
-
-					} else if (this.authPassword.length < 5) {
-						// this.errorMessage = 'Пожалуйста, введите пароль';
-						this.errorMessage = this.messages[736];
-
 					} else if (this.getRemainingChars(this.newNews.title_ru, this.newNews.title_ruLimit) < 0) {
 						// this.errorMessage = 'Заголовок слишком длинный (ru)';
 						this.errorMessage = this.messages[737];
+
+					} else if (this.newNews.description_ru.length < 20) {
+						// this.errorMessage = 'Пожалуйста, напишите текст новости (ru)';
+						this.errorMessage = this.messages[731];
 
 					} else if (this.getRemainingChars(this.newNews.description_ru, this.newNews.description_ruLimit) < 0) {
 						// this.errorMessage = 'Текст новости слишком длинный (ru)';
 						this.errorMessage = this.messages[738];
 
+					} else if (this.newNews.author_ru.length < 5) {
+						// this.errorMessage = 'Пожалуйста, укажите автора (ru)';
+						this.errorMessage = this.messages[732];
+
 					} else if (this.getRemainingChars(this.newNews.author_ru, this.newNews.author_ruLimit) < 0) {
 						// this.errorMessage = 'Имя автора слишком длинное (ru)';
 						this.errorMessage = this.messages[739];
+
+					} else if (this.newNews.title_en.length < 5) {
+						// this.errorMessage = 'Пожалуйста, напишите заголовок (en)';
+						this.errorMessage = this.messages[733];
 
 					} else if (this.getRemainingChars(this.newNews.title_en, this.newNews.title_ruLimit) < 0) {
 						// this.errorMessage = 'Заголовок слишком длинный (en)';
 						this.errorMessage = this.messages[740];
 
+					} else if (this.newNews.description_en.length < 20) {
+						// this.errorMessage = 'Пожалуйста, напишите текст новости (en)';
+						this.errorMessage = this.messages[734];
+
 					} else if (this.getRemainingChars(this.newNews.description_en, this.newNews.description_ruLimit) < 0) {
 						// this.errorMessage = 'Текст новости слишком длинный (en)';
 						this.errorMessage = this.messages[741];
 
+					} else if (this.newNews.author_en.length < 5) {
+						// this.errorMessage = 'Пожалуйста, укажите автора (en)';
+						this.errorMessage = this.messages[735];
+
 					} else if (this.getRemainingChars(this.newNews.author_en, this.newNews.author_ruLimit) < 0) {
 						// this.errorMessage = 'Имя автора слишком длинное (en)';
 						this.errorMessage = this.messages[742];
+
+					} else if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.messages[736];
 
 					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
 						// this.errorMessage = 'Пароль слишком длинный';
@@ -1480,7 +1510,9 @@
 				},
 				// Универсальный метод для подсчета оставшихся символов с учетом многобайтовых символов
 				getRemainingChars(value, maxLength) {
-					const charCount = Array.from(value).length; // Точный подсчет количества символов
+					// const charCount = Array.from(value).length;
+					// Точный подсчет количества символов
+					const charCount = [...value].length;
     				return maxLength - charCount;
 				},
 				// Метод для динамического определения класса

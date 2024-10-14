@@ -53,12 +53,26 @@
 							<img src="/backend/uploads/images/templates/icon.png" class="rounded me-1" alt="Limonade" width="24" height="24">
 							LIMONADE
 						</button>
-						<button type="button" class="btn btn-sm btn-warning shadow-sm">
+						<!-- <button type="button" class="btn btn-sm btn-warning shadow-sm"> -->
 							<!-- НЯ ЧАНГ -->
 							<!-- <i class="bi bi-building"></i> -->
-							<i class="bi bi-building-fill"></i>
+							<!-- <i class="bi bi-building-fill"></i>
 							{{ getTranslation('navBar.cityButton') }}
-						</button>
+						</button> -->
+
+						<div class="dropdown">
+							<button class="btn btn-sm btn-warning shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+								<i class="bi bi-building-fill"></i>
+								{{ cityButton }}
+							</button>
+							<ul class="dropdown-menu">
+								<li><h6 class="dropdown-header">{{ getTranslation('navBar.selectCity') }}</h6></li>
+								<li><a class="dropdown-item active" href="">{{ translations[currentLanguage].navBar.cities[0] }}</a></li>
+								<li><a class="dropdown-item disabled" href="">{{ translations[currentLanguage].navBar.cities[1] }}</a></li>
+								<li><a class="dropdown-item disabled" href="">{{ translations[currentLanguage].navBar.cities[2] }}</a></li>
+							</ul>
+						</div>
+
 						<div class="btn-group btn-group-sm shadow-sm" role="group" aria-label="Small button group">
 							<button @click="setLanguage('RU')" type="button" 
 								:class="['btn', 'btn-sm', currentLanguage === 'RU' ? 'btn-warning' : 'btn-outline-warning']">
@@ -291,19 +305,21 @@
 							aria-controls="nav-news" aria-selected="showNewsList || showNewsDetail">{{ getTranslation('news.newsTab') }}</button>
 					</div>
 				</nav>
-				<div class="tab-content" id="nav-tabContent">
+
+				<div v-if="isLoading" class="d-flex justify-content-center p-5">
+					<div class="spinner-grow text-warning" role="status">
+						<span class="visually-hidden">
+							<!-- Загружается... -->
+							{{ getTranslation('ads.isLoading') }}
+						</span>
+					</div>
+				</div>
+
+				<div v-if="!isLoading" class="tab-content" id="nav-tabContent">
 					<div :class="{'tab-pane': true, 'fade': true, 'show active': showAdList || showAdDetail || showCreateAd}"
 						id="nav-ad" role="tabpanel" aria-labelledby="nav-ad-tab" tabindex="0">
 
-						<div v-if="isLoading" class="d-flex justify-content-center p-5">
-							<div class="spinner-grow text-warning" role="status">
-								<span class="visually-hidden">
-									<!-- Загружается... -->
-									{{ getTranslation('ads.isLoading') }}
-								</span>
-							</div>
-						</div>
-						<div v-else class="mt-1">
+						<div class="mt-1">
 						
 							<div v-if="showAdList" v-for="(ad, index) in adsList" :key="ad.id" class="row mb-3">
 								<div class="col">
@@ -341,16 +357,16 @@
 							</div>
 		
 							<div v-if="showAdList" class="row mb-3">
-								<div v-if="adCurrentPage > 1" class="col">
-									<div @click="adCurrentPage = 1; loadAdsList(adCurrentPage)" class="btn btn-sm btn-secondary shadow-sm">
+								<div class="col">
+									<div v-if="adCurrentPage > 1" @click="adCurrentPage = 1; loadAdsList(adCurrentPage)" class="btn btn-sm btn-secondary shadow-sm">
 										<!-- В начало -->
 										<!-- <i class="bi bi-skip-backward"></i> -->
 										<i class="bi bi-skip-backward-fill"></i>
 										{{ getTranslation('ads.backToTopButton') }}
 									</div>
 								</div>
-								<div v-if="adsList.length >= 10" class="col">
-									<div @click="adCurrentPage += 1; loadAdsList(adCurrentPage)" class="btn btn-sm btn-primary shadow-sm">
+								<div class="col">
+									<div v-if="adsList.length >= 10" @click="adCurrentPage += 1; loadAdsList(adCurrentPage)" class="btn btn-sm btn-primary shadow-sm">
 										<!-- Показать еще... -->
 										<!-- <i class="bi bi-fast-forward"></i> -->
 										<i class="bi bi-fast-forward-fill"></i>
@@ -359,7 +375,7 @@
 								</div>
 							</div>
 		
-							<div v-if="showAdDetail" class="row mb-3">
+							<!-- <div v-if="showAdDetail" class="row mb-3">
 								<div class="col">
 									<div class="card shadow-sm rounded-top-0">
 										<img v-if="currentAd.photo_1" :src="currentAd.photo_1" class="mb-1" alt="image">
@@ -367,15 +383,70 @@
 										<img v-if="currentAd.photo_3" :src="currentAd.photo_3" class="" alt="image">
 										<div class="card-body">
 											<h5 class="card-title">{{ currentAd.title }}</h5>
-											<!-- Генерация кнопок категорий -->
+											
 											<div v-for="categoryName in getCategoryNames(currentAd.category)" :key="categoryName" class="d-inline-block">
 												<button class="btn btn-sm btn-warning mb-1 me-2 shadow-sm">
 													{{ categoryName }}
 												</button>
 											</div>
-											<p class="card-text">{{ currentAd.description }}</p>
+											<p class="card-text" style="white-space: pre-line;">{{ currentAd.description }}</p>
 											<h6 class="card-subtitle mb-2 text-body-secondary">
-												<!-- <i class="bi bi-send"></i> -->
+												
+												<i class="bi bi-send-fill"></i>
+												{{ currentAd.contact }}
+											</h6> -->
+
+							<div v-if="showAdDetail" class="row mb-3">
+								<div class="col">
+									<div class="card shadow-sm rounded-top-0">
+
+										<div v-if="currentAd.photo_1 || currentAd.photo_2 || currentAd.photo_3" id="carouselExampleIndicators" class="carousel slide">
+
+											<div class="carousel-indicators">
+												<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+												<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2" v-if="currentAd.photo_2"></button>
+												<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3" v-if="currentAd.photo_3"></button>
+											</div>
+
+											<div class="carousel-inner">
+												<div class="carousel-item active" v-if="currentAd.photo_1">
+													<img :src="currentAd.photo_1" class="d-block w-100" alt="image 1">
+												</div>
+												<div class="carousel-item" v-if="currentAd.photo_2">
+													<img :src="currentAd.photo_2" class="d-block w-100" alt="image 2">
+												</div>
+												<div class="carousel-item" v-if="currentAd.photo_3">
+													<img :src="currentAd.photo_3" class="d-block w-100" alt="image 3">
+												</div>
+											</div>
+
+											<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+												<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Previous</span>
+											</button>
+
+											<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+												<span class="carousel-control-next-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Next</span>
+											</button>
+
+										</div>
+
+										<!-- <img v-if="currentAd.photo_1" :src="currentAd.photo_1" class="mb-1" alt="image">
+										<img v-if="currentAd.photo_2" :src="currentAd.photo_2" class="mb-1" alt="image">
+										<img v-if="currentAd.photo_3" :src="currentAd.photo_3" class="" alt="image"> -->
+
+										<div class="card-body">
+											<h5 class="card-title">{{ currentAd.title }}</h5>
+											
+											<div v-for="categoryName in getCategoryNames(currentAd.category)" :key="categoryName" class="d-inline-block">
+												<button class="btn btn-sm btn-warning mb-1 me-2 shadow-sm">
+													{{ categoryName }}
+												</button>
+											</div>
+											<p class="card-text" style="white-space: pre-line;">{{ currentAd.description }}</p>
+											<h6 class="card-subtitle mb-2 text-body-secondary">
+												
 												<i class="bi bi-send-fill"></i>
 												{{ currentAd.contact }}
 											</h6>
@@ -399,8 +470,9 @@
 											</div>
 											
 											<div class="row">
-												<div v-if="!phpAdId" class="col-4">
-													<button class="btn btn-sm btn-secondary shadow-sm" @click="returnToAdList()">
+												<div v-if="!phpAdId" class="col-4 fixed-bottom ms-4" style="width: 100px; margin-bottom: 2rem;">
+													<button class="btn btn-sm btn-secondary shadow-sm " 
+														@click="returnToAdList()">
 														<!-- Назад -->
 														<!-- <i class="bi bi-skip-backward"></i> -->
 														<i class="bi bi-skip-backward-fill"></i>
@@ -413,7 +485,7 @@
 														{{ getTranslation('ads.adDetails.showOthersButton') }}
 													</button>
 												</div>
-												<div v-if="!isAdOwner" class="col-2">
+												<div v-if="!isAdOwner" class="col-2" :class="{ 'offset-4': !phpAdId }">
 													<button @click="openDislike()" :class="['btn', 'btn-sm', 'shadow-sm', dislike ? 'btn-danger' : 'btn-outline-danger']">
 														<!-- Пожаловаться -->
 														<!-- <i class="bi bi-hand-thumbs-down"></i> -->
@@ -452,7 +524,8 @@
 												<textarea v-model="dislikeText" class="form-control form-control-sm shadow-sm" id="FormControlTextarea11" rows="3" placeholder=""></textarea>
 											</div>
 
-											<button @click="dislikeAd(currentAd.id)" class="btn btn-sm btn-danger mb-2 shadow-sm" :disabled="dislikeText.length < 5">
+											<button @click="dislikeAd(currentAd.id)" class="btn btn-sm btn-danger mb-2 shadow-sm" :style="phpAdId ? {} : { marginLeft: '7rem' }"
+												:disabled="dislikeText.length < 5">
 												<!-- Отправить жалобу -->
 												<i class="bi bi-envelope-open-fill"></i>
 												{{ getTranslation('ads.adDetails.dislike.dislikeButton') }}
@@ -480,7 +553,8 @@
 												  	<a href="https://t.me/limonade_start_bot" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_start_bot</a>
 												</div>
 											</div>
-											<button @click="deleteAd(currentAd.id)" class="btn btn-sm btn-danger mb-2 shadow-sm" :disabled="authPassword.length < 5">
+											<button @click="deleteAd(currentAd.id)" class="btn btn-sm btn-danger mb-2 shadow-sm" style="margin-left: 7rem;"
+												:disabled="authPassword.length < 5">
 												<!-- Удалить объявление -->
 												<!-- <i class="bi bi-trash"></i> -->
 												<i class="bi bi-trash3-fill"></i>
@@ -654,15 +728,7 @@
 					<div :class="{'tab-pane': true, 'fade': true, 'show active': showNewsList || showNewsDetail}"
 						id="nav-news" role="tabpanel" aria-labelledby="nav-news-tab" tabindex="0">
 
-						<div v-if="isLoading" class="d-flex justify-content-center p-5">
-							<div class="spinner-grow text-warning" role="status">
-								<span class="visually-hidden">
-									<!-- Загружается... -->
-									{{ getTranslation('news.isLoading') }}
-								</span>
-							</div>
-						</div>
-						<div v-else class="mt-1">
+						<div class="mt-1">
 						
 							<div v-if="showNewsList" v-for="(news, index) in newsList" :key="news.id" class="row mb-3">
 								<div class="col">
@@ -698,16 +764,16 @@
 							</div>
 		
 							<div v-if="showNewsList" class="row mb-3">
-								<div v-if="newsCurrentPage > 1" class="col">
-									<div @click="newsCurrentPage = 1; loadNewsList(newsCurrentPage)" class="btn btn-sm btn-secondary shadow-sm">
+								<div class="col">
+									<div v-if="newsCurrentPage > 1" @click="newsCurrentPage = 1; loadNewsList(newsCurrentPage)" class="btn btn-sm btn-secondary shadow-sm">
 										<!-- В начало -->
 										<!-- <i class="bi bi-skip-backward"></i> -->
 										<i class="bi bi-skip-backward-fill"></i>
 										{{ getTranslation('news.backToTopButton') }}
 									</div>
 								</div>
-								<div v-if="newsList.length >= 10" class="col">
-									<div @click="newsCurrentPage += 1; loadNewsList(newsCurrentPage)" class="btn btn-sm btn-primary shadow-sm">
+								<div class="col">
+									<div v-if="newsList.length >= 10" @click="newsCurrentPage += 1; loadNewsList(newsCurrentPage)" class="btn btn-sm btn-primary shadow-sm">
 										<!-- Показать еще... -->
 										<!-- <i class="bi bi-fast-forward"></i> -->
 										<i class="bi bi-fast-forward-fill"></i>
@@ -719,18 +785,52 @@
 							<div v-if="showNewsDetail" class="row mb-3">
 								<div class="col">
 									<div class="card shadow-sm rounded-top-0">
-										<img v-if="currentNews.photo_1" :src="currentNews.photo_1" class="mb-1" alt="image">
+
+										<div v-if="currentNews.photo_1 || currentNews.photo_2 || currentNews.photo_3" id="carouselExampleIndicators2" class="carousel slide">
+
+											<div class="carousel-indicators">
+												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="1" aria-label="Slide 2" v-if="currentNews.photo_2"></button>
+												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="2" aria-label="Slide 3" v-if="currentNews.photo_3"></button>
+											</div>
+
+											<div class="carousel-inner">
+												<div class="carousel-item active" v-if="currentNews.photo_1">
+													<img :src="currentNews.photo_1" class="d-block w-100" alt="image 1">
+												</div>
+												<div class="carousel-item" v-if="currentNews.photo_2">
+													<img :src="currentNews.photo_2" class="d-block w-100" alt="image 2">
+												</div>
+												<div class="carousel-item" v-if="currentNews.photo_3">
+													<img :src="currentNews.photo_3" class="d-block w-100" alt="image 3">
+												</div>
+											</div>
+
+											<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide="prev">
+												<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Previous</span>
+											</button>
+
+											<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide="next">
+												<span class="carousel-control-next-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Next</span>
+											</button>
+
+										</div>
+
+										<!-- <img v-if="currentNews.photo_1" :src="currentNews.photo_1" class="mb-1" alt="image">
 										<img v-if="currentNews.photo_2" :src="currentNews.photo_2" class="mb-1" alt="image">
-										<img v-if="currentNews.photo_3" :src="currentNews.photo_3" class="" alt="image">
+										<img v-if="currentNews.photo_3" :src="currentNews.photo_3" class="" alt="image"> -->
+
 										<div class="card-body">
 											<h5 class="card-title">{{ currentNews['title_' + currentLanguage.toLowerCase()] }}</h5>
-											<p class="card-text">{{ currentNews['description_' + currentLanguage.toLowerCase()] }}</p>
+											<p class="card-text" style="white-space: pre-line;">{{ currentNews['description_' + currentLanguage.toLowerCase()] }}</p>
 											<h6 class="card-subtitle mb-2 text-body-secondary">
 												{{ currentNews['author_' + currentLanguage.toLowerCase()] }}
 											</h6>
 		
 											<div class="row mb-3">
-												<div class="col">
+												<div class="offset-4 col">
 													<p class="card-text"><small class="text-body-secondary">
 														<!-- Создано  -->
 														<!-- <i class="bi bi-calendar-date"></i> -->
@@ -741,7 +841,7 @@
 											</div>
 											
 											<div class="row">
-												<div class="col-4">
+												<div class="col-4 fixed-bottom ms-4" style="width: 100px; margin-bottom: 2rem;">
 													<button class="btn btn-sm btn-secondary shadow-sm" @click="returnToNewsList()">
 														<!-- Назад -->
 														<!-- <i class="bi bi-skip-backward"></i> -->
@@ -768,6 +868,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 
 	<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 	<script>
@@ -838,7 +939,15 @@
 						RU: {
 							navBar: {
 								// logoButton: 'LIMONADE.PRO',
-								cityButton: 'НЯ ЧАНГ',
+								cityButton: '',
+								//
+								selectCity: 'Выберите город',
+								//
+								cities: [
+									'НЯЧАНГ',
+									'// ДАНАНГ',
+									'// ДАЛАТ',
+								],
 								// langButton: 'RU',
 								menuButton: 'Меню',
 							},
@@ -1079,7 +1188,15 @@
 						EN: {
 							navBar: {
 								// logoButton: 'LIMONADE.PRO',
-								cityButton: 'NHA TRANG',
+								cityButton: '',
+								//
+								selectCity: 'Select city',
+								//
+								cities: [
+									'NHA TRANG',
+									'// DA NANG',
+									'// DALAT',
+								],
 								// langButton: 'EN',
 								menuButton: 'Menu',
 							},
@@ -1425,10 +1542,10 @@
 									// '': { code: '4' },
 									'Другое': { code: '5' }
 							}},
-								'Еда, кулинария': { code: 'L', subcategories: {
+								'Еда, напитки, кулинария': { code: 'L', subcategories: {
 									'Еда': { code: '1' },
-									'Кулинария': { code: '2' },
-									// '': { code: '3' },
+									'Напитки': { code: '2' },
+									'Кулинария': { code: '3' },
 									// '': { code: '4' },
 									'Другое': { code: '5' }
 							}},
@@ -1501,8 +1618,8 @@
 								'Электроника': { code: 'A' },
 								'Мебель': { code: 'B' },
 								'Бытовые товары': { code: 'C' },
-								'Одежда': { code: 'D' },
-								'Еда': { code: 'E' },
+								'Одежда, обувь': { code: 'D' },
+								'Еда, напитки': { code: 'E' },
 								'Детские товары': { code: 'F' },
 								'Животные': { code: 'G' },
 								'Хобби и отдых': { code: 'H' },
@@ -1627,10 +1744,10 @@
 									// '': { code: '4' },
 									'Other': { code: '5' }
 							}},
-								'Food, cooking': { code: 'L', subcategories: {
+								'Food, drinks, cooking': { code: 'L', subcategories: {
 									'Food': { code: '1' },
-									'Cooking': { code: '2' },
-									// '': { code: '3' },
+									'Drinks': { code: '2' },
+									'Cooking': { code: '3' },
 									// '': { code: '4' },
 									'Other': { code: '5' }
 							}},
@@ -1703,8 +1820,8 @@
 								'Electronics': { code: 'A' },
 								'Furniture': { code: 'B' },
 								'Household goods': { code: 'C' },
-								'Cloth': { code: 'D' },
-								'Food': { code: 'E' },
+								'Cloth, shoes': { code: 'D' },
+								'Food, drinks': { code: 'E' },
 								'Children\'s goods': { code: 'F' },
 								'Animals': { code: 'G' },
 								'Hobbies and recreation': { code: 'H' },
@@ -1760,6 +1877,8 @@
 					this.loadNewsList();
                     this.loadAdsList();
                 }
+				//
+				// this.translations[this.currentLanguage]['navBar']['cityButton'] = this.translations[this.currentLanguage]['navBar']['cities'][0];
 				// Устанавливаем обработчик события popstate, когда компонент монтируется
 				window.onpopstate = this.handlePopState;
             },
@@ -1774,6 +1893,12 @@
 				}
 			},
 			computed: {
+				// Автоматически возвращает первый город в зависимости от текущего языка
+				cityButton() {
+					// return this.translations[this.currentLanguage]['navBar']['cities'][0];
+					return this.translations[this.currentLanguage]['navBar']['cities'][0].slice(0, 7);
+				},
+				//
 				categories() {
 					return this.currentLanguage === 'RU' ? this.categoriesRu : this.categoriesEn;
 				}
@@ -1994,37 +2119,37 @@
 						// this.errorMessage = 'Пожалуйста, напишите название';
 						this.errorMessage = this.getTranslation('errors.' + 630);
 
-					} else if (this.categoryCode.length < 1) {
-						// this.errorMessage = 'Пожалуйста, выберите категорию';
-						this.errorMessage = this.getTranslation('errors.' + 631);
-
-					} else if (this.newAd.description.length < 20) {
-						// this.errorMessage = 'Пожалуйста, напишите описание';
-						this.errorMessage = this.getTranslation('errors.' + 632);
-
-					} else if (this.newAd.contact.length < 5) {
-						// this.errorMessage = 'Пожалуйста, напишите свой контакт';
-						this.errorMessage = this.getTranslation('errors.' + 633);
-
-					} else if (this.authPassword.length < 5) {
-						// this.errorMessage = 'Пожалуйста, введите пароль';
-						this.errorMessage = this.getTranslation('errors.' + 634);
-
 					} else if (this.getRemainingChars(this.newAd.title, this.newAd.titleLimit) < 0) {
 						// this.errorMessage = 'Название слишком длинное';
 						this.errorMessage = this.getTranslation('errors.' + 635);
+
+					} else if (this.categoryCode.length < 1) {
+						// this.errorMessage = 'Пожалуйста, выберите категорию';
+						this.errorMessage = this.getTranslation('errors.' + 631);
 
 					} else if (this.getRemainingChars(this.categoryCode, this.categoryCodeLimit) < 0) {
 						// this.errorMessage = 'Категория слишком длинная';
 						this.errorMessage = this.getTranslation('errors.' + 636);
 
+					} else if (this.newAd.description.length < 20) {
+						// this.errorMessage = 'Пожалуйста, напишите описание';
+						this.errorMessage = this.getTranslation('errors.' + 632);
+
 					} else if (this.getRemainingChars(this.newAd.description, this.newAd.descriptionLimit) < 0) {
 						// this.errorMessage = 'Описание слишком длинное';
 						this.errorMessage = this.getTranslation('errors.' + 637);
 
+					} else if (this.newAd.contact.length < 5) {
+						// this.errorMessage = 'Пожалуйста, напишите свой контакт';
+						this.errorMessage = this.getTranslation('errors.' + 633);
+
 					} else if (this.getRemainingChars(this.newAd.contact, this.newAd.contactLimit) < 0) {
 						// this.errorMessage = 'Контакт слишком длинный';
 						this.errorMessage = this.getTranslation('errors.' + 638);
+
+					} else if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.getTranslation('errors.' + 634);
 
 					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
 						// this.errorMessage = 'Пароль слишком длинный';
@@ -2314,7 +2439,9 @@
 				},
 				// Универсальный метод для подсчета оставшихся символов с учетом многобайтовых символов
 				getRemainingChars(value, maxLength) {
-					const charCount = Array.from(value).length; // Точный подсчет количества символов
+					// const charCount = Array.from(value).length;
+					// Точный подсчет количества символов
+					const charCount = [...value].length;
     				return maxLength - charCount;
 				},
 				// Метод для динамического определения класса
