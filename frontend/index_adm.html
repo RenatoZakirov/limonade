@@ -1059,6 +1059,14 @@
 					categoryCodeLimit: 7,
                 };
             },
+			mounted() {
+				// Обработчик события beforeunload
+				window.addEventListener("beforeunload", this.handleBeforeUnload);
+			},
+			beforeDestroy() {
+				// Удаляем обработчик события
+				window.removeEventListener("beforeunload", this.handleBeforeUnload);
+			},
 			watch: {
 				// Наблюдаем за изменением второго уровня подкатегорий (третий выпадающий список)
 				selectedSubcategory2() {
@@ -1523,7 +1531,11 @@
 						'text-success': remainingChars >= 0 // если символов достаточно
 					};
 				},
-
+				// Метод для обработки beforeunload
+				handleBeforeUnload(event) {
+					event.preventDefault();
+					event.returnValue = '';  // Обязательное условие для отображения сообщения
+				},
             }
         });
 		// Устанавливаем глобальный базовый URL для всех запросов axios
