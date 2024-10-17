@@ -117,8 +117,20 @@
 													<h5 class="card-title">
 														Создать новое объявление
 													</h5>
+
+													<div class="mb-2">
+														<label for="FormControlInput3" class="form-label">
+															Контакт
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(newAd.contact, newAd.contactLimit)">
+																({{ getRemainingChars(newAd.contact, newAd.contactLimit) }})
+															</span>
+														</label>
+														<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm"
+															id="FormControlInput3">
+													</div>
 													
-													<div class="mb-3">
+													<div class="mb-2">
 														<label for="formFile1" class="form-label">
 															Заглавное фото
 														</label>
@@ -143,7 +155,7 @@
 															id="formFile3" type="file" ref="fileInput">
 													</div>
 												
-													<div class="mb-3">
+													<div class="mb-2">
 														<label for="FormControlInput1" class="form-label">
 															Название
 															<span class="text text-danger">*</span>
@@ -156,7 +168,7 @@
 															id="FormControlInput1">
 													</div>
 					
-													<div class="mb-3">
+													<div class="mb-2">
 														<label for="categorySelect" class="form-label">
 															Категория
 															<span class="text text-danger">*</span>
@@ -170,7 +182,7 @@
 														</select>
 													</div>
 													
-													<div v-if="selectedMainCategory && subcategories1" class="mb-3">
+													<div v-if="selectedMainCategory && subcategories1" class="mb-2">
 														<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm shadow-sm" id="subcategory1Select" aria-label="Small select example">
 															<option value="">
 																Выберите подкатегорию
@@ -179,7 +191,7 @@
 														</select>
 													</div>
 													
-													<div v-if="selectedSubcategory1 && subcategories2" class="mb-3">
+													<div v-if="selectedSubcategory1 && subcategories2" class="mb-2">
 														<select v-model="selectedSubcategory2" class="form-select form-select-sm shadow-sm" id="subcategory2Select" aria-label="Small select example">
 															<option value="">
 																Выберите подкатегорию
@@ -200,7 +212,7 @@
 															id="FormControlTextarea1" rows="3"></textarea>
 													</div>
 								
-													<div class="mb-3">
+													<!-- <div class="mb-3">
 														<label for="FormControlInput3" class="form-label">
 															Контакт
 															<span class="text text-danger">*</span>
@@ -210,7 +222,7 @@
 														</label>
 														<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm"
 															id="FormControlInput3">
-													</div>
+													</div> -->
 				
 													<div class="form-check form-switch mb-3">
 														<input v-model="newAd.permanent" class="form-check-input" type="checkbox" role="switch"
@@ -1098,7 +1110,7 @@
 					this.newNews = { title_ru: '', title_ruLimit: 50, description_ru: '', description_ruLimit: 2000, author_ru: '', author_ruLimit: 50,
 						title_en: '', description_en: '', author_en: '' };
 					// очищаем пароль
-					this.authPassword = '';
+					// this.authPassword = '';
 					//
 					this.adId = '';
 					//
@@ -1108,7 +1120,7 @@
 					//
 					this.photoInputs = [true, false, false];
 					// Очистить поле файла через ref
-					this.$refs.fileInput.value = '';
+					// this.$refs.fileInput.value = '';
 					// очищаем массив фото
 					this.photos = [];
 					//

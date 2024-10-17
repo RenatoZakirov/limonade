@@ -30,29 +30,41 @@ class AdController {
 
         // Проверить, передана ли категория в запросе
         $category = isset($_GET['category']) ? $_GET['category'] : null;
+        // Проверить, передан ли текст в запросе
+        $searchText = isset($_GET['text']) ? trim($_GET['text']) : null;
 
-        // Базовый запрос для выборки объявлений
-        $query = 'WHERE status = 1 ORDER BY created_at DESC LIMIT ? OFFSET ?';
-        $params = [$perPage, $offset];
-
+        // Валидация категории
         if ($category) {
-            // Проверка, что категория — это строка и не длиннее 6 символов
             if (!is_string($category) || mb_strlen($category, 'UTF-8') > 6) {
                 http_response_code(400);
+                // Ошибка со строкой категорий
                 echo json_encode(['code' => 201]);
                 return;
             }
-
-            // Выполняем поиск, начиная с полной категории и убираем символы, если не находим объявлений
-            $ads = $this->findAdsByCategory($category, $perPage, $offset);
-            if (empty($ads)) {
-                // Если ничего не найдено, вернуть сообщение
+        }
+        // Валидация текста для поиска
+        if ($searchText) {
+            if (!is_string($searchText) || mb_strlen($searchText, 'UTF-8') > 51) {
                 http_response_code(400);
+                // Текст который вы ищете слишком длинный
+                echo json_encode(['code' => 205]);
+                return;
+            }
+        }
+
+        // Если категория или текст указаны, выполняем поиск с фильтрацией
+        if ($category || $searchText) {
+            $ads = $this->findAdsByCategoryAndText($category, $searchText, $perPage, $offset);
+            if (empty($ads)) {
+                http_response_code(400);
+                // Не удалось найти активных объявлений
                 echo json_encode(['code' => 202]);
                 return;
             }
         } else {
-            // Если категории нет, просто выбрать объявления с пагинацией
+            // Если нет категории и текста, просто выбрать объявления с пагинацией
+            $query = 'WHERE status = 1 ORDER BY created_at DESC LIMIT ? OFFSET ?';
+            $params = [$perPage, $offset];
             $ads = R::findAll('ads', $query, $params);
         }
 
@@ -74,30 +86,59 @@ class AdController {
     }
 
     // Метод для поиска объявлений с постепенным сокращением категории
-    private function findAdsByCategory($category, $perPage, $offset) {
-        while (mb_strlen($category, 'UTF-8') > 0) {
-            // Добавляем символ % к категории
+    private function findAdsByCategoryAndText($category, $searchText, $perPage, $offset) {
+        // Пытаемся найти объявления по категории, постепенно сокращая её
+        while ($category && mb_strlen($category, 'UTF-8') > 0) {
+            $params = [];
+            $query = 'WHERE status = 1';
+    
+            // Добавляем условие по категории
             $categoryParam = $category . '%';
-
-            // Выполняем запрос с текущей категорией
-            // $query = 'WHERE status = 1 AND category = ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
-            // $ads = R::findAll('ads', $query, [$category, $perPage, $offset]);
-            $query = 'WHERE status = 1 AND category LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
-            $ads = R::findAll('ads', $query, [$categoryParam, $perPage, $offset]);
+            $query .= ' AND category LIKE ?';
+            $params[] = $categoryParam;
+    
+            // Добавляем условие по тексту
+            if ($searchText) {
+                // Применяем регистронезависимый поиск по title и description
+                $query .= ' AND (LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?))';
+                $searchTextParam = '%' . $searchText . '%'; // Поддержка частичного совпадения
+                $params[] = $searchTextParam;
+                $params[] = $searchTextParam;
+            }
+    
+            // Добавляем пагинацию
+            $query .= ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+            $params[] = $perPage;
+            $params[] = $offset;
+    
+            // Выполняем запрос
+            $ads = R::findAll('ads', $query, $params);
+    
+            // Если объявления найдены, возвращаем их
+            if (!empty($ads)) {
+                return $ads;
+            }
+    
+            // Убираем последний символ категории и пробуем снова
+            $category = substr($category, 0, -1);
+        }
+    
+        // Если объявления не найдены по категории, пробуем искать только по тексту
+        if ($searchText) {
+            $query = 'WHERE status = 1 AND (LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?)) ORDER BY created_at DESC LIMIT ? OFFSET ?';
+            $searchTextParam = '%' . $searchText . '%'; // Поддержка частичного совпадения
+            $ads = R::findAll('ads', $query, [$searchTextParam, $searchTextParam, $perPage, $offset]);
 
             // Если объявления найдены, возвращаем их
             if (!empty($ads)) {
                 return $ads;
             }
-
-            // Убираем последний символ категории и пробуем снова
-            $category = substr($category, 0, -1);
         }
-
-        // Если объявления не найдены на любом уровне, вернуть пустой массив
+    
+        // Если ничего не найдено ни по категории, ни по тексту, возвращаем пустой массив
         return [];
     }
-
+    
     // Получить полный путь к фото, если оно существует
     private function getPhotoUrl($photoName) {
         $baseUrl = 'https://www.limonade.pro/'; // Базовый URL проекта

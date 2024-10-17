@@ -49,7 +49,7 @@
 				<nav class="navbar bg-body-tertiary fixed-top shadow-sm">
 					<div class="container-fluid">
 						
-						<button @click="cleanCategory(); loadAdsList()" class=" btn btn-sm btn-success shadow-sm">
+						<button @click="loadNewsList(); loadAdsList()" class=" btn btn-sm btn-success shadow-sm">
 							<img src="/backend/uploads/images/templates/icon.png" class="rounded me-1" alt="Limonade" width="24" height="24">
 							LIMONADE
 						</button>
@@ -113,11 +113,22 @@
 										</h2>
 										<div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
 											<div class="accordion-body">
+								
+												<label for="textSearch" class="form-label">
+													<!-- Введите текст -->
+													{{ getTranslation('menu.searchAd.writeStr') }}
+													<!-- Счетчик оставшихся символов для текста -->
+													<span :class="getCharCountClass(searchText, searchTextLimit)">
+														({{ getRemainingChars(searchText, searchTextLimit) }})
+													</span>
+												</label>
+												<input v-model="searchText" type="text" class="form-control form-control-sm mb-3 shadow-sm"
+													id="textSearch" :placeholder="getTranslation('menu.searchAd.searchTextPlaceholder')">
 			
 												<label for="categorySelect" class="form-label">
-													<!-- Выберите категорию -->
+													<!-- Или выберите категорию -->
 													{{ getTranslation('menu.searchAd.selectStr') }}
-												<span class="text text-danger">*</span>
+												<!-- <span class="text text-danger">*</span> -->
 												</label>
 												<select v-model="selectedMainCategory" @change="loadSubcategories('main')"
 													class="form-select form-select-sm mb-3 shadow-sm" id="categorySelect" aria-label="Small select example">
@@ -146,7 +157,8 @@
 													<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
 												</select>
 											
-												<button @click="adCurrentPage = 1; loadAdsList()" class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="categoryCode.length < 1">
+												<button @click="searchByTextOrCategory()" class="btn btn-sm btn-primary mb-2 shadow-sm"
+													:disabled="searchText.length < 4 && categoryCode.length < 1">
 													<!-- Искать -->
 													<i class="bi bi-search"></i>
 													{{ getTranslation('menu.searchAd.searchButton') }}
@@ -294,7 +306,7 @@
 
 				<nav>
 					<div class="nav nav-tabs" id="nav-tab" role="tablist">
-						<button @click="showScreen('adList')"
+						<button @click="phpAdId ? (() => { loadNewsList(); loadAdsList(); })() : showScreen('adList')"
 							:class="{'nav-link': true, 'active': showAdList || showAdDetail || showCreateAd}"
 							id="nav-ad-tab" type="button" role="tab"
 							aria-controls="nav-ad" aria-selected="showAdList || showAdDetail || showCreateAd">{{ getTranslation('ads.adTab') }}</button>
@@ -355,46 +367,36 @@
 									</div>
 								</div>
 							</div>
-		
-							<div v-if="showAdList" class="row mb-3">
-								<div class="col">
-									<div v-if="adCurrentPage > 1" @click="adCurrentPage = 1; loadAdsList(adCurrentPage)" class="btn btn-sm btn-secondary shadow-sm">
-										<!-- В начало -->
-										<!-- <i class="bi bi-skip-backward"></i> -->
-										<i class="bi bi-skip-backward-fill"></i>
-										{{ getTranslation('ads.backToTopButton') }}
-									</div>
-								</div>
-								<div class="col">
-									<div v-if="adsList.length >= 10" @click="adCurrentPage += 1; loadAdsList(adCurrentPage)" class="btn btn-sm btn-primary shadow-sm">
-										<!-- Показать еще... -->
-										<!-- <i class="bi bi-fast-forward"></i> -->
-										<i class="bi bi-fast-forward-fill"></i>
-										{{ getTranslation('ads.showMoreButton') }}
-									</div>
-								</div>
+
+							<div v-if="showAdList" class="d-flex justify-content-center mb-3">
+							
+								<button v-if="adCurrentPage > 1" @click="adCurrentPage = 1; loadAdsList(adCurrentPage)"
+									class="btn btn-sm btn-primary me-2 shadow-sm" type="button">
+									<!-- В начало -->
+									<!-- <i class="bi bi-skip-backward"></i> -->
+									<i class="bi bi-skip-backward-fill"></i>
+									{{ getTranslation('ads.backToTopButton') }}
+								</button>
+								<button v-if="adCurrentPage > 2" @click="adCurrentPage -= 1; loadAdsList(adCurrentPage)"
+									class="btn btn-sm btn-secondary me-2 shadow-sm" type="button">
+									<!-- Назад -->
+									<i class="bi bi-backspace-fill"></i>
+									{{ getTranslation('ads.showLessButton') }}
+								</button>
+								<button v-if="adsList.length > 2" class="btn btn-sm btn-outline-primary me-2 shadow-sm">
+									<!-- Номер страницы -->
+									{{ adCurrentPage }}
+								</button>
+								<button v-if="adsList.length >= 10" @click="adCurrentPage += 1; loadAdsList(adCurrentPage)"
+									class="btn btn-sm btn-primary shadow-sm" type="button">
+									<!-- Вперед -->
+									<!-- <i class="bi bi-fast-forward"></i> -->
+									<!-- <i class="bi bi-fast-forward-fill"></i> -->
+									<i class="bi bi-backspace-reverse-fill"></i>
+									{{ getTranslation('ads.showMoreButton') }}
+								</button>
+
 							</div>
-		
-							<!-- <div v-if="showAdDetail" class="row mb-3">
-								<div class="col">
-									<div class="card shadow-sm rounded-top-0">
-										<img v-if="currentAd.photo_1" :src="currentAd.photo_1" class="mb-1" alt="image">
-										<img v-if="currentAd.photo_2" :src="currentAd.photo_2" class="mb-1" alt="image">
-										<img v-if="currentAd.photo_3" :src="currentAd.photo_3" class="" alt="image">
-										<div class="card-body">
-											<h5 class="card-title">{{ currentAd.title }}</h5>
-											
-											<div v-for="categoryName in getCategoryNames(currentAd.category)" :key="categoryName" class="d-inline-block">
-												<button class="btn btn-sm btn-warning mb-1 me-2 shadow-sm">
-													{{ categoryName }}
-												</button>
-											</div>
-											<p class="card-text" style="white-space: pre-line;">{{ currentAd.description }}</p>
-											<h6 class="card-subtitle mb-2 text-body-secondary">
-												
-												<i class="bi bi-send-fill"></i>
-												{{ currentAd.contact }}
-											</h6> -->
 
 							<div v-if="showAdDetail" class="row mb-3">
 								<div class="col">
@@ -431,10 +433,6 @@
 											</button>
 
 										</div>
-
-										<!-- <img v-if="currentAd.photo_1" :src="currentAd.photo_1" class="mb-1" alt="image">
-										<img v-if="currentAd.photo_2" :src="currentAd.photo_2" class="mb-1" alt="image">
-										<img v-if="currentAd.photo_3" :src="currentAd.photo_3" class="" alt="image"> -->
 
 										<div class="card-body">
 											<h5 class="card-title">{{ currentAd.title }}</h5>
@@ -475,7 +473,8 @@
 														@click="returnToAdList()">
 														<!-- Назад -->
 														<!-- <i class="bi bi-skip-backward"></i> -->
-														<i class="bi bi-skip-backward-fill"></i>
+														<!-- <i class="bi bi-skip-backward-fill"></i> -->
+														<i class="bi bi-backspace-fill"></i>
 														{{ getTranslation('ads.adDetails.backButton') }}
 													</button>
 												</div>
@@ -763,23 +762,37 @@
 								</div>
 							</div>
 		
-							<div v-if="showNewsList" class="row mb-3">
-								<div class="col">
-									<div v-if="newsCurrentPage > 1" @click="newsCurrentPage = 1; loadNewsList(newsCurrentPage)" class="btn btn-sm btn-secondary shadow-sm">
-										<!-- В начало -->
-										<!-- <i class="bi bi-skip-backward"></i> -->
-										<i class="bi bi-skip-backward-fill"></i>
-										{{ getTranslation('news.backToTopButton') }}
-									</div>
-								</div>
-								<div class="col">
-									<div v-if="newsList.length >= 10" @click="newsCurrentPage += 1; loadNewsList(newsCurrentPage)" class="btn btn-sm btn-primary shadow-sm">
-										<!-- Показать еще... -->
-										<!-- <i class="bi bi-fast-forward"></i> -->
-										<i class="bi bi-fast-forward-fill"></i>
-										{{ getTranslation('news.showMoreButton') }}
-									</div>
-								</div>
+							<div v-if="showNewsList" class="d-flex justify-content-center mb-3">
+
+								<button v-if="newsCurrentPage > 1" @click="newsCurrentPage = 1; loadNewsList(newsCurrentPage)"
+									class="btn btn-sm btn-primary me-2 shadow-sm" type="button">
+									<!-- В начало -->
+									<!-- <i class="bi bi-skip-backward"></i> -->
+									<i class="bi bi-skip-backward-fill"></i>
+									{{ getTranslation('news.backToTopButton') }}
+								</button>
+								<button v-if="newsCurrentPage > 2" @click="newsCurrentPage -= 1; loadNewsList(newsCurrentPage)"
+									class="btn btn-sm btn-secondary me-2 shadow-sm" type="button">
+									<!-- Назад -->
+									<!-- <i class="bi bi-backspace-fill"></i> -->
+									<i class="bi bi-backspace-fill"></i>
+									{{ getTranslation('news.showLessButton') }}
+								</button>
+								<button v-if="newsList.length > 2" class="btn btn-sm btn-outline-primary me-2 shadow-sm">
+									<!-- Номер страницы -->
+									{{ newsCurrentPage }}
+								</button>
+								<button v-if="newsList.length >= 10" @click="newsCurrentPage += 1; loadNewsList(newsCurrentPage)"
+									class="btn btn-sm btn-primary shadow-sm" type="button">
+									<!-- Вперед -->
+									<!-- <i class="bi bi-fast-forward"></i> -->
+									<!-- <i class="bi bi-fast-forward-fill"></i> -->
+									<i class="bi bi-backspace-reverse-fill"></i>
+									{{ getTranslation('news.showMoreButton') }}
+								</button>
+						
+								<!-- loadAdsList(adCurrentPage) -->
+								
 							</div>
 		
 							<div v-if="showNewsDetail" class="row mb-3">
@@ -818,10 +831,6 @@
 
 										</div>
 
-										<!-- <img v-if="currentNews.photo_1" :src="currentNews.photo_1" class="mb-1" alt="image">
-										<img v-if="currentNews.photo_2" :src="currentNews.photo_2" class="mb-1" alt="image">
-										<img v-if="currentNews.photo_3" :src="currentNews.photo_3" class="" alt="image"> -->
-
 										<div class="card-body">
 											<h5 class="card-title">{{ currentNews['title_' + currentLanguage.toLowerCase()] }}</h5>
 											<p class="card-text" style="white-space: pre-line;">{{ currentNews['description_' + currentLanguage.toLowerCase()] }}</p>
@@ -845,7 +854,8 @@
 													<button class="btn btn-sm btn-secondary shadow-sm" @click="returnToNewsList()">
 														<!-- Назад -->
 														<!-- <i class="bi bi-skip-backward"></i> -->
-														<i class="bi bi-skip-backward-fill"></i>
+														<!-- <i class="bi bi-skip-backward-fill"></i> -->
+														<i class="bi bi-backspace-fill"></i>
 														{{ getTranslation('news.newsDetails.backButton') }}
 													</button>
 												</div>
@@ -954,7 +964,9 @@
 							menu: {
 								searchAd: {
 									searchAdTab: 'Фильтровать объявления',
-									selectStr: 'Выберите категорию',
+									writeStr: 'Введите текст',
+									searchTextPlaceholder: 'Плюшевый мишка',
+									selectStr: 'Или выберите категорию',
 									notSelectedStr: 'Не выбрано',
 									selectSubStr: 'Выберите подкатегорию',
 									searchButton: 'Искать',
@@ -991,7 +1003,9 @@
 								isLoading: 'Загружается...',
 								createdStr: 'Создано:',
 								viewDetailsButton: 'Посмотреть',
-								showMoreButton: 'Показать еще...',
+								showLessButton: 'Назад',
+								// showMoreButton: 'Показать еще...',
+								showMoreButton: 'Вперед',
 								backToTopButton: 'В начало',
 								adDetails: {
 									titleStr: '',
@@ -1045,7 +1059,9 @@
 								descriptionStr: '',
 								createdStr: 'Создано:',
 								viewDetailsButton: 'Посмотреть',
-								showMoreButton: 'Показать еще...',
+								showLessButton: 'Назад',
+								// showMoreButton: 'Показать еще...',
+								showMoreButton: 'Вперед',
 								backToTopButton: 'В начало',
 								newsDetails: {
 									titleStr: '',
@@ -1068,7 +1084,7 @@
 								202: 'Не удалось найти активных объявлений',
 								203: 'Ошибка с паролем',
 								204: 'Не удалось найти активного пользователя. Возможно ошибка в пароле',
-								205: '',
+								205: 'Текст который вы ищете слишком длинный',
 								206: '',
 								210: 'Пожалуйста, введите пароль',
 								211: 'Пароль слишком длинный',
@@ -1078,6 +1094,10 @@
 								220: 'Вы достигли лимита объявлений',
 								221: '',
 								222: '',
+								230: 'Пожалуйста, введите текст или выберите категорию',
+								231: 'Текст слишком длинный',
+								232: '',
+								233: '',
 								// Ошибки связанные со списком новостей
 								300: 'Ошибка с номером страницы',
 								301: '',
@@ -1203,7 +1223,9 @@
 							menu: {
 								searchAd: {
 									searchAdTab: 'Filter ads',
-									selectStr: 'Select category',
+									writeStr: 'Enter text',
+									searchTextPlaceholder: 'Teddy bear',
+									selectStr: 'Or select a category',
 									notSelectedStr: 'Not selected',
 									selectSubStr: 'Select a subcategory',
 									searchButton: 'Search',
@@ -1240,7 +1262,9 @@
 								isLoading: 'Loading...',
 								createdStr: 'Created:',
 								viewDetailsButton: 'View details',
-								showMoreButton: 'Show more...',
+								showLessButton: 'Back',
+								// showMoreButton: 'Show more...',
+								showMoreButton: 'Forward',
 								backToTopButton: 'Back to top',
 								adDetails: {
 									titleStr: '',
@@ -1294,7 +1318,8 @@
 								descriptionStr: '',
 								createdStr: 'Created:',
 								viewDetailsButton: 'View details',
-								showMoreButton: 'Show more...',
+								showLessButton: 'Back',
+								showMoreButton: 'Forward',
 								backToTopButton: 'Back to top',
 								newsDetails: {
 									titleStr: '',
@@ -1317,7 +1342,7 @@
 								202: 'Could not find active ads',
 								203: 'Password error',
 								204: 'Could not find active user. Possible password error',
-								205: '',
+								205: 'The text you are looking for is too long',
 								206: '',
 								210: 'Please enter your password',
 								211: 'The password is too long',
@@ -1327,6 +1352,10 @@
 								220: 'You have reached the ads limit',
 								221: '',
 								222: '',
+								230: 'Please enter text or select a category',
+								231: 'The text is too long',
+								232: '',
+								233: '',
 								// Ошибки связанные со списком новостей
 								300: 'Error with page number',
 								301: '',
@@ -1853,6 +1882,10 @@
 					categoryCode: '',
 					// лимит строки категории
 					categoryCodeLimit: 7,
+					// искомый текст
+					searchText: '',
+					// лимит искомого текста
+					searchTextLimit: 50,
 					// флаг указывающий скопирована ссылка в буфер или нет
 					copyIcon: false,
 					// Если phpAdId не передан, по умолчанию будет 0
@@ -1910,6 +1943,7 @@
 					this.subcategories1 = null;
 					this.subcategories2 = null;
 					this.categoryCode = '';
+					this.searchText = '';
 				},
 				// метод выбора, какой экран показать в данный момент
 				showScreen(screen) {
@@ -1922,6 +1956,28 @@
 					// метод закрытия бокового меню
 					this.closeSidebar();
 				},
+				// искать по тексту/ по категории
+				searchByTextOrCategory() {
+					// Плавная прокрутка вверх страницы после загрузки объявлений
+					window.scrollTo({top: 0, behavior: 'smooth'});
+					// Проверяем, введен ли текст и его длина
+					if (this.searchText.length < 4 && this.categoryCode.length < 1) {
+						// this.errorMessage = 'Пожалуйста, введите текст или выберите категорию';
+						this.errorMessage = this.getTranslation('errors.' + 230);
+
+					} else if (this.getRemainingChars(this.searchText, this.searchTextLimit) < 0) {
+						// this.errorMessage = 'Текст слишком длинный';
+						this.errorMessage = this.getTranslation('errors.' + 231);
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					// запускаем метод
+					this.adCurrentPage = 1;
+					this.loadAdsList(this.adCurrentPage);
+				},
                 // метод загрузки с сервера списка объявлений
                 loadAdsList(adCurrentPage = 1) {
 					// Плавная прокрутка страницы вверх после загрузки объявлений
@@ -1933,6 +1989,11 @@
 
 					// Формируем URL для запроса
     				let url = `api/ad/get_list?page=${adCurrentPage}`;
+
+					// Добавляем параметр searchText, если он не пустой
+					if (this.searchText.length > 0) {
+						url += `&text=${this.searchText}`;
+					}
 
 					// Добавляем параметр categoryCode, если он не пустой
 					if (this.categoryCode.length > 0) {
@@ -1952,7 +2013,7 @@
 							} else {
 								this.adsList = response.data;
 							}
-							this.cleanCategory();
+							// this.cleanCategory();
                         })
                         .catch((error) => {
 							//
@@ -1969,6 +2030,7 @@
 					// Плавная прокрутка страницы вверх после загрузки новостей
 					window.scrollTo({top: 0, behavior: 'smooth'});
 					this.showScreen('newsList');
+					this.cleanCategory();
 					this.isAdOwner = false;
 					this.authPassword = '';
 					this.phpAdId = 0;
