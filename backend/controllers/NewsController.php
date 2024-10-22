@@ -55,7 +55,7 @@ class NewsController {
     // Получить полный путь к фото, если оно существует
     private function getPhotoUrl($photoName) {
         $baseUrl = 'https://www.limonade.pro/'; // Базовый URL вашего проекта
-        $filePath = 'backend/uploads/images/';
+        $filePath = 'backend/uploads/images/news/';
         return $photoName ? $baseUrl . $filePath . $photoName . '.jpg' : null;
     }
 
@@ -87,6 +87,16 @@ class NewsController {
             if ($newsData['photo_3']) {
                 $newsData['photo_3'] = $this->getPhotoUrl($newsData['photo_3']);
             }
+
+            // Если есть фото_4, обновить путь
+            if ($newsData['photo_4']) {
+                $newsData['photo_4'] = $this->getPhotoUrl($newsData['photo_4']);
+            }
+
+            // Если есть фото_5, обновить путь
+            if ($newsData['photo_5']) {
+                $newsData['photo_5'] = $this->getPhotoUrl($newsData['photo_5']);
+            }
         }
 
         // Увеличить значение просмотров на 1
@@ -103,18 +113,18 @@ class NewsController {
     public function createNews() {
         // Поля и их значения по умолчанию
         $fields = [
-            'hash_num' => $_POST['password'] ?? null,
-            'title_ru' => $_POST['title_ru'] ?? null,
-            'description_ru' => $_POST['description_ru'] ?? null,
-            'author_ru' => $_POST['author_ru'] ?? null,
-            'title_en' => $_POST['title_en'] ?? null,
-            'description_en' => $_POST['description_en'] ?? null,
-            'author_en' => $_POST['author_en'] ?? null,
+            'hash_num' => isset($_POST['password']) ? trim($_POST['password']) : null,
+            'title_ru' => isset($_POST['title_ru']) ? trim($_POST['title_ru']) : null,
+            'description_ru' => isset($_POST['description_ru']) ? trim($_POST['description_ru']) : null,
+            'author_ru' => isset($_POST['author_ru']) ? trim($_POST['author_ru']) : null,
+            'title_en' => isset($_POST['title_en']) ? trim($_POST['title_en']) : null,
+            'description_en' => isset($_POST['description_en']) ? trim($_POST['description_en']) : null,
+            'author_en' => isset($_POST['author_en']) ? trim($_POST['author_en']) : null,
         ];
 
         // Проверка обязательных полей на наличие и пустоту
         foreach ($fields as $key => $value) {
-            if (empty(trim($value))) {
+            if (empty($value)) {
                 http_response_code(400);
                 echo json_encode(['code' => 700]);
                 return;
@@ -164,7 +174,7 @@ class NewsController {
             $isMultiple = isset($_FILES['photos']['name']) && is_array($_FILES['photos']['name']);
             
             // Определяем количество файлов для обработки (максимум 3)
-            $fileCount = $isMultiple ? min(3, count($_FILES['photos']['name'])) : 1;
+            $fileCount = $isMultiple ? min(5, count($_FILES['photos']['name'])) : 1;
 
             // Обрабатываем каждый файл
             for ($i = 0; $i < $fileCount; $i++) {
@@ -186,7 +196,7 @@ class NewsController {
             // Минимальные допустимые размеры изображения
             $minResolution = [600, 450];
             // Путь к папке для сохранения изображений
-            $filePath = 'uploads/images/';
+            $filePath = 'uploads/images/news/';
 
             // Массив для хранения имен фотографий объявления
             $newsPhotos = [];
@@ -253,6 +263,16 @@ class NewsController {
                         // Обрабатываем photo_3
                         $this->processPhoto($imageEditor, $filePath, $newsPhotos, $savedPhotos, 3);
                         break;
+
+                    case 3:
+                        // Обрабатываем photo_4
+                        $this->processPhoto($imageEditor, $filePath, $newsPhotos, $savedPhotos, 4);
+                        break;
+
+                    case 4:
+                        // Обрабатываем photo_5
+                        $this->processPhoto($imageEditor, $filePath, $newsPhotos, $savedPhotos, 5);
+                        break;
                 }
             }
         }
@@ -269,6 +289,8 @@ class NewsController {
         $news->photo_1 = isset($newsPhotos[1]) ? (string) $newsPhotos[1] : null;
         $news->photo_2 = isset($newsPhotos[2]) ? (string) $newsPhotos[2] : null;
         $news->photo_3 = isset($newsPhotos[3]) ? (string) $newsPhotos[3] : null;
+        $news->photo_4 = isset($newsPhotos[4]) ? (string) $newsPhotos[4] : null;
+        $news->photo_5 = isset($newsPhotos[5]) ? (string) $newsPhotos[5] : null;
 
         $news->author_ru = $author_ru; // Автор новости
         $news->author_en = $author_en; // Автор новости
@@ -384,6 +406,8 @@ class NewsController {
         $this->deletePhotoIfExists($news->photo_1);
         $this->deletePhotoIfExists($news->photo_2);
         $this->deletePhotoIfExists($news->photo_3);
+        $this->deletePhotoIfExists($news->photo_4);
+        $this->deletePhotoIfExists($news->photo_5);
 
         // Обновить статус новости и дату
         $news->status = 0; // Статус новости
@@ -398,7 +422,7 @@ class NewsController {
     // Вспомогательный метод для удаления фото, если оно существует
     private function deletePhotoIfExists($photoName) {
         if ($photoName) {
-            $imageFile = __DIR__ . '/../uploads/images/' . $photoName . '.jpg';
+            $imageFile = __DIR__ . '/../uploads/images/news/' . $photoName . '.jpg';
             if (file_exists($imageFile)) {
                 unlink($imageFile);
             }

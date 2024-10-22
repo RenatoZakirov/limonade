@@ -49,16 +49,10 @@
 				<nav class="navbar bg-body-tertiary fixed-top shadow-sm">
 					<div class="container-fluid">
 						
-						<button @click="loadNewsList(); loadAdsList()" class=" btn btn-sm btn-success shadow-sm">
+						<button @click="loadNewsList(); loadAdsList()" class="btn btn-sm btn-success shadow-sm">
 							<img src="/backend/uploads/images/templates/icon.png" class="rounded me-1" alt="Limonade" width="24" height="24">
 							LIMONADE
 						</button>
-						<!-- <button type="button" class="btn btn-sm btn-warning shadow-sm"> -->
-							<!-- НЯЧАНГ -->
-							<!-- <i class="bi bi-building"></i> -->
-							<!-- <i class="bi bi-building-fill"></i>
-							{{ getTranslation('navBar.cityButton') }}
-						</button> -->
 
 						<div class="dropdown">
 							<button class="btn btn-sm btn-warning shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -275,7 +269,7 @@
 												<div class="container">
 													<div class="row mb-2">
 														<div class="form-text">
-															<img src="https://www.limonade.pro/backend/uploads/images/templates/face.jpg" class="rounded float-start shadow-sm me-2 mb-2" alt="...">
+															<img src="https://www.limonade.pro/backend/uploads/images/templates/icon_3.jpg" class="rounded float-start shadow-sm me-2 mb-2" alt="...">
 															{{ getTranslation('menu.aboutUs.descriptionStr1') }}
 															<br>
 															{{ getTranslation('menu.aboutUs.descriptionStr2') }}
@@ -591,7 +585,7 @@
 												<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm" id="formFile1" type="file">
 											</div>
 				
-											<div v-if="photoInputs[1]" class="mb-2">
+											<div v-if="photoInputs[1]" class="mb-3">
 												<label for="formFile2" class="form-label">
 													<!-- Фото 2 -->
 													{{ getTranslation('ads.adCreate.photoTitleStr2') }}
@@ -599,7 +593,7 @@
 												<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm" id="formFile2" type="file">
 											</div>
 											
-											<div v-if="photoInputs[2]" class="mb-2">
+											<div v-if="photoInputs[2]" class="mb-3">
 												<label for="formFile3" class="form-label">
 													<!-- Фото 3 -->
 													{{ getTranslation('ads.adCreate.photoTitleStr3') }}
@@ -805,6 +799,8 @@
 												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
 												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="1" aria-label="Slide 2" v-if="currentNews.photo_2"></button>
 												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="2" aria-label="Slide 3" v-if="currentNews.photo_3"></button>
+												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="3" aria-label="Slide 4" v-if="currentNews.photo_4"></button>
+												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="4" aria-label="Slide 5" v-if="currentNews.photo_5"></button>
 											</div>
 
 											<div class="carousel-inner">
@@ -816,6 +812,12 @@
 												</div>
 												<div class="carousel-item" v-if="currentNews.photo_3">
 													<img :src="currentNews.photo_3" class="d-block w-100" alt="image 3">
+												</div>
+												<div class="carousel-item" v-if="currentNews.photo_4">
+													<img :src="currentNews.photo_4" class="d-block w-100" alt="image 4">
+												</div>
+												<div class="carousel-item" v-if="currentNews.photo_5">
+													<img :src="currentNews.photo_5" class="d-block w-100" alt="image 5">
 												</div>
 											</div>
 
@@ -991,10 +993,10 @@
 								aboutUs: {
 									aboutUsTab: 'О нас',
 									descriptionStr1: 'Приветствуем вас на нашем сайте!',
-									descriptionStr2: 'Меня зовут Ренато, я из России, живу в Нячанге, Вьетнам.',
-									descriptionStr3: 'Я создал этот сайт для русскоязычного и англоязычного сообщества нашего города, чтобы упростить обмен информацией и помочь друг другу в повседневных делах. Здесь вы можете бесплатно разместить объявления о продаже, обмене вещей, предложении услуг, а также узнать о последних новостях Нячанга.',
+									descriptionStr2: 'Мы, команда Limonade, приехали из России, в данный момент живем в Нячанге, Вьетнам.',
+									descriptionStr3: 'Мы создали этот сайт для русскоязычного и англоязычного сообщества нашего города, чтобы упростить обмен информацией и помочь друг другу в повседневных делах. Здесь вы можете бесплатно разместить объявления о продаже, обмене вещей, предложении услуг, а также узнать о последних новостях Нячанга.',
 									descriptionStr4: 'Наш сайт доступен как на русском, так и на английском языках, чтобы каждый мог легко воспользоваться его возможностями.',
-									descriptionStr5: 'Если у вас есть вопросы или пожелания, свяжитесь со мной через наш Telegram:',
+									descriptionStr5: 'Если у вас есть вопросы или пожелания, свяжитесь с нами через наш Telegram:',
 									descriptionStr6: 'Спасибо, что вы с нами!',
 								},
 							},
@@ -1032,11 +1034,11 @@
 								},
 								adCreate: {
 									createStr: 'Создать новое объявление',
-									createDescriptionStr1: 'Объявление будет размещено бесплатно на 10 дней. Опубликованное объявление нельзя отредактировать, только удалить и создать новое.',
+									createDescriptionStr1: 'Объявление будет размещено бесплатно на 10 дней. Опубликованное объявление нельзя отредактировать, только удалить и создать новое. Одновременно не более 3 объявлений.',
 									createDescriptionStr2: "Фото не обязательно, но это поможет вашему объявлению выделиться на фоне других.",
 									photoTitleStr1: 'Заглавное фото',
 									photoTitleStr2: 'Фото 2',
-									photoTitleStr3: 'Фото 3',
+									photoTitleStr3: 'Фото 3 (Максимум 3)',
 									adTitleStr: 'Название',
 									adTitlePlaceholderStr: 'Уроки йоги для домашних котов',
 									adCategoryStr: 'Категория',
@@ -1250,10 +1252,10 @@
 								aboutUs: {
 									aboutUsTab: 'About Us',
 									descriptionStr1: 'Welcome to our website!',
-									descriptionStr2: 'My name is Renato, I am from Russia, living in Nha Trang, Vietnam.',
-									descriptionStr3: 'I created this site for the Russian and English speaking community of our city to simplify the exchange of information and help each other in everyday affairs. Here you can post free ads for sale, exchange of things, offer of services, and also learn about the latest news of Nha Trang.',
+									descriptionStr2: 'We, the Limonade team, come from Russia and currently live in Nha Trang, Vietnam.',
+									descriptionStr3: 'We created this site for the Russian and English speaking community of our city to simplify the exchange of information and help each other in everyday affairs. Here you can post free ads for sale, exchange of things, offer of services, and also learn about the latest news in Nha Trang.',
 									descriptionStr4: 'Our site is available in both Russian and English so that everyone can easily use its capabilities.',
-									descriptionStr5: 'If you have any questions or suggestions, please contact me via our Telegram:',
+									descriptionStr5: 'If you have any questions or suggestions, please contact us via our Telegram:',
 									descriptionStr6: 'Thank you for being with us!',
 								},
 							},
@@ -1291,11 +1293,11 @@
 								},
 								adCreate: {
 									createStr: 'Create a new ad',
-									createDescriptionStr1: 'The ad will be posted for free for 10 days. The published ad cannot be edited, only deleted and a new one created.',
+									createDescriptionStr1: 'The ad will be posted for free for 10 days. The published ad cannot be edited, only deleted and a new one created. No more than 3 ads at the time.',
 									createDescriptionStr2: "Photos are not required, but they will help your listing stand out from the crowd.",
 									photoTitleStr1: 'Main photo',
 									photoTitleStr2: 'Photo 2',
-									photoTitleStr3: 'Photo 3',
+									photoTitleStr3: 'Photo 3 (Maximum 3)',
 									adTitleStr: 'Title',
 									adTitlePlaceholderStr: 'Yoga lessons for home cats',
 									adCategoryStr: 'Category',
@@ -2018,6 +2020,8 @@
                         .catch((error) => {
 							//
                             this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
+							//
+							this.cleanCategory();
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })

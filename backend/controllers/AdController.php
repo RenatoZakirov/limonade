@@ -258,16 +258,16 @@ class AdController {
     public function createAd() {
         // Поля и их значения по умолчанию
         $fields = [
-            'hash_num' => $_POST['password'] ?? null,
-            'title' => $_POST['title'] ?? null,
-            'category' => $_POST['category'] ?? null,
-            'description' => $_POST['description'] ?? null,
-            'contact' => $_POST['contact'] ?? null,
+            'hash_num' => isset($_POST['password']) ? trim($_POST['password']) : null,
+            'title' => isset($_POST['title']) ? trim($_POST['title']) : null,
+            'category' => isset($_POST['category']) ? trim($_POST['category']) : null,
+            'description' => isset($_POST['description']) ? trim($_POST['description']) : null,
+            'contact' => isset($_POST['contact']) ? trim($_POST['contact']) : null,
         ];
 
         // Проверка обязательных полей на наличие и пустоту
         foreach ($fields as $key => $value) {
-            if (empty(trim($value))) {
+            if (empty($value)) {
                 http_response_code(400);
                 // echo json_encode(["message" => "Поле $field пустое или отсутствует"]);
                 echo json_encode(['code' => 600]);
@@ -321,7 +321,7 @@ class AdController {
         if ($hash_num != $this->adm_pass) {
 
             // Проверка количества активных объявлений пользователя
-            $ads_limit = 6;
+            $ads_limit = 3;
             $activeAdsCount = R::count('ads', 'user_id = ? AND status = 1', [$user->id]);
 
             if ($activeAdsCount >= $ads_limit) {

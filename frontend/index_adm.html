@@ -338,7 +338,7 @@
 														Создать новую новость
 													</h5>
 													
-													<div class="mb-3">
+													<div class="mb-2">
 														<label for="formFile4" class="form-label">
 															Заглавное фото
 														</label>
@@ -362,8 +362,24 @@
 														<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm"
 															id="formFile6" type="file" ref="fileInput">
 													</div>
+
+													<div v-if="photoInputs[3]" class="mb-2">
+														<label for="formFile7" class="form-label">
+															Фото 4
+														</label>
+														<input @change="handleFileChange($event, 3)" class="form-control form-control-sm shadow-sm"
+															id="formFile7" type="file" ref="fileInput">
+													</div>
+
+													<div v-if="photoInputs[4]" class="mb-2">
+														<label for="formFile8" class="form-label">
+															Фото 5
+														</label>
+														<input @change="handleFileChange($event, 4)" class="form-control form-control-sm shadow-sm"
+															id="formFile8" type="file" ref="fileInput">
+													</div>
 												
-													<div class="mb-3">
+													<div class="mb-2">
 														<label for="FormControlInput7" class="form-label">
 															Заголовок (ru)
 															<span class="text text-danger">*</span>
@@ -375,7 +391,7 @@
 														<input v-model="newNews.title_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput7">
 													</div>
 					
-													<div class="mb-3">
+													<div class="mb-2">
 														<label for="FormControlTextarea3" class="form-label">
 															Текст (ru)
 															<span class="text text-danger">*</span>
@@ -386,7 +402,7 @@
 														<textarea v-model="newNews.description_ru" class="form-control form-select-sm shadow-sm" id="FormControlTextarea3" rows="3"></textarea>
 													</div>
 								
-													<div class="mb-3">
+													<div class="mb-2">
 														<label for="FormControlInput8" class="form-label">
 															Автор (ru)
 															<span class="text text-danger">*</span>
@@ -397,7 +413,7 @@
 														<input v-model="newNews.author_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput8">
 													</div>
 
-													<div class="mb-3">
+													<div class="mb-2">
 														<label for="FormControlInput17" class="form-label">
 															Заголовок (en)
 															<span class="text text-danger">*</span>
@@ -408,7 +424,7 @@
 														<input v-model="newNews.title_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput17">
 													</div>
 					
-													<div class="mb-3">
+													<div class="mb-2">
 														<label for="FormControlTextarea13" class="form-label">
 															Текст (en)
 															<span class="text text-danger">*</span>
@@ -419,7 +435,7 @@
 														<textarea v-model="newNews.description_en" class="form-control form-select-sm shadow-sm" id="FormControlTextarea13" rows="3"></textarea>
 													</div>
 								
-													<div class="mb-3">
+													<div class="mb-2">
 														<label for="FormControlInput18" class="form-label">
 															Автор (en)
 															<span class="text text-danger">*</span>
@@ -657,7 +673,7 @@
 					//
 					userIdLimit: 6,
 					// управляет видимостью полей для фото
-					photoInputs: [true, false, false], // скрываем фото 2 и фото 3
+					photoInputs: [true, false, false, false, false], // скрываем фото 2 и фото 3
 					// содержит массив загруженных фото
         			photos: [],
 					// показывает, что данные в процессе загрузки с сервера
@@ -822,7 +838,7 @@
 						741: 'Текст новости слишком длинный (en)',
 						742: 'Имя автора слишком длинное (en)',
 						743: 'Пароль слишком длинный',
-						744: 'Слишком много фото. Максимум 3 шт',
+						744: 'Слишком много фото. Максимум 5 шт',
 						745: '',
 						746: '',
 						750: 'Новость успешно создана!',
@@ -1118,7 +1134,7 @@
 					//
 					this.userId = '';
 					//
-					this.photoInputs = [true, false, false];
+					this.photoInputs = [true, false, false, false, false];
 					// Очистить поле файла через ref
 					// this.$refs.fileInput.value = '';
 					// очищаем массив фото
@@ -1289,7 +1305,7 @@
 						this.errorMessage = this.messages[743];
 					}
 					// Проверяем наличие фотографий (максимум 3)
-					if (this.photos.length > 3) {
+					if (this.photos.length > 5) {
 						// this.errorMessage = 'Слишком много фото. Максимум 3 шт';
 						this.errorMessage = this.messages[744];
 					}
@@ -1370,7 +1386,7 @@
 						// очищаем id
 						this.adId = '';
 						// очищаем пароль
-						this.authPassword = '';
+						// this.authPassword = '';
 						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 						setTimeout(() => { this.successMessage = ''; }, 3000);
 					})
@@ -1419,7 +1435,7 @@
 						// очищаем id
 						this.userId = '';
 						// очищаем пароль
-						this.authPassword = '';
+						// this.authPassword = '';
 						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 						setTimeout(() => { this.successMessage = ''; }, 3000);
 					})
@@ -1469,7 +1485,7 @@
 						// очищаем id
 						this.newsId = '';
 						// очищаем пароль
-						this.authPassword = '';
+						// this.authPassword = '';
 						// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 						setTimeout(() => { this.successMessage = ''; }, 3000);
 					})
