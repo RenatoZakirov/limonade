@@ -141,8 +141,17 @@ class AdController {
     
     // Получить полный путь к фото, если оно существует
     private function getPhotoUrl($photoName) {
-        $baseUrl = 'https://www.limonade.pro/'; // Базовый URL проекта
+        // Базовый URL проекта
+        $baseUrl = 'https://www.limonade.pro/';
         $filePath = 'backend/uploads/images/';
+        return $photoName ? $baseUrl . $filePath . $photoName . '.jpg' : null;
+    }
+
+    // Получить полный путь к фото, если оно существует
+    private function getTmpPhotoUrl($photoName) {
+        // Базовый URL проекта
+        $baseUrl = 'https://www.limonade.pro/';
+        $filePath = 'backend/uploads/images/tmp/';
         return $photoName ? $baseUrl . $filePath . $photoName . '.jpg' : null;
     }
 
@@ -246,13 +255,57 @@ class AdController {
 
         // Увеличить значение просмотров на 1
         $ad->viewed += 1;
-        R::store($ad); // Сохранить изменения в базе данных
+        // Сохранить изменения в базе данных
+        R::store($ad);
 
         // Отправить результат
         header('Content-Type: application/json');
         echo json_encode($adData);
         
     }
+
+    // Получить одно объявление по ID или самое старое активное объявление из временной таблицы
+    public function checkAd($id = 0) {
+        // Определяем таблицу и загружаем объявление
+        $table = $id ? 'ads' : 'messages';
+        $ad = $id ? R::load($table, $id) : R::findOne($table, 'status = 1 ORDER BY id ASC');
+
+        // $ad = R::findOne('messages', 'status = 1 ORDER BY id ASC');
+        // error_log("ad: " . print_r($ad, true));
+        // error_log("table: " . print_r($table, true));
+
+        // Проверить, существует ли объявление и его статус равен 1 (активное объявление)
+        if (!$ad->id || $ad->status != 1) {
+            http_response_code(400);
+            echo json_encode(['code' => 400]);
+            return;
+        }
+
+        // Подготовить массив для данных объявления
+        $adData = R::exportAll([$ad])[0];
+
+        // Обновить пути к фотографиям в зависимости от значения id
+        if (!empty($adData['photo_1'])) {
+            $adData['photo_1'] = $id ? $this->getPhotoUrl($adData['photo_1']) : $this->getTmpPhotoUrl($adData['photo_1']);
+        }
+        if (!empty($adData['photo_2'])) {
+            $adData['photo_2'] = $id ? $this->getPhotoUrl($adData['photo_2']) : $this->getTmpPhotoUrl($adData['photo_2']);
+        }
+        if (!empty($adData['photo_3'])) {
+            $adData['photo_3'] = $id ? $this->getPhotoUrl($adData['photo_3']) : $this->getTmpPhotoUrl($adData['photo_3']);
+        }
+
+        // Увеличить просмотры только для основной таблицы 'ads' и если ID указан
+        if ($id) {
+            $ad->viewed += 1;
+            R::store($ad);
+        }
+
+        // Отправить результат
+        header('Content-Type: application/json');
+        echo json_encode($adData);
+    }
+
 
     // Создать новое объявление
     public function createAd() {
@@ -507,18 +560,26 @@ class AdController {
 
     // Функция для обработки фотографий
     private function processPhoto($imageEditor, $filePath, &$adPhotos, &$savedPhotos, $key) {
-        $photoName = $imageEditor->generateUniqueName(); // Генерация уникального имени файла
-        $imageEditor->createImage();                    // Создание изображения
-        $imageEditor->resizeToFit();                    // Изменение размера изображения
-
+        // Генерация уникального имени файла
+        $photoName = $imageEditor->generateUniqueName();
+        // Создание изображения
+        $imageEditor->createImage();
+        // Изменение размера изображения
+        $imageEditor->resizeToFit();
+        //
         if ($imageEditor->orientation == 'h') {
-            $imageEditor->saveOriginal($filePath . $photoName . '.jpg'); // Сохраняем оригинал горизонтального изображения
+            // Сохраняем оригинал горизонтального изображения
+            $imageEditor->saveOriginal($filePath . $photoName . '.jpg');
         } else {
-            $imageEditor->createPaddedImage();                           // Создаем изображение с добавлением полей
-            $imageEditor->savePadded($filePath . $photoName . '.jpg');   // Сохраняем изображение с полями
+            // Создаем изображение с добавлением полей
+            $imageEditor->createPaddedImage();
+            // Сохраняем изображение с полями
+            $imageEditor->savePadded($filePath . $photoName . '.jpg');
         }
-        $adPhotos[$key] = $photoName; // Добавляем имя файла в массив
-        $savedPhotos[] = $filePath . $photoName . '.jpg'; // Сохраняем путь к файлу
+        // Добавляем имя файла в массив
+        $adPhotos[$key] = $photoName;
+        // Сохраняем путь к файлу
+        $savedPhotos[] = $filePath . $photoName . '.jpg';
     }
 
     // Пометить объявление как удалённое и удалить связанные фотографии

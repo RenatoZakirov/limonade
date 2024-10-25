@@ -318,7 +318,9 @@
 													</div>
 
 													<div class="input-group input-group-sm mb-2 shadow-sm">
-														<label class="input-group-text" for="inputGroupSelect01">Категория</label>
+														<label class="input-group-text" :class="{ 'text-danger': categoryCode === '' }" for="inputGroupSelect01">
+															Категория
+														</label>
 														<span class="input-group-text" id="basic-addon2">{{ categoryCode }}</span>
 														<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select" id="inputGroupSelect01">
 															<option value="">
@@ -391,14 +393,14 @@
 												</div>
 
 												<div class="d-flex justify-content-between card-footer">
-													<button @click="changeAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
-														<i class="bi bi-envelope-open-fill"></i>
-														Опубликовать
-													</button>
-
 													<button @click="cleanForm()" class="btn btn-sm btn-danger shadow-sm">
 														<i class="bi bi-trash3-fill"></i>
 														Очистить
+													</button>
+
+													<button @click="changeAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+														<i class="bi bi-envelope-open-fill"></i>
+														Опубликовать
 													</button>
 												</div>
 
@@ -1443,28 +1445,29 @@
 				},
 				//
 				getNextAd(id) {
+					// много проверок тут
 
-					if (id == 0) {
-						id = 198;
-					}
+					// Заменяем пустую строку на 0
+					id = id || 0;
 					// отправляем данные на сервер
                     this.isLoading2 = true;
-                    axios.get(`api/ad/get_one/${id}`)
+                    axios.get(`api/ad/check_one/${id}`)
                         .then(response => {
-							// загрузить данные по обьявлению
-                            this.currentAd.contact = response.data.contact;
+							// загрузить данные по объявлению
+							this.currentAd.contact = response.data.contact || '';
 							//
-							this.currentAd.title = response.data.title;
+							this.currentAd.title = response.data.title || '';
 							//
-							this.categoryCode = this.currentAd.category = response.data.category;
+							this.categoryCode = this.currentAd.category = response.data.category || '';
 							//
-							this.currentAd.description = response.data.description;
+							this.currentAd.description = response.data.description || '';
 							//
-							this.currentAd.created_at = response.data.created_at;
+							this.currentAd.created_at = response.data.created_at || '';
 							//
-							this.currentAd.id = response.data.id;
+							this.currentAd.id = response.data.id || '';
 							//
-							this.currentAd.status = response.data.status;
+							this.currentAd.status = response.data.status || '';
+
 							// проверка на наличие фото и их запись
 							this.currentAd.photos = [];
 							//
