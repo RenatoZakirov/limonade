@@ -141,6 +141,12 @@ class Router {
         // error_log("Base Path: " . $this->basePath);
         // error_log("Path: " . $path);
 
+        // Считаем уникальных пользователей
+        $this->incrementUniqueVisitors();
+        
+        // Считаем просмотры для каждой страницы
+        $this->incrementPageView($path);
+
         // Проверяем, пустой ли путь
         if ($path === '') {
             $this->routes[$this->requestMethod]['/']();
@@ -187,6 +193,36 @@ class Router {
     private function notFound() {
         http_response_code(404);
         echo json_encode(['code' => 100]);
+    }
+
+    private function incrementUniqueVisitors() {
+        $ipAddress = $_SERVER['REMOTE_ADDR'];
+        
+        // Проверка уникальности IP за последние 24 часа
+        $existingVisitor = R::findOne('visitors', 'ip_address = ? AND visit_date = ?', [
+            $ipAddress, date('Y-m-d')
+        ]);
+        
+        if (!$existingVisitor) {
+            $visitor = R::dispense('visitors');
+            $visitor->ip_address = $ipAddress;
+            $visitor->visit_date = date('Y-m-d');
+            R::store($visitor);
+        }
+    }
+
+    private function incrementPageView($path) {
+        $view = R::findOne('pages', 'path = ?', [$path]);
+        if (!$view) {
+            $view = R::dispense('pages');
+            $view->path = $path;
+            $view->views = 1;
+            $view->last_viewed = date('Y-m-d H:i:s');
+        } else {
+            $view->views++;
+            $view->last_viewed = date('Y-m-d H:i:s');
+        }
+        R::store($view);
     }
 }
 

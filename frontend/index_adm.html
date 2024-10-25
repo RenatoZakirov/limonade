@@ -104,11 +104,11 @@
 						<div class="accordion mt-3" id="accordionExample">
 							<div class="accordion-item">
 								<h2 class="accordion-header">
-									<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+									<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
 										Создать новое объявление
 									</button>
 								</h2>
-								<div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+								<div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
 									<div class="accordion-body">
 										
 										<div class="col mt-1">
@@ -211,18 +211,6 @@
 														<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm"
 															id="FormControlTextarea1" rows="3"></textarea>
 													</div>
-								
-													<!-- <div class="mb-3">
-														<label for="FormControlInput3" class="form-label">
-															Контакт
-															<span class="text text-danger">*</span>
-															<span :class="getCharCountClass(newAd.contact, newAd.contactLimit)">
-																({{ getRemainingChars(newAd.contact, newAd.contactLimit) }})
-															</span>
-														</label>
-														<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm"
-															id="FormControlInput3">
-													</div> -->
 				
 													<div class="form-check form-switch mb-3">
 														<input v-model="newAd.permanent" class="form-check-input" type="checkbox" role="switch"
@@ -258,6 +246,182 @@
 									</div>
 								</div>
 							</div>
+
+							<div class="accordion-item">
+								<h2 class="accordion-header">
+									<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+										Редактировать объявление
+									</button>
+								</h2>
+								<div id="collapseSix" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+									<div class="accordion-body">
+
+										<div v-if="isLoading2" class="d-flex justify-content-center p-3">
+											<div class="spinner-grow text-warning" role="status">
+												<span class="visually-hidden">
+													Загружается...
+												</span>
+											</div>
+										</div>
+
+										<div v-if="!isLoading2" class="col">
+
+											<div class="card mb-3 shadow-sm">
+
+												<!-- <img src="/backend/uploads/images/templates/cat.jpg" class="card-img-top" alt=""> -->
+
+												<div v-if="currentAd.photos[0]" id="carouselExampleIndicators" class="carousel slide">
+
+													<div class="carousel-indicators">
+														<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+														<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2" v-if="currentAd.photos[1]"></button>
+														<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3" v-if="currentAd.photos[2]"></button>
+													</div>
+		
+													<div class="carousel-inner">
+														<div class="carousel-item active" v-if="currentAd.photos[0]">
+															<img :src="currentAd.photos[0]" class="d-block w-100 card-img-top" alt="image 1">
+														</div>
+														<div class="carousel-item" v-if="currentAd.photos[1]">
+															<img :src="currentAd.photos[1]" class="d-block w-100 card-img-top" alt="image 2">
+														</div>
+														<div class="carousel-item" v-if="currentAd.photos[2]">
+															<img :src="currentAd.photos[2]" class="d-block w-100 card-img-top" alt="image 3">
+														</div>
+													</div>
+		
+													<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+														<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+														<span class="visually-hidden">Previous</span>
+													</button>
+		
+													<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+														<span class="carousel-control-next-icon" aria-hidden="true"></span>
+														<span class="visually-hidden">Next</span>
+													</button>
+		
+												</div>
+
+												<div class="card-body">
+													<div class="input-group input-group-sm mb-2 shadow-sm">
+														<span class="input-group-text" :class="getCharCountClass2(currentAd.contact, currentAd.contactLimit)"
+															id="inputGroup-sizing-sm">Контакт ({{ getRemainingChars(currentAd.contact, currentAd.contactLimit) }})</span>
+														<input v-model="currentAd.contact" type="text" class="form-control" aria-label="Sizing example input"
+															aria-describedby="inputGroup-sizing-sm">
+													</div>
+
+													<div class="input-group input-group-sm mb-2 shadow-sm">
+														<span class="input-group-text" :class="getCharCountClass2(currentAd.title, currentAd.titleLimit)"
+															id="inputGroup-sizing-sm">Название ({{ getRemainingChars(currentAd.title, currentAd.titleLimit) }})</span>
+														<input v-model="currentAd.title" type="text" class="form-control" aria-label="Sizing example input"
+															aria-describedby="inputGroup-sizing-sm">
+													</div>
+
+													<div class="input-group input-group-sm mb-2 shadow-sm">
+														<label class="input-group-text" for="inputGroupSelect01">Категория</label>
+														<span class="input-group-text" id="basic-addon2">{{ categoryCode }}</span>
+														<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select" id="inputGroupSelect01">
+															<option value="">
+																Не выбрано
+															</option>
+															<option v-for="(cat, key) in categories" :key="key" :value="key">{{ key }}</option>
+														</select>
+														
+													</div>
+
+													<div v-if="selectedMainCategory && subcategories1" class="input-group input-group-sm mb-2 shadow-sm">
+														<label class="input-group-text" for="inputGroupSelect02">Подкатегория 1</label>
+														<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select" id="inputGroupSelect02">
+															<option value="">
+																Выберите подкатегорию
+															</option>
+															<option v-for="(sub, key) in subcategories1" :key="key" :value="key">{{ key }}</option>
+														</select>
+													</div>
+
+													<div v-if="selectedSubcategory1 && subcategories2" class="input-group input-group-sm mb-2 shadow-sm">
+														<label class="input-group-text" for="inputGroupSelect03">Подкатегория 2</label>
+														<select v-model="selectedSubcategory2" class="form-select" id="inputGroupSelect03">
+															<option value="">
+																Выберите подкатегорию
+															</option>
+															<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
+														</select>
+													</div>
+
+													<!-- <div class="mb-3">
+														<label for="FormControlTextarea61" class="form-label">
+															Описание
+															<span :class="getCharCountClass2(newAd.description, newAd.descriptionLimit)">
+																({{ getRemainingChars(newAd.description, newAd.descriptionLimit) }})
+															</span>
+														</label>
+														<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm"
+															id="FormControlTextarea61" rows="3"></textarea>
+													</div> -->
+
+													<div class="input-group input-group-sm mb-2 shadow-sm">
+														<span class="input-group-text" :class="getCharCountClass2(currentAd.description, currentAd.descriptionLimit)"
+															id="FormControlTextarea61">Текст<br>({{ getRemainingChars(currentAd.description, currentAd.descriptionLimit) }})</span>
+														<textarea v-model="currentAd.description" class="form-control form-select-sm shadow-sm"
+															id="FormControlTextarea61" rows="4"></textarea>
+													</div>
+
+													<div class="card-text d-flex justify-content-between">
+														<span>
+															<small class="text-body-secondary text-truncate">
+																<i class="bi bi-calendar-date-fill"></i>
+																Создано:
+																{{ currentAd.created_at.split(' ')[0] }}
+															</small>
+														</span>
+														<span>
+															<small class="text-body-secondary">
+																<i class="bi bi-1-square-fill"></i>
+																{{ currentAd.id }}
+															</small>
+														</span>
+														<span>
+															<small class="text-body-secondary">
+																<i class="bi bi-power"></i>
+																{{ currentAd.status }}
+															</small>
+														</span>
+													</div>
+												</div>
+
+												<div class="d-flex justify-content-between card-footer">
+													<button @click="changeAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+														<i class="bi bi-envelope-open-fill"></i>
+														Опубликовать
+													</button>
+
+													<button @click="cleanForm()" class="btn btn-sm btn-danger shadow-sm">
+														<i class="bi bi-trash3-fill"></i>
+														Очистить
+													</button>
+												</div>
+
+											</div>
+										</div>
+
+										<div class="col input-group input-group-sm shadow-sm">
+											<span class="input-group-text" :class="getCharCountClass2(authPassword, authPasswordLimit)"
+												id="inputGroup-sizing-sm">Пароль ({{ getRemainingChars(authPassword, authPasswordLimit) }})</span>
+											<input v-model="authPassword" type="password" id="inputPassword61" class="form-control"
+												aria-describedby="passwordHelpBlock">
+											<span class="input-group-text">
+												<i class="bi bi-1-square-fill"></i>
+											</span>
+											<input v-model="searchAdId" type="text" class="form-control" aria-label="Server">
+											<button @click="getNextAd(searchAdId)" class="btn btn-outline-secondary" type="button" :disabled="authPassword.length < 5"
+												id="button-addon61">Загрузить</button>
+										</div>
+
+									</div>
+								</div>
+							</div>
+
 							<div class="accordion-item">
 								<h2 class="accordion-header">
 									<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
@@ -313,6 +477,7 @@
 									</div>
 								</div>
 							</div>
+
 						</div>
 
 					</div>
@@ -639,6 +804,30 @@
 						//
 						permanent: false
 					},
+					currentAd: {
+						//
+						title: '',
+						// лимит названия
+						titleLimit: 40,
+						//
+          				description: '',
+						// лимит описания
+						descriptionLimit: 1000,
+						//
+						contact: '',
+						// лимит контакта
+						contactLimit: 50,
+						//
+						category: '',
+						//
+						created_at: '',
+						//
+						id: '',
+						//
+						status: '',
+						// содержит массив загруженных фото
+						photos: [],
+					},
 					// содержит объект новой новости (ещё не созданной)
 					newNews: {
 						//
@@ -674,10 +863,11 @@
 					userIdLimit: 6,
 					// управляет видимостью полей для фото
 					photoInputs: [true, false, false, false, false], // скрываем фото 2 и фото 3
-					// содержит массив загруженных фото
-        			photos: [],
+					
 					// показывает, что данные в процессе загрузки с сервера
                     isLoading: false,
+					//
+					isLoading2: false,
 					// содержит текст всплывающей подсказки в случае успеха
 					successMessage: null,
 					// содержит текст всплывающей подсказки в случае ошибки
@@ -1085,6 +1275,10 @@
 					categoryCode: '',
 					// лимит строки категории
 					categoryCodeLimit: 7,
+					//
+					photos: [],
+					//
+					searchAdId: '',
                 };
             },
 			mounted() {
@@ -1123,6 +1317,8 @@
 					// очищаем форму 1
 					this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, category: '', permanent: false };
 					// очищаем форму 2
+					this.currentAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, category: '', created_at: '', id: '', status: '', photos: [] };
+					// очищаем форму 3
 					this.newNews = { title_ru: '', title_ruLimit: 50, description_ru: '', description_ruLimit: 2000, author_ru: '', author_ruLimit: 50,
 						title_en: '', description_en: '', author_en: '' };
 					// очищаем пароль
@@ -1137,6 +1333,8 @@
 					this.photoInputs = [true, false, false, false, false];
 					// Очистить поле файла через ref
 					// this.$refs.fileInput.value = '';
+					//
+					this.searchAdId = '';
 					// очищаем массив фото
 					this.photos = [];
 					//
@@ -1243,6 +1441,54 @@
 							this.isLoading = false;
 						});
 				},
+				//
+				getNextAd(id) {
+
+					if (id == 0) {
+						id = 198;
+					}
+					// отправляем данные на сервер
+                    this.isLoading2 = true;
+                    axios.get(`api/ad/get_one/${id}`)
+                        .then(response => {
+							// загрузить данные по обьявлению
+                            this.currentAd.contact = response.data.contact;
+							//
+							this.currentAd.title = response.data.title;
+							//
+							this.categoryCode = this.currentAd.category = response.data.category;
+							//
+							this.currentAd.description = response.data.description;
+							//
+							this.currentAd.created_at = response.data.created_at;
+							//
+							this.currentAd.id = response.data.id;
+							//
+							this.currentAd.status = response.data.status;
+							// проверка на наличие фото и их запись
+							this.currentAd.photos = [];
+							//
+							// cover_photo
+							//
+							// user_id
+							
+							response.data.photo_1 && this.currentAd.photos.push(response.data.photo_1);
+							response.data.photo_2 && this.currentAd.photos.push(response.data.photo_2);
+							response.data.photo_3 && this.currentAd.photos.push(response.data.photo_3);
+
+							// console.log(response.data)
+                        })
+                        .catch((error) => {
+							//
+							this.errorMessage = this.messages[error.response.data['code']];
+                            // this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.errorMessage = ''; }, 3000);
+                        })
+                        .finally(() => {
+                            this.isLoading2 = false;
+                        });
+                },
 				// метод создания новой новости
 				createNews() {
 					// Плавная прокрутка страницы вверх
@@ -1557,6 +1803,14 @@
 					return {
 						'text-danger': remainingChars < 0,  // если символов больше чем нужно
 						'text-success': remainingChars >= 0 // если символов достаточно
+					};
+				},
+				// Метод для динамического определения класса
+				getCharCountClass2(value, maxLength) {
+					const remainingChars = this.getRemainingChars(value, maxLength);
+					return {
+						'text-danger': remainingChars < 0,  // если символов больше чем нужно
+						'text-dark': remainingChars >= 0 // если символов достаточно
 					};
 				},
 				// Метод для обработки beforeunload

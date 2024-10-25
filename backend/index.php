@@ -24,6 +24,7 @@ require_once 'config/config.php';
 R::setup($dsn, $username, $password);
 
 // Дополнительные настройки RedBeanPHP
+// R::freeze(false);
 R::freeze(true); // Установить true в продакшн для повышения производительности
 
 // Включение логирования ошибок
