@@ -36,7 +36,7 @@ class NewsController {
         $news = R::findAll('news', $query, $params);
 
         // Путь к шаблонному изображению
-        $defaultPhotoUrl = $this->getPhotoUrl('templates/grey');
+        $defaultPhotoUrl = $this->getPhotoUrl('templates/no_image');
 
         // Подготовить результаты
         $result = [];

@@ -191,8 +191,13 @@ class Router {
     }
 
     private function notFound() {
-        http_response_code(404);
-        echo json_encode(['code' => 100]);
+        // http_response_code(404);
+        // echo json_encode(['code' => 100]);
+
+        // 404
+        header('Content-Type: text/html');
+        $htmlContent = file_get_contents(__DIR__ . '/../frontend/404.html');
+        echo $htmlContent;
     }
 
     private function incrementUniqueVisitors() {
