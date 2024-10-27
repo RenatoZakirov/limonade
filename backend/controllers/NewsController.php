@@ -374,6 +374,14 @@ class NewsController {
             return;
         }
 
+        // Проверить введенный пароль
+        if ($password != $this->adm_pass) {
+            // Выводим сообщение на экран
+            http_response_code(400);
+            echo json_encode(['code' => 522]);
+            return;
+        }
+
         // Загрузить новость по ID
         $news = R::load('news', $id);
 
@@ -385,13 +393,13 @@ class NewsController {
             return;
         }
 
-        // Проверить введенный пароль
-        if ($password != $this->adm_pass) {
-            // Выводим сообщение на экран
-            http_response_code(400);
-            echo json_encode(['code' => 522]);
-            return;
-        }
+        // // Проверить введенный пароль
+        // if ($password != $this->adm_pass) {
+        //     // Выводим сообщение на экран
+        //     http_response_code(400);
+        //     echo json_encode(['code' => 522]);
+        //     return;
+        // }
 
         // Проверка статуса новости
         if ($news->status != 1) {

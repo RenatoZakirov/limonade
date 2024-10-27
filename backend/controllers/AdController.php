@@ -265,17 +265,31 @@ class AdController {
     }
 
     // Получить одно объявление по ID или самое старое активное объявление из временной таблицы
-    public function checkAd($id = 0) {
+    public function checkAd($id, $password) {
+        // Проверка на наличие пароля
+        if (empty($password) || mb_strlen($password, 'UTF-8') > 17) {
+            // Выводим сообщение на экран
+            http_response_code(400);
+            echo json_encode(['code' => 424]);
+            return;
+        }
+
+        // Проверить введенный пароль
+        if ($password != $this->adm_pass) {
+            // Выводим сообщение на экран
+            http_response_code(400);
+            echo json_encode(['code' => 422]);
+            return;
+        }
+
         // Определяем таблицу и загружаем объявление
         $table = $id ? 'ads' : 'messages';
         $ad = $id ? R::load($table, $id) : R::findOne($table, 'status = 1 ORDER BY id ASC');
 
-        // $ad = R::findOne('messages', 'status = 1 ORDER BY id ASC');
-        // error_log("ad: " . print_r($ad, true));
         // error_log("table: " . print_r($table, true));
 
         // Проверить, существует ли объявление и его статус равен 1 (активное объявление)
-        if (!$ad->id || $ad->status != 1) {
+        if (!$ad || !$ad->id || $ad->status != 1) {
             http_response_code(400);
             echo json_encode(['code' => 400]);
             return;
@@ -306,6 +320,254 @@ class AdController {
         echo json_encode($adData);
     }
 
+    // Обновить обьявление
+    public function updateAd($id, $password) {
+
+        // Декодируем JSON из php://input
+        $inputData = json_decode(file_get_contents("php://input"), true);
+
+        // error_log("POST: " . print_r($inputData, true));
+
+        // Проверка на наличие пароля
+        if (empty($password) || mb_strlen($password, 'UTF-8') > 17) {
+            // Выводим сообщение на экран
+            http_response_code(400);
+            echo json_encode(['code' => 424]);
+            return;
+        }
+
+        // Проверить введенный пароль
+        if ($password != $this->adm_pass) {
+            // Выводим сообщение на экран
+            http_response_code(400);
+            echo json_encode(['code' => 422]);
+            return;
+        }
+
+        // Поля и их значения по умолчанию
+        $fields = [
+            'contact' => isset($inputData['contact']) ? trim($inputData['contact']) : null,
+            'title' => isset($inputData['title']) ? trim($inputData['title']) : null,
+            'category' => isset($inputData['category']) ? trim($inputData['category']) : null,
+            'description' => isset($inputData['description']) ? trim($inputData['description']) : null,
+        ];
+
+        // Проверка обязательных полей на наличие и пустоту
+        foreach ($fields as $key => $value) {
+            if (empty($value)) {
+                http_response_code(400);
+                echo json_encode(['code' => 600]);
+                return;
+            }
+        }
+
+        // Ограничения по длине полей
+        $fieldLimits = [
+            'contact' => 51,
+            'title' => 41,
+            'category' => 6,
+            'description' => 1001
+        ];
+
+        // Проверка длины полей
+        foreach ($fieldLimits as $field => $limit) {
+            if (mb_strlen($fields[$field], 'UTF-8') > $limit) {
+                http_response_code(400);
+                echo json_encode(['code' => 601]);
+                return;
+            }
+        }
+
+        // Присвоение переменных для дальнейшего использования
+        $contact = $fields['contact'];
+        $title = $fields['title'];
+        $category = $fields['category'];
+        $description = $fields['description'];
+
+        //
+        if (!$id) {
+            //
+            $message_id = isset($inputData['id']) ? trim($inputData['id']) : null;
+            //
+            $limit = 8;
+            // Проверяем, что $id является строкой, состоящей только из цифр и его длина не превышает лимит
+            if (!ctype_digit($message_id) || strlen($message_id) > $limit) {
+                http_response_code(400);
+                echo json_encode(['code' => 101]);
+                // Прекращаем выполнение скрипта при ошибке
+                return;
+            }
+            // Загружаем объявление по ID
+            $ad = R::load('messages', (int)$message_id);
+            
+            // Проверить, существует ли объявление и его статус равен 1 (активное объявление)
+            if (!$ad->id || $ad->status != 1) {
+                // Если объявление не найдено или статус не равен 1, вернуть ошибку 404
+                http_response_code(400);
+                echo json_encode(['code' => 400]);
+                return;
+            }
+            // error_log("Ad: " . $ad);
+
+            // Создаем новое объявление
+            $newAd = R::dispense('ads'); // Используем RedBeanPHP для создания записи в таблице "ads"
+            $newAd->user_id = 1;
+            $newAd->title = $title; // Заголовок объявления
+            $newAd->category = $category; // Категория объявления
+            $newAd->description = $description; // Описание объявления
+
+            // Устанавливаем пути к временной и целевой папкам
+            $tmpPath = 'uploads/images/tmp/';
+            $newPath = 'uploads/images/';
+
+            // Сохраняем названия фотографий в таблицу ads
+            $newAd->cover_photo = $ad->cover_photo ? $ad->cover_photo : null;
+            $newAd->photo_1 = $ad->photo_1 ? $ad->photo_1 : null;
+            $newAd->photo_2 = $ad->photo_2 ? $ad->photo_2 : null;
+            $newAd->photo_3 = $ad->photo_3 ? $ad->photo_3 : null;
+
+            // Перемещаем файлы из временной папки в целевую и удаляем их из временной папки
+            $photos = ['cover_photo', 'photo_1', 'photo_2', 'photo_3'];
+
+            foreach ($photos as $photoField) {
+                // Проверяем, что поле не пустое
+                if ($ad->{$photoField}) {
+                    // Добавляем расширение к имени файла
+                    $fileName = $ad->{$photoField} . '.jpg';
+                    $tmpFile = $tmpPath . $fileName;
+                    $newFile = $newPath . $fileName;
+
+                    // Проверяем, что файл существует в временной папке
+                    if (file_exists($tmpFile)) {
+                        // Перемещаем файл в новую папку
+                        if (rename($tmpFile, $newFile)) {
+                            // Успешно перемещено
+                            // echo "Файл {$fileName} успешно перемещен.\n";
+                        } else {
+                            // Ошибка при перемещении
+                            // echo "Не удалось переместить файл {$fileName}.\n";
+                            http_response_code(400);
+                            echo json_encode(['code' => 461]);
+                            return;
+                        }
+                    } else {
+                        // echo "Файл {$fileName} не найден в временной папке.\n";
+                        http_response_code(400);
+                        echo json_encode(['code' => 462]);
+                        return;
+                    }
+                }
+            }
+
+            $newAd->contact = $contact; // Контактная информация
+            $newAd->status = 1; // Статус объявления
+            $newAd->created_at = date('Y-m-d H:i:s'); // Дата создания
+            $newAd->viewed = 0; // Счетчик просмотров (изначально 0)
+            R::store($newAd); // Сохраняем объявление в базе данных
+
+            $ad->status = 0;
+            $ad->closed_at = date('Y-m-d H:i:s');
+            R::store($ad); // Сохраняем объявление в базе данных
+
+            // Возвращаем ответ
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true]);
+            // return;
+        }
+
+        if ($id) {
+            // Загружаем объявление по ID
+            $ad = R::load('ads', $id);
+
+            // Проверить, существует ли объявление и его статус равен 1 (активное объявление)
+            if (!$ad->id || $ad->status != 1) {
+                // Если объявление не найдено или статус не равен 1, вернуть ошибку 404
+                http_response_code(400);
+                echo json_encode(['code' => 400]);
+                return;
+            }
+            // Сохраняем новые данные в старое обьявление
+            $ad->title = $title; // Заголовок объявления
+            $ad->category = $category; // Категория объявления
+            $ad->description = $description; // Описание объявления
+            $ad->contact = $contact; // Контактная информация
+            R::store($ad); // Сохраняем объявление в базе данных
+            // Возвращаем ответ
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true]);
+        }
+    }
+
+    //
+    public function cleanAd($id, $password) {
+        // Проверка на наличие пароля и ID
+        if (empty($password) || empty($id) || mb_strlen($password, 'UTF-8') > 17) {
+            // Выводим сообщение на экран
+            http_response_code(400);
+            echo json_encode(['code' => 420]);
+            return;
+        }
+
+        // Проверить введенный пароль
+        if ($password != $this->adm_pass) {
+            // Выводим сообщение на экран
+            http_response_code(400);
+            echo json_encode(['code' => 422]);
+            return;
+        }
+
+        // Загрузить объявление по ID
+        $ad = R::load('messages', $id);
+
+        // Проверка объявления
+        if (!$ad->id) {
+            //
+            http_response_code(400);
+            echo json_encode(['code' => 421]);
+            return;
+        }
+
+        // Проверка статуса объявления
+        if ($ad->status != 1) {
+            //
+            http_response_code(400);
+            echo json_encode(['code' => 423]);
+            return;
+        }
+
+        // Устанавливаем пути к временной папке
+        $tmpPath = 'uploads/images/tmp/';
+
+        // Собираем названия фотографий
+        $photos = [$ad->cover_photo, $ad->photo_1, $ad->photo_2, $ad->photo_3];
+
+        foreach ($photos as $photoFile) {
+            // Проверяем, что поле не пустое
+            if ($photoFile) {
+                // Формируем полный путь к файлу с расширением
+                $tmpFile = $tmpPath . $photoFile . '.jpg';
+        
+                // Удаляем файл, если он существует
+                if (file_exists($tmpFile)) {
+                    if (!unlink($tmpFile)) {
+                        // Ошибка при удалении
+                        http_response_code(400);
+                        echo json_encode(['code' => 462]);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Обновить статус объявления и дату
+        $ad->status = 0; // Статус объявления
+        $ad->closed_at = date('Y-m-d H:i:s'); // Дата удаления
+        R::store($ad);
+
+        // Сообщение об успехе
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true]);
+    }
 
     // Создать новое объявление
     public function createAd() {
@@ -670,6 +932,14 @@ class AdController {
             return;
         }
 
+        // Проверить введенный пароль
+        if ($password != $this->adm_pass) {
+            // Выводим сообщение на экран
+            http_response_code(400);
+            echo json_encode(['code' => 422]);
+            return;
+        }
+
         // Загрузить объявление по ID
         $ad = R::load('ads', $id);
 
@@ -681,13 +951,13 @@ class AdController {
             return;
         }
 
-        // Проверить введенный пароль
-        if ($password != $this->adm_pass) {
-            // Выводим сообщение на экран
-            http_response_code(400);
-            echo json_encode(['code' => 422]);
-            return;
-        }
+        // // Проверить введенный пароль
+        // if ($password != $this->adm_pass) {
+        //     // Выводим сообщение на экран
+        //     http_response_code(400);
+        //     echo json_encode(['code' => 422]);
+        //     return;
+        // }
 
         // Проверка статуса объявления
         if ($ad->status != 1) {

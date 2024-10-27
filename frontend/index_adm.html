@@ -304,15 +304,19 @@
 
 												<div class="card-body">
 													<div class="input-group input-group-sm mb-2 shadow-sm">
-														<span class="input-group-text" :class="getCharCountClass2(currentAd.contact, currentAd.contactLimit)"
-															id="inputGroup-sizing-sm">Контакт ({{ getRemainingChars(currentAd.contact, currentAd.contactLimit) }})</span>
+														<span class="input-group-text" :class="{ 'text-danger': currentAd.contact === '' || !currentAd.contact.includes('@') }"
+															id="inputGroup-sizing-sm">Контакт</span>
+															<span class="input-group-text" :class="getCharCountClass2(currentAd.contact, currentAd.contactLimit)"
+																id="basic-addon2">{{ getRemainingChars(currentAd.contact, currentAd.contactLimit) }}</span>
 														<input v-model="currentAd.contact" type="text" class="form-control" aria-label="Sizing example input"
 															aria-describedby="inputGroup-sizing-sm">
 													</div>
 
 													<div class="input-group input-group-sm mb-2 shadow-sm">
-														<span class="input-group-text" :class="getCharCountClass2(currentAd.title, currentAd.titleLimit)"
-															id="inputGroup-sizing-sm">Название ({{ getRemainingChars(currentAd.title, currentAd.titleLimit) }})</span>
+														<span class="input-group-text" :class="{ 'text-danger': currentAd.title === '' }"
+															id="inputGroup-sizing-sm">Название</span>
+															<span class="input-group-text" :class="getCharCountClass2(currentAd.title, currentAd.titleLimit)"
+																id="basic-addon2">{{ getRemainingChars(currentAd.title, currentAd.titleLimit) }}</span>
 														<input v-model="currentAd.title" type="text" class="form-control" aria-label="Sizing example input"
 															aria-describedby="inputGroup-sizing-sm">
 													</div>
@@ -351,21 +355,10 @@
 														</select>
 													</div>
 
-													<!-- <div class="mb-3">
-														<label for="FormControlTextarea61" class="form-label">
-															Описание
-															<span :class="getCharCountClass2(newAd.description, newAd.descriptionLimit)">
-																({{ getRemainingChars(newAd.description, newAd.descriptionLimit) }})
-															</span>
-														</label>
-														<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm"
-															id="FormControlTextarea61" rows="3"></textarea>
-													</div> -->
-
 													<div class="input-group input-group-sm mb-2 shadow-sm">
 														<span class="input-group-text" :class="getCharCountClass2(currentAd.description, currentAd.descriptionLimit)"
 															id="FormControlTextarea61">Текст<br>({{ getRemainingChars(currentAd.description, currentAd.descriptionLimit) }})</span>
-														<textarea v-model="currentAd.description" class="form-control form-select-sm shadow-sm"
+														<textarea v-model="currentAd.description" class="form-control form-select-sm"
 															id="FormControlTextarea61" rows="4"></textarea>
 													</div>
 
@@ -393,14 +386,17 @@
 												</div>
 
 												<div class="d-flex justify-content-between card-footer">
-													<button @click="cleanForm()" class="btn btn-sm btn-danger shadow-sm">
+													<button @click="cleanAd()" class="btn btn-sm btn-danger shadow-sm" :disabled="searchAdId.length > 0">
 														<i class="bi bi-trash3-fill"></i>
+														Удалить
+													</button>
+													<button @click="cleanForm()" class="btn btn-sm btn-warning shadow-sm">
+														<i class="bi bi-trash3"></i>
 														Очистить
 													</button>
-
 													<button @click="changeAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
 														<i class="bi bi-envelope-open-fill"></i>
-														Опубликовать
+														{{ searchAdId.length > 0 ? 'Изменить' : 'Разместить' }}
 													</button>
 												</div>
 
@@ -416,7 +412,7 @@
 												<i class="bi bi-1-square-fill"></i>
 											</span>
 											<input v-model="searchAdId" type="text" class="form-control" aria-label="Server">
-											<button @click="getNextAd(searchAdId)" class="btn btn-outline-secondary" type="button" :disabled="authPassword.length < 5"
+											<button @click="getAd(searchAdId)" class="btn btn-outline-secondary" type="button" :disabled="authPassword.length < 5"
 												id="button-addon61">Загрузить</button>
 										</div>
 
@@ -806,6 +802,7 @@
 						//
 						permanent: false
 					},
+					//
 					currentAd: {
 						//
 						title: '',
@@ -827,6 +824,8 @@
 						id: '',
 						//
 						status: '',
+						//
+						cover_photo: '',
 						// содержит массив загруженных фото
 						photos: [],
 					},
@@ -920,8 +919,9 @@
 						421: 'Не удалось найти объявление',
 						422: 'Ошибка доступа',
 						423: 'Объявление было удалено ранее',
-						424: '',
+						424: 'Ошибка с паролем',
 						425: '',
+						426: '',
 						430: 'Ошибка с текстом или ID',
 						431: 'Текст объявления слишком длинный',
 						432: '',
@@ -932,11 +932,14 @@
 						443: '',
 						450: 'Пожалуйста, напишите текст жалобы',
 						451: 'Текст жалобы слишком длинный',
-						452: '',
+						452: 'Это объявление нельзя удалять',
 						453: '',
+						454: '',
 						460: 'Объявление успешно удалено!',
-						461: '',
-						462: '',
+						461: 'Не удалось переместить фото в новую папку',
+						462: 'Фото не найдено в временной папке',
+						463: 'Этот метод пока не готов',
+						464: '',
 						470: 'Жалоба на объявление принята!',
 						471: '',
 						472: '',
@@ -949,8 +952,9 @@
 						486: '',
 						487: '',
 						490: 'Объявление успешно заблокировано!',
-						491: '',
+						491: 'Временное объявление успешно удалено!',
 						492: '',
+						493: '',
 						// Ошибки связанные с одной новостью
 						500: 'Не удалось найти активную новость',
 						501: '',
@@ -1000,7 +1004,7 @@
 						641: '',
 						642: '',
 						650: 'Объявление успешно создано!',
-						651: '',
+						651: 'Объявление успешно обновлено!',
 						652: '',
 						// Ошибки связанные с созданием новости
 						700: 'Не заполнены важные поля',
@@ -1356,7 +1360,15 @@
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
 					// Проверяем, введены ли параметры объявления и их длина
-					if (this.newAd.title.length < 5) {
+					if (this.newAd.contact.length < 5) {
+						// this.errorMessage = 'Пожалуйста, напишите свой контакт';
+						this.errorMessage = this.messages[633];
+
+					} else if (this.getRemainingChars(this.newAd.contact, this.newAd.contactLimit) < 0) {
+						// this.errorMessage = 'Контакт слишком длинный';
+						this.errorMessage = this.messages[638];
+
+					} else if (this.newAd.title.length < 3) {
 						// this.errorMessage = 'Пожалуйста, напишите название';
 						this.errorMessage = this.messages[630];
 
@@ -1379,14 +1391,6 @@
 					} else if (this.getRemainingChars(this.newAd.description, this.newAd.descriptionLimit) < 0) {
 						// this.errorMessage = 'Описание слишком длинное';
 						this.errorMessage = this.messages[637];
-
-					} else if (this.newAd.contact.length < 5) {
-						// this.errorMessage = 'Пожалуйста, напишите свой контакт';
-						this.errorMessage = this.messages[633];
-
-					} else if (this.getRemainingChars(this.newAd.contact, this.newAd.contactLimit) < 0) {
-						// this.errorMessage = 'Контакт слишком длинный';
-						this.errorMessage = this.messages[638];
 
 					} else if (this.authPassword.length < 5) {
 						// this.errorMessage = 'Пожалуйста, введите пароль';
@@ -1444,14 +1448,26 @@
 						});
 				},
 				//
-				getNextAd(id) {
-					// много проверок тут
+				getAd(id) {
+					//
+					if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.messages[634];
 
+					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
+						// this.errorMessage = 'Пароль слишком длинный';
+						this.errorMessage = this.messages[639];
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
 					// Заменяем пустую строку на 0
 					id = id || 0;
 					// отправляем данные на сервер
                     this.isLoading2 = true;
-                    axios.get(`api/ad/check_one/${id}`)
+                    axios.get(`api/ad/check/${id}/${this.authPassword}`)
                         .then(response => {
 							// загрузить данные по объявлению
 							this.currentAd.contact = response.data.contact || '';
@@ -1467,19 +1483,14 @@
 							this.currentAd.id = response.data.id || '';
 							//
 							this.currentAd.status = response.data.status || '';
-
+							//
+							this.currentAd.cover_photo = response.data.cover_photo || '';
 							// проверка на наличие фото и их запись
 							this.currentAd.photos = [];
 							//
-							// cover_photo
-							//
-							// user_id
-							
 							response.data.photo_1 && this.currentAd.photos.push(response.data.photo_1);
 							response.data.photo_2 && this.currentAd.photos.push(response.data.photo_2);
-							response.data.photo_3 && this.currentAd.photos.push(response.data.photo_3);
-
-							// console.log(response.data)
+							response.data.photo_3 && this.currentAd.photos.push(response.data.photo_3);							
                         })
                         .catch((error) => {
 							//
@@ -1492,6 +1503,131 @@
                             this.isLoading2 = false;
                         });
                 },
+				// Внести изменения в объявление
+				changeAd() {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+					// Проверяем, введены ли параметры объявления и их длина
+					if (
+							this.currentAd.contact.length < 5 ||
+							(this.searchAdId === '' && !this.currentAd.contact.includes('@'))
+						) {
+						// this.errorMessage = 'Пожалуйста, напишите свой контакт';
+						this.errorMessage = this.messages[633];
+
+					} else if (this.getRemainingChars(this.currentAd.contact, this.currentAd.contactLimit) < 0) {
+						// this.errorMessage = 'Контакт слишком длинный';
+						this.errorMessage = this.messages[638];
+					
+					} else if (this.currentAd.title.length < 3) {
+						// this.errorMessage = 'Пожалуйста, напишите название';
+						this.errorMessage = this.messages[630];
+
+					} else if (this.getRemainingChars(this.currentAd.title, this.currentAd.titleLimit) < 0) {
+						// this.errorMessage = 'Название слишком длинное';
+						this.errorMessage = this.messages[635];
+
+					} else if (this.categoryCode.length < 1) {
+						// this.errorMessage = 'Пожалуйста, выберите категорию';
+						this.errorMessage = this.messages[631];
+
+					} else if (this.getRemainingChars(this.categoryCode, this.categoryCodeLimit) < 0) {
+						// this.errorMessage = 'Категория слишком длинная';
+						this.errorMessage = this.messages[636];
+
+					} else if (this.currentAd.description.length < 20) {
+						// this.errorMessage = 'Пожалуйста, напишите описание';
+						this.errorMessage = this.messages[632];
+
+					} else if (this.getRemainingChars(this.currentAd.description, this.currentAd.descriptionLimit) < 0) {
+						// this.errorMessage = 'Описание слишком длинное';
+						this.errorMessage = this.messages[637];
+
+					} else if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.messages[634];
+
+					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
+						// this.errorMessage = 'Пароль слишком длинный';
+						this.errorMessage = this.messages[639];
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+
+					this.currentAd.category = this.categoryCode;
+					// Заменяем пустую строку на 0
+					id = this.searchAdId || 0;
+					// this.currentAd.searchAdId = this.searchAdId || 0;
+
+					// отправляем данные на сервер
+					this.isLoading2 = true;
+					axios.post(`api/ad/update/${id}/${this.authPassword}`, this.currentAd, { headers: { 'Content-Type': 'application/json' } })
+						.then(response => {
+							//
+							this.successMessage = this.messages[651];
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.successMessage = ''; }, 3000);
+							// очищаем форму
+							this.cleanForm();
+						})
+						.catch((error) => {
+							//
+							this.errorMessage = this.messages[error.response.data['code']];
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.errorMessage = ''; }, 3000);
+						})
+						.finally(() => {
+							this.isLoading2 = false;
+						});
+				},
+				//
+				cleanAd() {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+					// Проверяем, введены ли параметры объявления и их длина
+					if (this.authPassword.length < 5) {
+						// this.errorMessage = 'Пожалуйста, введите пароль';
+						this.errorMessage = this.messages[634];
+
+					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
+						// this.errorMessage = 'Пароль слишком длинный';
+						this.errorMessage = this.messages[639];
+
+					} else if (!this.currentAd.id || this.searchAdId !== '') {
+						// this.errorMessage = 'Это объявление нельзя удалять';
+						this.errorMessage = this.messages[452];
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+					//
+					id = this.currentAd.id;
+					// отправляем данные на сервер
+					this.isLoading2 = true;
+					axios.get(`api/ad/clean/${id}/${this.authPassword}`)
+					.then(response => {
+							//
+							this.successMessage = this.messages[491];
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.successMessage = ''; }, 3000);
+							// очищаем форму
+							this.cleanForm();
+						})
+						.catch((error) => {
+							//
+							this.errorMessage = this.messages[error.response.data['code']];
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.errorMessage = ''; }, 3000);
+						})
+						.finally(() => {
+							this.isLoading2 = false;
+						});
+				},
 				// метод создания новой новости
 				createNews() {
 					// Плавная прокрутка страницы вверх

@@ -2179,7 +2179,7 @@
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
 					// Проверяем, введены ли параметры объявления и их длина
-					if (this.newAd.title.length < 5) {
+					if (this.newAd.title.length < 3) {
 						// this.errorMessage = 'Пожалуйста, напишите название';
 						this.errorMessage = this.getTranslation('errors.' + 630);
 

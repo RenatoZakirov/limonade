@@ -31,11 +31,12 @@ class Router {
                     $controller = new AdController(ADM_PASS);
                     $controller->getAd($id, false);
                 },
-                'api/ad/check_one/{id}' => function($params) {
+                'api/ad/check/{id}/{password}' => function($params) {
                     // Используем тернарный оператор для проверки id
                     $id = ($params[0] === '0') ? 0 : self::validateId($params[0]);
+                    $password = trim((string)$params[1]);
                     $controller = new AdController(ADM_PASS);
-                    $controller->checkAd($id);
+                    $controller->checkAd($id, $password);
                 },
                 'api/ad/get_list_by_user/{password}' => function($params) {
                     $password = trim((string)$params[0]);
@@ -55,6 +56,13 @@ class Router {
                     $password = trim((string)$params[1]); // 
                     $controller = new AdController(ADM_PASS);
                     $controller->blockAd($id, $password);
+                },
+                'api/ad/clean/{id}/{password}' => function($params) {
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
+                    $password = trim((string)$params[1]); // 
+                    $controller = new AdController(ADM_PASS);
+                    $controller->cleanAd($id, $password);
                 },
 
                 // Новости
@@ -102,6 +110,13 @@ class Router {
                 'api/ad/create' => function() {
                     $controller = new AdController(ADM_PASS);
                     $controller->createAd();
+                },
+                'api/ad/update/{id}/{password}' => function($params) {
+                    // Используем тернарный оператор для проверки id
+                    $id = ($params[0] === '0') ? 0 : self::validateId($params[0]);
+                    $password = trim((string)$params[1]);
+                    $controller = new AdController(ADM_PASS);
+                    $controller->updateAd($id, $password);
                 },
                 'api/ad/dislike/{id}' => function($params) {
                     // Проверяем и приводим к целому числу

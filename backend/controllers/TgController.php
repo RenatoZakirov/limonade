@@ -7,34 +7,6 @@ class TgController {
         $this->tg_key = $tg_key;
     }
 
-    // // Обработка вебхука
-    // public function handleWebhook() {
-    //     // Получение данных из вебхука
-    //     $update = json_decode(file_get_contents("php://input"), TRUE);
-
-    //     // Проверка на наличие сообщения
-    //     if (isset($update['message'])) {
-    //         $message = $update['message'];
-    //         $chatId = $message['chat']['id']; // Получаем chat_id пользователя
-    //         $text = isset($message['text']) ? trim($message['text']) : ''; // Текст сообщения
-
-    //         // Обработка команды /start
-    //         if ($text === '/start') {
-    //             $this->handleStartCommand($chatId);
-    //         } else {
-    //             // Ответ на некорректные запросы
-    //             $this->sendMessage($chatId, 'Я не понимаю ваш запрос и не могу его обработать');
-    //         }
-    //     } elseif (isset($update['callback_query'])) {
-    //         // Заглушка для обработки callback запросов
-    //         $this->handleCallbackQuery($update['callback_query']);
-    //     } else {
-    //         http_response_code(400);
-    //         // Ответ на некорректные запросы
-    //         // $this->sendMessage($chatId, 'Я не понимаю ваш запрос и не могу его обработать');
-    //     }
-    // }
-
     // Обработка вебхука
     public function handleWebhook() {
         // Получение данных из вебхука
@@ -82,15 +54,18 @@ class TgController {
                 $this->sendMessage($chatId, 'Я не понимаю ваш запрос и не могу его обработать');
                 return;
             }
-    
-            // Username пересланного сообщения
-            $userContact = isset($message['forward_origin']['username']) ? $message['forward_origin']['username'] : '';
-            // Имя пересланного сообщения
-            $userName = isset($message['forward_origin']['sender_user_name']) ? $message['forward_origin']['sender_user_name'] : '';
-            // Текст пересланного сообщения (если есть)
-            $description = isset($message['caption']) ? trim($message['caption']) : '';
+
+            $structure = $this->getForwardedMessageInfo($message);
+
+            $userContact = $structure['userContact'];
+
+            $userName = $structure['userName'];
+
+            $description = $structure['description'];
+
+            
             // media_group_id (если это группа медиа)
-            $mediaGroupId = isset($message['media_group_id']) ? $message['media_group_id'] : null;
+            $mediaGroupId = isset($message['media_group_id']) ? strval($message['media_group_id']) : null;
             // Массив с фото
             $photos = $message['photo'] ?? [];
 
@@ -105,13 +80,16 @@ class TgController {
     // Сохранение данных из сообщения
     public function saveMessage($chatId, $userContact, $userName, $description, $mediaGroupId, $photos) {
         // Лимиты по длине полей
-        $contact_limit = 51;
-        $description_limit = 1001;
+        $contact_limit = 50;
+        $description_limit = 1000;
         
         // Подготавливаем значение user_contact из $userName и $userContact
-        $separator = ", телеграм ";
+        $separator = ', телеграм ';
+        //
+        $userName =  $userName ?? 'Noname';
+        //
         $fullContact = $userName . $separator . $userContact;
-
+        
         // Проверяем, не превышает ли длина полного контакта лимит
         if (mb_strlen($fullContact, 'UTF-8') > $contact_limit) {
             // Рассчитываем излишек символов
@@ -150,24 +128,31 @@ class TgController {
             $message->media_group_id = $mediaGroupId;
             $message->status = 1;
             $message->created_at = date('Y-m-d H:i:s');
+
+        } else if ($message->status == 0) {
+            return;
         }
     
-        // Определяем, сколько фото уже сохранено для этой записи
+        // Определяем, сколько фото уже сохранено для этой записи, включая cover_photo
         $existingPhotos = 0;
-        //
-        for ($i = 1; $i <= 3; $i++) {
-            if (!empty($message->{'photo_' . $i})) {
+        $photoFields = ['cover_photo', 'photo_1', 'photo_2', 'photo_3'];
+
+        foreach ($photoFields as $field) {
+            if (!empty($message->{$field})) {
                 $existingPhotos++;
             }
         }
-    
-        // Если уже сохранено 3 фото, игнорируем обработку
-        if ($existingPhotos >= 3) {
+
+        // Если уже сохранено 4 фото, игнорируем обработку
+        if ($existingPhotos >= 4) {
             return;
         }
     
         // Обрабатываем самое большое фото, если фото присутствуют
         if (!empty($photos)) {
+            // Путь к папке для сохранения изображений
+            $tmpPath = 'uploads/images/tmp/';
+            $tmpPath_2 = 'uploads/images/tmp_2/';
             // Выбираем самое большое фото — последний элемент в массиве
             $largestPhoto = end($photos);
             // Получаем путь к фото на сервере
@@ -178,6 +163,9 @@ class TgController {
             // error_log("Incoming update: " . print_r($photo, true));
             // Если была ошибка, ответ уже отправлен в методе checkPhoto
             if (!$photo) {
+                // Закрыть объявление
+                $this->closeMessage($tmpPath, $message, $chatId);
+                $this->deleteFilesInDirectory($tmpPath_2);
                 return;
             }
 
@@ -187,34 +175,34 @@ class TgController {
             $maxSize = 5 * 1024 * 1024;
             // Минимальные допустимые размеры изображения
             $minResolution = [600, 450];
-
-            // Путь к папке для сохранения изображений
-            $filePath = 'uploads/images/tmp/';
  
             // Создаем объект для редактирования изображений
             $imageEditor = new ImageEditor($photo);
 
             // Проверяем тип файла
             if (!$imageEditor->validateType($allowedTypes)) {
-                // Удаляем временный файл
-                unlink($telegramFilePath);
-                $this->sendMessage($chatId, 'Недопустимый тип фото, порядковый номер фото: ' . ($existingPhotos + 1));
+                // Закрыть объявление
+                $this->closeMessage($tmpPath, $message, $chatId);
+                $this->deleteFilesInDirectory($tmpPath_2);
+                $this->sendMessage($chatId, 'Ошибка: недопустимый тип фото, порядковый номер фото: ' . $existingPhotos++);
                 return;
             }
 
             // Проверяем размер файла
             if (!$imageEditor->validateSize($maxSize)) {
-                // Удаляем временный файл
-                unlink($telegramFilePath);
-                $this->sendMessage($chatId, 'Недопустимо большой размер фото, порядковый номер фото: ' . ($existingPhotos + 1));
+                // Закрыть объявление
+                $this->closeMessage($tmpPath, $message, $chatId);
+                $this->deleteFilesInDirectory($tmpPath_2);
+                $this->sendMessage($chatId, 'Ошибка: недопустимо большой размер фото, порядковый номер фото: ' . $existingPhotos++);
                 return;
             }
 
             // Проверяем разрешение изображения
             if (!$imageEditor->validateResolution($minResolution)) {
-                // Удаляем временный файл
-                unlink($telegramFilePath);
-                $this->sendMessage($chatId, 'Недопустимо маленькое разрешение фото, порядковый номер фото: ' . ($existingPhotos + 1));
+                // Закрыть объявление
+                $this->closeMessage($tmpPath, $message, $chatId);
+                $this->deleteFilesInDirectory($tmpPath_2);
+                $this->sendMessage($chatId, 'Ошибка: недопустимо маленькое разрешение фото, порядковый номер фото: ' . $existingPhotos++);
                 return;
             }
 
@@ -229,32 +217,113 @@ class TgController {
                         $imageEditor->createImage();          // Создаем изображение
                         $imageEditor->resizeToFit();          // Меняем размер изображения
                         $imageEditor->createPaddedImage();    // Создаем изображение с добавлением полей
-                        $imageEditor->savePadded($filePath . $coverPhotoName . '.jpg'); // Сохраняем с полями
+                        $imageEditor->savePadded($tmpPath . $coverPhotoName . '.jpg'); // Сохраняем с полями
                     } else {
                         // Для вертикальных изображений сохраняем оригинал
                         $imageEditor->createImage();
                         $imageEditor->resizeToFit();
-                        $imageEditor->saveOriginal($filePath . $coverPhotoName . '.jpg');
+                        $imageEditor->saveOriginal($tmpPath . $coverPhotoName . '.jpg');
                     }
                     $message->cover_photo = $coverPhotoName;
                     // Обрабатываем photo_1
-                    $message->photo_1 = $this->processPhoto($imageEditor, $filePath);
-                    break;
-
-                case 1:
-                    // Обрабатываем photo_2
-                    $message->photo_2 = $this->processPhoto($imageEditor, $filePath);
+                    $message->photo_1 = $this->processPhoto($imageEditor, $tmpPath);
                     break;
 
                 case 2:
+                    // Обрабатываем photo_2
+                    $message->photo_2 = $this->processPhoto($imageEditor, $tmpPath);
+                    break;
+
+                case 3:
                     // Обрабатываем photo_3
-                    $message->photo_3 = $this->processPhoto($imageEditor, $filePath);
+                    $message->photo_3 = $this->processPhoto($imageEditor, $tmpPath);
                     break;
             }
         }
 
         // Сохраняем запись в базе данных (независимо от того, есть ли фото)
         R::store($message);
+    }
+
+    private function getForwardedMessageInfo($message) {
+        // Проверка на наличие разных полей, чтобы обработать оба варианта
+        $userContact = '';
+        $userName = '';
+        $description = '';
+    
+        if (isset($message['forward_origin'])) {
+            // Если сообщение переслано из канала
+            if ($message['forward_origin']['type'] === 'channel') {
+                $userContact = isset($message['forward_origin']['chat']['username'])
+                    ? '@' . $message['forward_origin']['chat']['username']
+                    : '';
+                $userName = isset($message['forward_origin']['chat']['title'])
+                    ? $message['forward_origin']['chat']['title']
+                    : '';
+            } else {
+                // Обработка вариантов с sender_user или других форматов
+                $userContact = isset($message['forward_origin']['sender_user']['username'])
+                    ? '@' . $message['forward_origin']['sender_user']['username']
+                    : (isset($message['forward_origin']['username'])
+                        ? '@' . $message['forward_origin']['username']
+                        : '');
+
+                $userName = isset($message['forward_origin']['sender_user']['first_name'])
+                    ? $message['forward_origin']['sender_user']['first_name']
+                    : (isset($message['forward_origin']['sender_user_name'])
+                        ? $message['forward_origin']['sender_user_name']
+                        : '');
+            }
+        }
+    
+        // Получение текста или описания сообщения (caption или text)
+        $description = isset($message['caption']) 
+            ? trim($message['caption'])
+            : (isset($message['text']) ? trim($message['text']) : '');
+    
+        return [
+            'userContact' => $userContact,
+            'userName' => $userName,
+            'description' => $description,
+        ];
+    }
+    
+    private function closeMessage($tmpPath, $message, $chatId) {
+        // Закрыть объявление
+        $message->status = 0;
+        $message->closed_at = date('Y-m-d H:i:s');
+        R::store($message);
+        // Собираем названия фотографий
+        $photoFields = ['cover_photo', 'photo_1', 'photo_2', 'photo_3'];
+
+        foreach ($photoFields as $field) {
+            if (!empty($message->{$field})) {
+                // Формируем полный путь к файлу с расширением
+                $tmpFile = $tmpPath . $message->{$field} . '.jpg';
+        
+                // Удаляем файл, если он существует
+                if (file_exists($tmpFile)) {
+                    if (!unlink($tmpFile)) {
+                        // Ошибка при удалении
+                        $this->sendMessage($chatId, 'Ошибка: не получилось удалить фото');
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    private function deleteFilesInDirectory($directory) {
+        // Получаем список всех файлов в директории
+        $files = glob($directory . '*'); // добавляем * для выбора всех файлов
+        
+        // Проходим по каждому файлу и удаляем его
+        foreach($files as $file) {
+            if (is_file($file)) {
+                // Удаляем файл
+                unlink($file);
+            }
+        }
     }
 
     private function downloadFromTelegram($fileId) {
@@ -288,7 +357,7 @@ class TgController {
     private function checkPhoto($chatId, $filePath, $index) {
         // Проверяем, существует ли файл
         if (!file_exists($filePath)) {
-            $this->sendMessage($chatId, 'Ошибка: файл не найден на сервере, порядковый номер файла: ' . ($index + 1));
+            $this->sendMessage($chatId, 'Ошибка: файл не найден на сервере, порядковый номер файла: ' . $index++);
             return null;
         }
     
@@ -298,7 +367,7 @@ class TgController {
         if ($imageInfo === false) {
             // Удаляем временный файл
             unlink($filePath);
-            $this->sendMessage($chatId, 'Файл не является изображением, порядковый номер файла: ' . ($index + 1));
+            $this->sendMessage($chatId, 'Ошибка: файл не является изображением, порядковый номер файла: ' . $index++);
             return null;
         }
     
