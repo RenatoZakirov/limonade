@@ -951,14 +951,6 @@ class AdController {
             return;
         }
 
-        // // Проверить введенный пароль
-        // if ($password != $this->adm_pass) {
-        //     // Выводим сообщение на экран
-        //     http_response_code(400);
-        //     echo json_encode(['code' => 422]);
-        //     return;
-        // }
-
         // Проверка статуса объявления
         if ($ad->status != 1) {
             //
@@ -981,6 +973,70 @@ class AdController {
         // Сообщение об успехе
         header('Content-Type: application/json');
         echo json_encode(['success' => true]);
+    }
+
+    // Удалить старые обьявления
+    public function closeOldAds($password) {
+        // Проверка на наличие пароля
+        if (empty($password) || mb_strlen($password, 'UTF-8') > 17) {
+            // Выводим сообщение на экран
+            // http_response_code(400);
+            // echo json_encode(['code' => 420]);
+            header('Content-Type: text/html');
+            echo 'Проблема с паролем...';
+            return;
+        }
+
+        // Проверить введенный пароль
+        if ($password != $this->adm_pass) {
+            // Выводим сообщение на экран
+            // http_response_code(400);
+            // echo json_encode(['code' => 422]);
+            header('Content-Type: text/html');
+            echo 'Проблема с доступом...';
+            return;
+        }
+
+        // Вычисление даты 10 дней назад
+        $dateLimit = date('Y-m-d H:i:s', strtotime('-12 days'));
+
+        // Поиск всех объявлений, созданных более 10 дней назад и активных
+        $oldAds = R::find('ads', 'created_at < ? AND status = 1', [$dateLimit]);
+
+        // Проверка, есть ли объявления для закрытия
+        if (empty($oldAds)) {
+            // http_response_code(400);
+            // echo json_encode(['code' => 422]);
+            header('Content-Type: text/html');
+            echo 'Объявления старше 12 дней не найдены...';
+            return;
+        }
+
+        // header('Content-Type: text/html');
+        // echo 'Всего найдено объявлений: ' . count($oldAds);
+        // return;
+
+        // error_log('Массив объявлений: ' . print_r($oldAds, true)); die;
+
+        // Закрытие объявлений в цикле
+        foreach ($oldAds as $ad) {
+            // Удалить связанные фотографии
+            $this->deletePhotoIfExists($ad->cover_photo);
+            $this->deletePhotoIfExists($ad->photo_1);
+            $this->deletePhotoIfExists($ad->photo_2);
+            $this->deletePhotoIfExists($ad->photo_3);
+
+            // Обновить статус и дату закрытия
+            $ad->status = 0;
+            $ad->closed_at = date('Y-m-d H:i:s');
+            R::store($ad);
+        }
+
+        // Сообщение об успехе
+        // header('Content-Type: application/json');
+        // echo json_encode(['success' => true]);
+        header('Content-Type: text/html');
+        echo 'Всего удаленно объявлений: ' . count($oldAds);
     }
 
     // Пожаловаться на обьявление по ID

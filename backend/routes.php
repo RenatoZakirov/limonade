@@ -64,6 +64,12 @@ class Router {
                     $controller = new AdController(ADM_PASS);
                     $controller->cleanAd($id, $password);
                 },
+                'api/ad/close_old/{password}' => function($params) {
+                    // Проверяем
+                    $password = trim((string)$params[0]); // 
+                    $controller = new AdController(ADM_PASS);
+                    $controller->closeOldAds($password);
+                },
 
                 // Новости
                 'api/news/get_list' => function() {

@@ -152,7 +152,7 @@ class TgController {
         if (!empty($photos)) {
             // Путь к папке для сохранения изображений
             $tmpPath = 'uploads/images/tmp/';
-            $tmpPath_2 = 'uploads/images/tmp_2/';
+            // $tmpPath_2 = 'uploads/images/tmp_2/';
             // Выбираем самое большое фото — последний элемент в массиве
             $largestPhoto = end($photos);
             // Получаем путь к фото на сервере
@@ -165,7 +165,7 @@ class TgController {
             if (!$photo) {
                 // Закрыть объявление
                 $this->closeMessage($tmpPath, $message, $chatId);
-                $this->deleteFilesInDirectory($tmpPath_2);
+                // $this->deleteFilesInDirectory($tmpPath_2);
                 return;
             }
 
@@ -183,8 +183,8 @@ class TgController {
             if (!$imageEditor->validateType($allowedTypes)) {
                 // Закрыть объявление
                 $this->closeMessage($tmpPath, $message, $chatId);
-                $this->deleteFilesInDirectory($tmpPath_2);
-                $this->sendMessage($chatId, 'Ошибка: недопустимый тип фото, порядковый номер фото: ' . $existingPhotos++);
+                // $this->deleteFilesInDirectory($tmpPath_2);
+                $this->sendMessage($chatId, 'Ошибка: недопустимый тип фото, порядковый номер фото: ' . ($existingPhotos + 1));
                 return;
             }
 
@@ -192,8 +192,8 @@ class TgController {
             if (!$imageEditor->validateSize($maxSize)) {
                 // Закрыть объявление
                 $this->closeMessage($tmpPath, $message, $chatId);
-                $this->deleteFilesInDirectory($tmpPath_2);
-                $this->sendMessage($chatId, 'Ошибка: недопустимо большой размер фото, порядковый номер фото: ' . $existingPhotos++);
+                // $this->deleteFilesInDirectory($tmpPath_2);
+                $this->sendMessage($chatId, 'Ошибка: недопустимо большой размер фото, порядковый номер фото: ' . ($existingPhotos + 1));
                 return;
             }
 
@@ -201,8 +201,8 @@ class TgController {
             if (!$imageEditor->validateResolution($minResolution)) {
                 // Закрыть объявление
                 $this->closeMessage($tmpPath, $message, $chatId);
-                $this->deleteFilesInDirectory($tmpPath_2);
-                $this->sendMessage($chatId, 'Ошибка: недопустимо маленькое разрешение фото, порядковый номер фото: ' . $existingPhotos++);
+                // $this->deleteFilesInDirectory($tmpPath_2);
+                $this->sendMessage($chatId, 'Ошибка: недопустимо маленькое разрешение фото, порядковый номер фото: ' . ($existingPhotos + 1));
                 return;
             }
 
@@ -357,7 +357,7 @@ class TgController {
     private function checkPhoto($chatId, $filePath, $index) {
         // Проверяем, существует ли файл
         if (!file_exists($filePath)) {
-            $this->sendMessage($chatId, 'Ошибка: файл не найден на сервере, порядковый номер файла: ' . $index++);
+            $this->sendMessage($chatId, 'Ошибка: файл не найден на сервере телеграма, порядковый номер файла: ' . ($index + 1));
             return null;
         }
     
@@ -367,7 +367,7 @@ class TgController {
         if ($imageInfo === false) {
             // Удаляем временный файл
             unlink($filePath);
-            $this->sendMessage($chatId, 'Ошибка: файл не является изображением, порядковый номер файла: ' . $index++);
+            $this->sendMessage($chatId, 'Ошибка: файл не является изображением, порядковый номер файла: ' . ($index + 1));
             return null;
         }
     
@@ -434,6 +434,9 @@ class TgController {
 
     // Обработка команды /start
     private function handleStartCommand($chatId) {
+        // Выкинуть поискового бота телеграм из скрипта
+        // if ($chatId == '') return;
+
         // Поиск пользователя по chat_id в базе данных
         $user = R::findOne('users', 'chat_id = ?', [$chatId]);
 

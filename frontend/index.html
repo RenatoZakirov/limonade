@@ -431,11 +431,25 @@
 										<div class="card-body">
 											<h5 class="card-title">{{ currentAd.title }}</h5>
 											
-											<div v-for="categoryName in getCategoryNames(currentAd.category)" :key="categoryName" class="d-inline-block">
+											<!-- <div v-for="categoryName in getCategoryNames(currentAd.category)" :key="categoryName" class="d-inline-block">
 												<button class="btn btn-sm btn-warning mb-1 me-2 shadow-sm">
 													{{ categoryName }}
 												</button>
+											</div> -->
+
+											<div v-for="(categoryName, index) in getCategoryNames(currentAd.category)" 
+												:key="categoryName" 
+												class="d-inline-block">
+												<button 
+													:class="{
+														'd-none': currentAd.category.startsWith('3') && index === 1
+													}" 
+													class="btn btn-sm btn-warning mb-1 me-2 shadow-sm">
+													{{ categoryName }}
+												</button>
 											</div>
+
+
 											<p class="card-text" style="white-space: pre-line;">{{ currentAd.description }}</p>
 											<h6 class="card-subtitle mb-2 text-body-secondary">
 												
