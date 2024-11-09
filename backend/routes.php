@@ -17,76 +17,103 @@ class Router {
         $this->routes = [
             'GET' => [
                 '/' => function() {
+                    // header('Content-Type: text/html');
+                    // readfile(__DIR__ . '/../frontend/index.html');
+                    $this->notFound();
+                },
+                'web' => function() { 
                     header('Content-Type: text/html');
-                    readfile(__DIR__ . '/../frontend/index.html');
+                    readfile(__DIR__ . '/../frontend/index_web.html'); 
                 },
                 // Объявления
                 'api/ad/get_list' => function() {
-                    $controller = new AdController(ADM_PASS);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
+                    $controller->getAllAds();
+                },
+                'web/ad/get_list' => function() {
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
                     $controller->getAllAds();
                 },
                 'api/ad/get_one/{id}' => function($params) {
                     // Проверяем и приводим к целому числу
                     $id = self::validateId($params[0]);
-                    $controller = new AdController(ADM_PASS);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
+                    $controller->getAd($id, false);
+                },
+                'web/ad/get_one/{id}' => function($params) {
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
                     $controller->getAd($id, false);
                 },
                 'api/ad/check/{id}/{password}' => function($params) {
                     // Используем тернарный оператор для проверки id
                     $id = ($params[0] === '0') ? 0 : self::validateId($params[0]);
                     $password = trim((string)$params[1]);
-                    $controller = new AdController(ADM_PASS);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
                     $controller->checkAd($id, $password);
                 },
                 'api/ad/get_list_by_user/{password}' => function($params) {
                     $password = trim((string)$params[0]);
-                    $controller = new AdController(ADM_PASS);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
                     $controller->findAdsByUser($password);
+                },
+                'web/ad/get_list_by_user/{telegram_user_id}' => function($params) {
+                    $telegram_user_id = trim((string)$params[0]);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
+                    $controller->findAdsByTgId($telegram_user_id);
                 },
                 'api/ad/delete/{id}/{password}' => function($params) {
                     // Проверяем и приводим к целому числу
                     $id = self::validateId($params[0]);
                     $password = trim((string)$params[1]);
-                    $controller = new AdController(ADM_PASS);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
                     $controller->deleteAd($id, $password);
+                },
+                'web/ad/delete/{id}/{telegram_user_id}' => function($params) {
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
+                    $telegram_user_id = trim((string)$params[1]);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
+                    $controller->deleteAdByTgId($id, $telegram_user_id);
                 },
                 'api/ad/block/{id}/{password}' => function($params) {
                     // Проверяем и приводим к целому числу
                     $id = self::validateId($params[0]);
                     $password = trim((string)$params[1]); // 
-                    $controller = new AdController(ADM_PASS);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
                     $controller->blockAd($id, $password);
                 },
                 'api/ad/clean/{id}/{password}' => function($params) {
                     // Проверяем и приводим к целому числу
                     $id = self::validateId($params[0]);
                     $password = trim((string)$params[1]); // 
-                    $controller = new AdController(ADM_PASS);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
                     $controller->cleanAd($id, $password);
                 },
                 'api/ad/close_old/{password}' => function($params) {
                     // Проверяем
                     $password = trim((string)$params[0]); // 
-                    $controller = new AdController(ADM_PASS);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
                     $controller->closeOldAds($password);
                 },
 
                 // Новости
                 'api/news/get_list' => function() {
-                    $controller = new NewsController(ADM_PASS);
+                    $controller = new NewsController(ADM_PASS, ADM_USER_ID);
                     $controller->getAllNews();
                 },
                 'api/news/get_one/{id}' => function($params) {
                     // Проверяем и приводим к целому числу
                     $id = self::validateId($params[0]);
-                    $controller = new NewsController(ADM_PASS);
+                    $controller = new NewsController(ADM_PASS, ADM_USER_ID);
                     $controller->getNews($id);
                 },
                 'api/news/delete/{id}/{password}' => function($params) {
                     // Проверяем и приводим к целому числу
                     $id = self::validateId($params[0]);
                     $password = trim((string)$params[1]); // 
-                    $controller = new NewsController(ADM_PASS);
+                    $controller = new NewsController(ADM_PASS, ADM_USER_ID);
                     $controller->deleteNews($id, $password);
                 },
 
@@ -95,7 +122,7 @@ class Router {
                     // Проверяем и приводим к целому числу
                     $id = self::validateId($params[0]);
                     $password = trim((string)$params[1]); // 
-                    $controller = new UserController(ADM_PASS);
+                    $controller = new UserController(ADM_PASS, ADM_USER_ID);
                     $controller->blockUser($id, $password);
                 },
 
@@ -103,7 +130,7 @@ class Router {
                 'html/ad/get_one/{id}' => function($params) {
                     // Проверяем и приводим к целому числу
                     $id = self::validateId($params[0]);
-                    $controller = new AdController(ADM_PASS);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
                     $controller->getAd($id, true);
                 },
                 'html/admin' => function() {
@@ -114,35 +141,45 @@ class Router {
             'POST' => [
                 // Объявления
                 'api/ad/create' => function() {
-                    $controller = new AdController(ADM_PASS);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
                     $controller->createAd();
+                },
+                'web/ad/create' => function() {
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
+                    $controller->createAdByTgId();
                 },
                 'api/ad/update/{id}/{password}' => function($params) {
                     // Используем тернарный оператор для проверки id
                     $id = ($params[0] === '0') ? 0 : self::validateId($params[0]);
                     $password = trim((string)$params[1]);
-                    $controller = new AdController(ADM_PASS);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
                     $controller->updateAd($id, $password);
                 },
                 'api/ad/dislike/{id}' => function($params) {
                     // Проверяем и приводим к целому числу
                     $id = self::validateId($params[0]);
-                    $controller = new AdController(ADM_PASS);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
+                    $controller->dislikeAd($id);
+                },
+                'web/ad/dislike/{id}' => function($params) {
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID);
                     $controller->dislikeAd($id);
                 },
                 // Новости
                 'api/news/create' => function() {
-                    $controller = new NewsController(ADM_PASS);
+                    $controller = new NewsController(ADM_PASS, ADM_USER_ID);
                     $controller->createNews();
                 },
-                // Пользователи
+                // Пользователи (пока не написан этот метод)
                 'api/user/create' => function() {
-                    $controller = new UserController(ADM_PASS);
+                    $controller = new UserController(ADM_PASS, ADM_USER_ID);
                     $controller->createUser();
                 },
                 // Телеграм
                 'bot' => function() {
-                    $controller = new TgController(TG_KEY);
+                    $controller = new TgController(TG_KEY, ADM_2_USER_ID);
                     $controller->handleWebhook();
                 }
             ],
@@ -215,7 +252,7 @@ class Router {
 
         // 404
         header('Content-Type: text/html');
-        $htmlContent = file_get_contents(__DIR__ . '/../frontend/404.html');
+        $htmlContent = file_get_contents(__DIR__ . '/../frontend/404_web.html');
         echo $htmlContent;
     }
 

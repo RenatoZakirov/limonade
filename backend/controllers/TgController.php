@@ -2,9 +2,11 @@
 
 class TgController {
     private $tg_key;
+    private $adm_2_user_id;
 
-    public function __construct($tg_key) {
+    public function __construct($tg_key, $adm_2_user_id) {
         $this->tg_key = $tg_key;
+        $this->adm_2_user_id = $adm_2_user_id;
     }
 
     // Обработка вебхука
@@ -29,6 +31,7 @@ class TgController {
             http_response_code(400);
             $this->sendMessage($chatId, 'Я не понимаю ваш запрос и не могу его обработать');
         }
+        // !!Выкинуть поискового бота телеграм из скрипта
     }
 
     // Обработка входящего сообщения
@@ -37,9 +40,17 @@ class TgController {
         $chatId = (string)$message['chat']['id'];
         $text = isset($message['text']) ? trim($message['text']) : '';
     
-        // Обработка команды /start
-        if ($text === '/start') {
+        // Обработка команды /start с параметром
+        if (preg_match('/^\/start id_(\d+)$/', $text, $matches)) {
+            // Извлекаем id объявления
+            $adId = $matches[1];
             //
+            $this->handleStartWithAdCommand($chatId, $adId);
+            return;
+        }
+
+        // Обработка команды /start без параметра
+        if ($text === '/start') {
             $this->handleStartCommand($chatId);
             return;
         }
@@ -47,9 +58,10 @@ class TgController {
         // Логика для пересланного сообщения с объявлением
         if (isset($message['forward_origin'])) {
             // Мой chat_id
-            $myChatId = '7969651882';
+            // $myChatId = '7969651882';
             // Приводим оба значения к строковому типу перед сравнением
-            if ($chatId !== (string)$myChatId) {
+            // if ($chatId !== (string)$myChatId) {
+            if ($chatId !== $this->adm_2_user_id) {
                 // Если сообщение пришло не от меня, отправляем ошибку
                 $this->sendMessage($chatId, 'Я не понимаю ваш запрос и не могу его обработать');
                 return;
@@ -84,7 +96,7 @@ class TgController {
         $description_limit = 1000;
         
         // Подготавливаем значение user_contact из $userName и $userContact
-        $separator = ', телеграм ';
+        $separator = ', telegram ';
         //
         $userName =  $userName ?? 'Noname';
         //
@@ -213,17 +225,17 @@ class TgController {
                     $coverPhotoName = $imageEditor->generateUniqueName(); // Генерируем уникальное имя для обложки
                     
                     // Если ориентация горизонтальная, создаем изображение с полями
-                    if ($imageEditor->orientation == 'h') {
-                        $imageEditor->createImage();          // Создаем изображение
-                        $imageEditor->resizeToFit();          // Меняем размер изображения
-                        $imageEditor->createPaddedImage();    // Создаем изображение с добавлением полей
-                        $imageEditor->savePadded($tmpPath . $coverPhotoName . '.jpg'); // Сохраняем с полями
-                    } else {
+                    // if ($imageEditor->orientation == 'h') {
+                        // $imageEditor->createImage();          // Создаем изображение
+                        // $imageEditor->resizeToFit();          // Меняем размер изображения
+                        // $imageEditor->createPaddedImage();    // Создаем изображение с добавлением полей
+                        // $imageEditor->savePadded($tmpPath . $coverPhotoName . '.jpg'); // Сохраняем с полями
+                    // } else {
                         // Для вертикальных изображений сохраняем оригинал
-                        $imageEditor->createImage();
-                        $imageEditor->resizeToFit();
-                        $imageEditor->saveOriginal($tmpPath . $coverPhotoName . '.jpg');
-                    }
+                    $imageEditor->createImage();
+                    $imageEditor->resizeToFit();
+                    $imageEditor->saveOriginal($tmpPath . $coverPhotoName . '.jpg');
+                    // }
                     $message->cover_photo = $coverPhotoName;
                     // Обрабатываем photo_1
                     $message->photo_1 = $this->processPhoto($imageEditor, $tmpPath);
@@ -412,14 +424,31 @@ class TgController {
     }
     
     // Отправка сообщения пользователю через Telegram API
-    private function sendMessage($chatId, $text) {
+    private function sendMessage($chatId, $text, $webAppUrl = null, $parseMode = 'Markdown') {
+        //
         $url = "https://api.telegram.org/bot" . $this->tg_key . "/sendMessage";
+        // Подготавливаем данные для сообщения
         $data = [
             'chat_id' => $chatId,
             'text' => $text,
         ];
 
-        // Выполнение POST-запроса к Telegram API
+        // Если указан URL для Web App, добавляем Inline клавиатуру с кнопкой
+        if ($webAppUrl) {
+            $keyboard = [
+                'inline_keyboard' => [
+                    [
+                        [
+                            'text' => 'Посмотреть', 
+                            'web_app' => ['url' => $webAppUrl]
+                        ]
+                    ]
+                ]
+            ];
+            $data['reply_markup'] = json_encode($keyboard);
+        }
+
+        // Настройки для отправки POST-запроса к Telegram API
         $options = [
             'http' => [
                 'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
@@ -434,9 +463,106 @@ class TgController {
 
     // Обработка команды /start
     private function handleStartCommand($chatId) {
+        //
+        // Выкинуть поискового бота телеграм из скрипта
+        
+        // текст кнопки
+        $text = "Нажмите на кнопку, чтобы запустить приложение.";
+        // ваш URL веб-приложения
+        $webAppUrl = "https://www.limonade.pro/web";
+        // Отправка сообщения с Web App кнопкой
+        $this->sendMessage($chatId, $text, $webAppUrl);
+
+        // Проверяем существование пользователя или создаём его
+        $this->getUserOrCreate($chatId);
+    }
+
+    // Обработка команды /start id_<id>
+    private function handleStartWithAdCommand($chatId, $adId) {
+        // Проверяем id на валидность
+        if (!$this->validateId($adId)) {
+            // ID объявления не валидный, игнорируем запрос
+            $this->sendMessage($chatId, 'Я не понимаю ваш запрос и не могу его обработать');
+            return;
+        }
+
+        // Проверяем по ID есть ли такое объявление
+        $ad = R::load('ads', $adId);
+        
+        // Проверить, существует ли объявление и его статус равен 1 (активное объявление)
+        if (!$ad->id || $ad->status != 1) {
+            // Если объявление не найдено или статус не равен 1, вернуть ошибку 404
+            $this->sendMessage($chatId, 'Объявление с таким id не найдено');
+            return;
+        }
+
+        // текст кнопки
+        $text = "Нажмите на кнопку, чтобы посмотреть данное объявление";
+        // ваш URL веб-приложения с параметром
+        $webAppUrl = "https://www.limonade.pro/web?ad=$adId";
+        // Отправка сообщения с Web App кнопкой
+        $this->sendMessage($chatId, $text, $webAppUrl);
+
+        // текст кнопки
+        $text = "Нажмите на кнопку, чтобы посмотреть все свежие объявления";
+        // ваш URL веб-приложения
+        $webAppUrl = "https://www.limonade.pro/web";
+        // Отправка сообщения с Web App кнопкой
+        $this->sendMessage($chatId, $text, $webAppUrl);
+
+        // Проверяем существование пользователя или создаём его
+        $this->getUserOrCreate($chatId);
+    }
+
+    // Приватный метод для проверки и создания пользователя
+    private function getUserOrCreate($chatId) {
+        // Поиск пользователя по chat_id в базе данных
+        $user = R::findOne('users', 'chat_id = ?', [$chatId]);
+
+        // Пользователя нет, создаем новую запись
+        if (!$user) {
+            // Генерируем новый хеш
+            $hashNum = $this->generateUniqueHash();
+            // Создаем нового пользователя
+            $user = R::dispense('users');
+            $user->chat_id = $user->telegram_user_id = $chatId;
+            $user->hash_num = $hashNum;
+            // Статус активен
+            $user->status = 1;
+            // Дата создания
+            $user->created_at = date('Y-m-d H:i:s');
+            // Дата последнего посещения
+            $user->last_visit = date('Y-m-d H:i:s');
+            $user->closed_at = null;
+
+            // Сохраняем нового пользователя в базу данных
+            R::store($user);
+        }
+    }
+
+    // Приватный статический метод для проверки ID
+    private static function validateId($id) {
+        // Лимит
+        $limit = 8;
+        return ctype_digit($id) && strlen($id) <= $limit;
+    }
+
+    // Обработка команды /start
+    private function handleStartCommand_2($chatId) {
         // Выкинуть поискового бота телеграм из скрипта
         // if ($chatId == '') return;
+        // Мой chat_id
+        $adminChatId = '437599386';
 
+        if ($chatId == $adminChatId) {
+            //
+            $text = "Добро пожаловать! Нажмите на кнопку ниже, чтобы запустить приложение.";
+            $webAppUrl = "https://www.limonade.pro/web"; // ваш URL веб-приложения
+            // Отправка сообщения с Web App кнопкой
+            $this->sendMessage($chatId, $text, $webAppUrl);
+            return;
+        }
+        
         // Поиск пользователя по chat_id в базе данных
         $user = R::findOne('users', 'chat_id = ?', [$chatId]);
 
@@ -445,7 +571,7 @@ class TgController {
             $hashNum = $user->hash_num;
             $this->sendMessage($chatId, $hashNum);
             $this->sendMessage($chatId, "Это ваш ID. Используйте его для работы с сервисом www.limonade.pro и никому не показывайте\n\n" . 
-                "This is your ID. Use it to work with the www.limonade.pro service and do not show it to anyone", 'Markdown');
+                "This is your ID. Use it to work with the www.limonade.pro service and do not show it to anyone", null, 'Markdown');
 
         } else {
             // Пользователя нет, создаем новую запись
@@ -466,7 +592,7 @@ class TgController {
             // Возвращаем пользователю новый hash_num
             $this->sendMessage($chatId, $hashNum);
             $this->sendMessage($chatId, "Это ваш ID. Используйте его для работы с сервисом www.limonade.pro и никому не показывайте\n\n" . 
-                "This is your ID. Use it to work with the www.limonade.pro service and do not show it to anyone", 'Markdown');
+                "This is your ID. Use it to work with the www.limonade.pro service and do not show it to anyone", null, 'Markdown');
         }
     }
 

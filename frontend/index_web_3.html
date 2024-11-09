@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Объявления</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script> -->
+    <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-router@4.4.5/dist/vue-router.global.min.js"></script> -->
+
+    <script type="importmap">
+        {
+          "imports": {
+            "vue": "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.js",
+            "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4.4.5/dist/vue-router.esm-browser.js",
+            "@vue/devtools-api": "https://cdn.jsdelivr.net/npm/@vue/devtools-api/lib/esm/index.js"
+          }
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    <style>
+        /* Ваши стили можно разместить здесь */
+        body {
+            background-image: url('https://www.limonade.pro//backend/uploads/images/templates/bg_light.png');
+            background-size: cover;       /* Изображение заполняет весь экран */
+            background-position: center;  /* Центрирование по горизонтали и вертикали */
+            background-repeat: no-repeat; /* Отключение повторения */
+            background-attachment: fixed; /* Фон остается на месте при прокрутке */
+            font-family: "Roboto", sans-serif;
+        }
+        .btn-transparent-bg {
+            background-color: rgba(108, 117, 125, 0.5) !important; /* Прозрачный фон */
+            border-color: rgba(108, 117, 125, 0.0) !important; /* Прозрачный бордер */
+            color: white; /* Установите цвет текста (можете изменить по необходимости) */
+        }
+    </style>
+</head>
+<body>
+    <div id="app" v-cloak>
+        <router-view></router-view>
+    </div>
+
+    <script type="module">
+        import { createApp } from 'vue';
+        import { createRouter, createWebHashHistory } from 'vue-router';
+
+        // Компонент базового шаблона
+        const Layout = {
+            template: `
+                <div class="container">
+
+                    <nav class="navbar bg-transparent fixed-top">
+                        <div class="container-fluid d-flex justify-content-around">
+                            
+                            <button class="btn btn-secondary btn-transparent-bg">
+                                <i class="bi bi-house-door-fill"></i>
+                            </button>
+
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle btn-transparent-bg fw-medium" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-building-fill"></i>
+                                    Нячанг
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item active" href="">Нячанг</a></li>
+                                    <li><a class="dropdown-item disabled" href="">Дананг</a></li>
+                                    <li><a class="dropdown-item disabled" href="">Далат</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <button class="btn btn-secondary btn-transparent-bg fw-medium">
+                                    <i class="bi bi-translate"></i>
+                                    ru
+                                </button>
+                                <button class="btn btn-secondary btn-transparent-bg fw-medium">en</button>
+                            </div>
+
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle btn-transparent-bg fw-medium" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-wrench-adjustable"></i>
+                                    создать
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="">создать новое</a></li>
+                                    <li><a class="dropdown-item" href="">показать мои</a></li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </nav>
+
+                    <!-- <div class="d-flex justify-content-center p-5">
+                        <div class="spinner-grow text-secondary" role="status">
+                            <span class="visually-hidden">
+                                Загружается...
+                            </span>
+                        </div>
+                    </div> -->
+
+                    <router-view></router-view>
+
+                </div>
+                `
+        };
+
+        // Компонент списка объявлений
+        const AdList = {
+            data() {
+                return {
+                    adsList: []
+                };
+            },
+            template: `
+                <div>
+                    <h2>Список Объявлений</h2>
+                    <ul class="list-group">
+                        <li class="list-group-item" v-for="ad in ads" :key="ad.id">
+                            <router-link :to="'/ad/' + ad.id">{{ ad.title }}</router-link>
+                        </li>
+                    </ul>
+                </div>
+
+                
+
+                <div class="mt-1">
+                
+                    <div v-for="(ad, index) in adsList" :key="ad.id" class="row mb-3">
+                        <div class="col">
+                            <!-- Условно добавляем класс rounded-top-0 для первого объявления -->
+                            <div :class="['card', 'shadow-sm', {'rounded-top-0': index === 0}]">
+                                <div class="row g-0">
+                                    <div class="col-5">
+                                        <!-- Условно меняем класс rounded-start для первого объявления -->
+                                        <img :src="ad.cover_photo" :class="['img-fluid', index === 0 ? 'custom-rounded-img' : 'rounded-start']" alt="image">
+                                    </div>
+                                    <div class="col-7">
+                                        <div class="card-body">
+                                            <h5 class="card-title text-truncate">{{ ad.title }}</h5>
+                                            <p class="card-text description-text">{{ ad.description }}</p>
+                                            <p class="card-text">
+                                                <small class="text-body-secondary text-truncate">
+                                                    <!-- Создано  -->
+                                                    <!-- <i class="bi bi-calendar-date"></i> -->
+                                                    <i class="bi bi-calendar-date-fill"></i>
+                                                    {{ ad.created_at.split(' ')[0] }}
+                                                </small>
+                                            </p>
+                                            <div class="btn btn-sm btn-primary shadow-sm" @click="loadAdDetail(ad.id)">
+                                                <!-- <i class="bi bi-eye"></i> -->
+                                                <i class="bi bi-eye-fill"></i>
+                                                посмотреть
+                                            </div>
+                                            <!-- <router-link :to="'/ad/' + ad.id">{{ ad.title }}</router-link> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center mb-3">
+                    
+                        <button
+                            class="btn btn-secondary" type="button">
+                            <!-- <i class="bi bi-skip-backward"></i> -->
+                            <i class="bi bi-skip-backward-fill"></i>
+                            в начало
+                        </button>
+                        <button
+                            class="btn btn-secondary" type="button">
+                            <i class="bi bi-backspace-fill"></i>
+                            назад
+                        </button>
+                        <button class="btn btn-outline-secondary">
+                            <!-- Номер страницы -->
+                            3
+                        </button>
+                        <button
+                            class="btn btn-secondary" type="button">
+                            <!-- <i class="bi bi-fast-forward"></i> -->
+                            <!-- <i class="bi bi-fast-forward-fill"></i> -->
+                            <i class="bi bi-backspace-reverse-fill"></i>
+                            вперед
+                        </button>
+
+                    </div>
+
+                </div>
+            `,
+            mounted() {
+                axios.get('/api/ads').then(response => {
+                    this.adsList = response.data;
+                });
+            }
+        };
+
+        // Компонент деталей объявления
+        const AdDetails = {
+            data() {
+                return {
+                    ad: {}
+                };
+            },
+            template: `
+                <div>
+                    <h2>{{ ad.title }}</h2>
+                    <p>{{ ad.description }}</p>
+                    <router-link to="/ads">Назад к списку</router-link>
+                </div>
+            `,
+            methods: {
+                loadAd() {
+                    const adId = this.$route.params.id;
+                    axios.get(`/api/ads/${adId}`).then(response => {
+                        this.ad = response.data;
+                    });
+                }
+            },
+            // Вызовите метод loadAd, когда этот компонент будет загружен
+            mounted() {
+                this.loadAd();
+            }
+        };
+
+        // Компонент создания нового объявления
+        const NewAd = {
+            data() {
+                return {
+                    title: '',
+                    description: ''
+                };
+            },
+            template: `
+                <div>
+                    <h2>Создать Новое Объявление</h2>
+                    <form @submit.prevent="submitAd">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Заголовок</label>
+                            <input type="text" class="form-control" id="title" v-model="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Описание</label>
+                            <textarea class="form-control" id="description" v-model="description" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Создать</button>
+                    </form>
+                </div>
+            `,
+            methods: {
+                submitAd() {
+                    axios.post('/api/ads', {
+                        title: this.title,
+                        description: this.description
+                    }).then(() => {
+                        this.$router.push('/ads');
+                    });
+                }
+            }
+        };
+
+        // Настройка роутера
+        const routes = [
+            {
+                path: '/',
+                component: Layout,
+                children: [
+                    { path: 'ads', component: AdList },
+                    { path: 'ad/:id', component: AdDetails },
+                    { path: 'new_ad', component: NewAd }
+                ]
+            }
+        ];
+        const router = createRouter({
+            history: createWebHashHistory(),
+            routes
+        });
+
+        // Создание Vue приложения
+        const app = createApp({});
+        app.use(router);
+        app.mount('#app');
+    </script>
+</body>
+</html>

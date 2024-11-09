@@ -2,9 +2,11 @@
 
 class AdController {
     private $adm_pass;
+    private $adm_user_id;
 
-    public function __construct($adm_pass) {
+    public function __construct($adm_pass, $adm_user_id) {
         $this->adm_pass = $adm_pass;
+        $this->adm_user_id = $adm_user_id;
     }
 
     // Получить все объявления с пагинацией и фильтрацией по категории
@@ -32,6 +34,8 @@ class AdController {
         $category = isset($_GET['category']) ? $_GET['category'] : null;
         // Проверить, передан ли текст в запросе
         $searchText = isset($_GET['text']) ? trim($_GET['text']) : null;
+        // Проверить, передан ли язык в запросе
+        $lang = isset($_GET['lang']) ? trim($_GET['lang']) : null;
 
         // Валидация категории
         if ($category) {
@@ -54,7 +58,7 @@ class AdController {
 
         // Если категория или текст указаны, выполняем поиск с фильтрацией
         if ($category || $searchText) {
-            $ads = $this->findAdsByCategoryAndText($category, $searchText, $perPage, $offset);
+            $ads = $this->findAdsByCategoryAndText($category, $searchText, $lang, $perPage, $offset);
             if (empty($ads)) {
                 http_response_code(400);
                 // Не удалось найти активных объявлений
@@ -86,7 +90,11 @@ class AdController {
     }
 
     // Метод для поиска объявлений с постепенным сокращением категории
-    private function findAdsByCategoryAndText($category, $searchText, $perPage, $offset) {
+    private function findAdsByCategoryAndText($category, $searchText, $lang, $perPage, $offset) {
+        // Определяем названия колонок в зависимости от языка
+        $titleColumn = "title_" . $lang;
+        $descriptionColumn = "description_" . $lang;
+
         // Пытаемся найти объявления по категории, постепенно сокращая её
         while ($category && mb_strlen($category, 'UTF-8') > 0) {
             $params = [];
@@ -100,8 +108,10 @@ class AdController {
             // Добавляем условие по тексту
             if ($searchText) {
                 // Применяем регистронезависимый поиск по title и description
-                $query .= ' AND (LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?))';
-                $searchTextParam = '%' . $searchText . '%'; // Поддержка частичного совпадения
+                // $query .= ' AND (LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?))';
+                $query .= " AND (LOWER($titleColumn) LIKE LOWER(?) OR LOWER($descriptionColumn) LIKE LOWER(?))";
+                // Поддержка частичного совпадения
+                $searchTextParam = '%' . $searchText . '%';
                 $params[] = $searchTextParam;
                 $params[] = $searchTextParam;
             }
@@ -125,8 +135,10 @@ class AdController {
     
         // Если объявления не найдены по категории, пробуем искать только по тексту
         if ($searchText) {
-            $query = 'WHERE status = 1 AND (LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?)) ORDER BY created_at DESC LIMIT ? OFFSET ?';
-            $searchTextParam = '%' . $searchText . '%'; // Поддержка частичного совпадения
+            // $query = 'WHERE status = 1 AND (LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?)) ORDER BY created_at DESC LIMIT ? OFFSET ?';
+            $query = "WHERE status = 1 AND (LOWER($titleColumn) LIKE LOWER(?) OR LOWER($descriptionColumn) LIKE LOWER(?)) ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            // Поддержка частичного совпадения
+            $searchTextParam = '%' . $searchText . '%';
             $ads = R::findAll('ads', $query, [$searchTextParam, $searchTextParam, $perPage, $offset]);
 
             // Если объявления найдены, возвращаем их
@@ -191,7 +203,59 @@ class AdController {
         }
 
         // Путь к шаблонному изображению
-        $defaultPhotoUrl = $this->getPhotoUrl('templates/grey');
+        $defaultPhotoUrl = $this->getPhotoUrl('templates/no_image');
+
+        // Подготовить результаты
+        $result = [];
+        foreach ($ads as $ad) {
+            $adData = R::exportAll([$ad])[0];
+            // Если нет обложки, использовать шаблонное изображение
+            $adData['cover_photo'] = $adData['cover_photo'] ? $this->getPhotoUrl($adData['cover_photo']) : $defaultPhotoUrl;
+            $result[] = $adData;
+        }
+
+        // Отправить результат
+        header('Content-Type: application/json');
+        echo json_encode($result);
+    }
+
+    // Найти все активные обьявления одного пользователя
+    public function findAdsByTgId($telegram_user_id) {
+        // Проверка на наличие user_id
+        if (empty($telegram_user_id) || mb_strlen($telegram_user_id, 'UTF-8') > 25) {
+            // Выводим сообщение на экран
+            http_response_code(400);
+            echo json_encode(['code' => 212]);
+            return;
+        }
+
+        // Поиск пользователя по user_id
+        $user = R::findOne('users', 'telegram_user_id = ?', [$telegram_user_id]);
+
+        // Проверка, существует ли пользователь и активен ли он
+        if (!$user || $user->status != 1) {
+            http_response_code(400);
+            echo json_encode(['code' => 204]);
+            return;
+        }
+
+        // Обновление даты последнего визита
+        $user->last_visit = date('Y-m-d H:i:s');
+        R::store($user);
+
+        // Запрос на выборку объявлений пользователя со статусом 1 (активные)
+        $query = 'WHERE status = 1 AND user_id = ? ORDER BY created_at DESC';
+        $ads = R::findAll('ads', $query, [$user->id]);
+
+        // Проверка, найдены ли объявления
+        if (empty($ads)) {
+            http_response_code(400); // Not Found
+            echo json_encode(['code' => 202]);
+            return;
+        }
+
+        // Путь к шаблонному изображению
+        $defaultPhotoUrl = $this->getPhotoUrl('templates/no_image');
 
         // Подготовить результаты
         $result = [];
@@ -379,10 +443,10 @@ class AdController {
         }
 
         // Присвоение переменных для дальнейшего использования
-        $contact = $fields['contact'];
         $title = $fields['title'];
-        $category = $fields['category'];
         $description = $fields['description'];
+        $category = $fields['category'];
+        $contact = $fields['contact'];
 
         //
         if (!$id) {
@@ -409,13 +473,24 @@ class AdController {
             }
             // error_log("Ad: " . $ad);
 
-            // Создаем новое объявление
-            $newAd = R::dispense('ads'); // Используем RedBeanPHP для создания записи в таблице "ads"
-            $newAd->user_id = 1;
-            $newAd->title = $title; // Заголовок объявления
-            $newAd->category = $category; // Категория объявления
-            $newAd->description = $description; // Описание объявления
+            // Получаем переведенные данные
+            $translatedData = $this->translateAd($title, $description);
 
+            // Создаем новое объявление
+            // Создаем запись в таблице "ads"
+            $newAd = R::dispense('ads');
+            // id пользователя
+            $newAd->user_id = 1;
+            // Категория объявления
+            $newAd->category = $category;
+            // Заголовок объявления на русском
+            $newAd->title_ru = $translatedData['title_ru'];
+            // Описание объявления на русском
+            $newAd->description_ru = $translatedData['description_ru'];
+            // Заголовок объявления на английском
+            $newAd->title_en = $translatedData['title_en'];
+            // Описание объявления на английском
+            $newAd->description_en = $translatedData['description_en'];
             // Устанавливаем пути к временной и целевой папкам
             $tmpPath = 'uploads/images/tmp/';
             $newPath = 'uploads/images/';
@@ -459,15 +534,23 @@ class AdController {
                 }
             }
 
-            $newAd->contact = $contact; // Контактная информация
-            $newAd->status = 1; // Статус объявления
-            $newAd->created_at = date('Y-m-d H:i:s'); // Дата создания
-            $newAd->viewed = 0; // Счетчик просмотров (изначально 0)
-            R::store($newAd); // Сохраняем объявление в базе данных
+            // Контактная информация
+            $newAd->contact = $contact;
+            // Статус объявления
+            $newAd->status = 1;
+            // Дата создания
+            $newAd->created_at = date('Y-m-d H:i:s');
+            // Счетчик просмотров (изначально 0)
+            $newAd->viewed = 0;
+            // Сохраняем объявление в базе данных
+            R::store($newAd);
 
+            // Статус объявления
             $ad->status = 0;
+            // Дата закрытия
             $ad->closed_at = date('Y-m-d H:i:s');
-            R::store($ad); // Сохраняем объявление в базе данных
+            // Сохраняем объявление в базе данных
+            R::store($ad);
 
             // Возвращаем ответ
             header('Content-Type: application/json');
@@ -476,6 +559,12 @@ class AdController {
         }
 
         if ($id) {
+
+            // Этот метод находится в доработке
+            http_response_code(402);
+            echo json_encode(['code' => 402]);
+            return;
+
             // Загружаем объявление по ID
             $ad = R::load('ads', $id);
 
@@ -487,9 +576,16 @@ class AdController {
                 return;
             }
             // Сохраняем новые данные в старое обьявление
-            $ad->title = $title; // Заголовок объявления
-            $ad->category = $category; // Категория объявления
-            $ad->description = $description; // Описание объявления
+            // Категория объявления
+            $ad->category = $category;
+            // Заголовок объявления на русском
+            $ad->title_ru = $title_ru;
+            // Описание объявления на русском
+            $ad->description_ru = $description_ru;
+            // Заголовок объявления на английском
+            $ad->title_en = $title_en;
+            // Описание объявления на английском
+            $ad->description_en = $description_en;
             $ad->contact = $contact; // Контактная информация
             R::store($ad); // Сохраняем объявление в базе данных
             // Возвращаем ответ
@@ -498,7 +594,7 @@ class AdController {
         }
     }
 
-    //
+    // ??Очистить неопубликованное обьявление
     public function cleanAd($id, $password) {
         // Проверка на наличие пароля и ID
         if (empty($password) || empty($id) || mb_strlen($password, 'UTF-8') > 17) {
@@ -615,10 +711,10 @@ class AdController {
         // Присвоение переменных для дальнейшего использования
         $hash_num = $fields['hash_num'];
         $title = $fields['title'];
-        $category = $fields['category'];
         $description = $fields['description'];
+        $category = $fields['category'];
         $contact = $fields['contact'];
-        $permanent = ($_POST['permanent'] ?? 'false') === 'true';
+        // $permanent = ($_POST['permanent'] ?? 'false') === 'true';
 
         // Поиск пользователя по hash_num
         $user = R::findOne('users', 'hash_num = ?', [$hash_num]);
@@ -720,17 +816,18 @@ class AdController {
                         $coverPhotoName = $imageEditor->generateUniqueName(); // Генерируем уникальное имя для обложки
                         
                         // Если ориентация горизонтальная, создаем изображение с полями
-                        if ($imageEditor->orientation == 'h') {
-                            $imageEditor->createImage();          // Создаем изображение
-                            $imageEditor->resizeToFit();          // Меняем размер изображения
-                            $imageEditor->createPaddedImage();    // Создаем изображение с добавлением полей
-                            $imageEditor->savePadded($filePath . $coverPhotoName . '.jpg'); // Сохраняем с полями
-                        } else {
+                        // if ($imageEditor->orientation == 'h') {
+                        //     $imageEditor->createImage();          // Создаем изображение
+                        //     $imageEditor->resizeToFit();          // Меняем размер изображения
+                            // $imageEditor->createPaddedImage();    // Создаем изображение с добавлением полей
+                            // $imageEditor->savePadded($filePath . $coverPhotoName . '.jpg'); // Сохраняем с полями
+                        //     $imageEditor->saveOriginal($filePath . $coverPhotoName . '.jpg');
+                        // } else {
                             // Для вертикальных изображений сохраняем оригинал
                             $imageEditor->createImage();
                             $imageEditor->resizeToFit();
                             $imageEditor->saveOriginal($filePath . $coverPhotoName . '.jpg');
-                        }
+                        // }
                         $adPhotos[0] = $coverPhotoName;
                         $savedPhotos[] = $filePath . $coverPhotoName . '.jpg';
                         // Обрабатываем photo_1
@@ -756,7 +853,7 @@ class AdController {
         $ad->title = $title; // Заголовок объявления
         $ad->category = $category; // Категория объявления
         $ad->description = $description; // Описание объявления
-        $ad->permanent = $permanent; // Флаг вечного объявления
+        // $ad->permanent = $permanent; // Флаг вечного объявления
 
         // Сохраняем фотографии в базе данных
         $ad->cover_photo = isset($adPhotos[0]) ? (string) $adPhotos[0] : null;
@@ -769,6 +866,217 @@ class AdController {
         $ad->created_at = date('Y-m-d H:i:s'); // Дата создания
         $ad->viewed = 0; // Счетчик просмотров (изначально 0)
         R::store($ad); // Сохраняем объявление в базе данных
+
+        // Возвращаем ответ
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true]);
+    }
+
+    // Создать новое объявление
+    public function createAdByTgId() {
+        // Поля и их значения по умолчанию
+        $fields = [
+            'telegram_user_id' => isset($_POST['telegram_user_id']) ? trim($_POST['telegram_user_id']) : null,
+            'title' => isset($_POST['title']) ? trim($_POST['title']) : null,
+            'category' => isset($_POST['category']) ? trim($_POST['category']) : null,
+            'description' => isset($_POST['description']) ? trim($_POST['description']) : null,
+            'contact' => isset($_POST['contact']) ? trim($_POST['contact']) : null,
+        ];
+
+        // Проверка обязательных полей на наличие и пустоту
+        foreach ($fields as $key => $value) {
+            if (empty($value)) {
+                http_response_code(400);
+                // echo json_encode(["message" => "Поле $field пустое или отсутствует"]);
+                echo json_encode(['code' => 600]);
+                return;
+            }
+        }
+
+        // Ограничения по длине полей
+        $fieldLimits = [
+            'telegram_user_id' => 26,
+            'title' => 41,
+            'category' => 6,
+            'description' => 1001,
+            'contact' => 51
+        ];
+
+        // Проверка длины полей
+        foreach ($fieldLimits as $field => $limit) {
+            if (mb_strlen($fields[$field], 'UTF-8') > $limit) {
+                http_response_code(400);
+                // echo json_encode([
+                //     "message" => "Длина поля $field превышает $limit символов",
+                //     "lengths" => [$field => strlen($fields[$field])]
+                // ]);
+                echo json_encode(['code' => 601]);
+                return;
+            }
+        }
+
+        // Присвоение переменных для дальнейшего использования
+        $telegram_user_id = $fields['telegram_user_id'];
+        $title = $fields['title'];
+        $description = $fields['description'];
+        $category = $fields['category'];
+        $contact = $fields['contact'];
+        // $permanent = ($_POST['permanent'] ?? 'false') === 'true';
+
+        // Поиск пользователя по hash_num
+        $user = R::findOne('users', 'telegram_user_id = ?', [$telegram_user_id]);
+
+        if (!$user || $user->status != 1) {
+            http_response_code(400);
+            echo json_encode(['code' => 602]);
+            return;
+        }
+
+        // Обновление даты последнего визита
+        $user->last_visit = date('Y-m-d H:i:s');
+        R::store($user);
+
+        if ($telegram_user_id != $this->adm_user_id) {
+
+            // Проверка количества активных объявлений пользователя
+            $ads_limit = 3;
+            $activeAdsCount = R::count('ads', 'user_id = ? AND status IN (1, 2)', [$user->id]);
+
+            if ($activeAdsCount >= $ads_limit) {
+                http_response_code(400);
+                echo json_encode(['code' => 603]);
+                return;
+            }
+        }
+
+        // Проверяем, есть ли загруженные фотографии в $_FILES
+        if (isset($_FILES['photos'])) {
+            $photos = [];
+            
+            // Проверяем, является ли $_FILES['photos'] массивом или одиночным файлом
+            $isMultiple = isset($_FILES['photos']['name']) && is_array($_FILES['photos']['name']);
+            
+            // Определяем количество файлов для обработки (максимум 3)
+            $fileCount = $isMultiple ? min(3, count($_FILES['photos']['name'])) : 1;
+
+            // Обрабатываем каждый файл
+            for ($i = 0; $i < $fileCount; $i++) {
+                // Приведение массива $_FILES['photos'] к унифицированному виду для удобства обработки
+                $photo = $this->checkPhoto($isMultiple, $i);
+                
+                // Если фото обработано успешно, добавляем его в массив
+                if ($photo !== null) {
+                    $photos[] = $photo;
+                } else {
+                    return;  // Если была ошибка, ответ уже отправлен в методе checkPhoto
+                }
+            }
+
+            // Разрешенные типы изображений
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            // Максимальный размер файла (5 MB)
+            $maxSize = 5 * 1024 * 1024;
+            // Минимальные допустимые размеры изображения
+            $minResolution = [600, 450];
+            // Путь к папке для сохранения изображений
+            $filePath = 'uploads/images/';
+
+            // Массив для хранения имен фотографий объявления
+            $adPhotos = [];
+            $savedPhotos = [];  // Массив для хранения путей сохраненных файлов
+
+            // Цикл по всем загруженным фотографиям
+            foreach ($photos as $key => $photoFile) {
+                $imageEditor = new ImageEditor($photoFile); // Создаем объект для редактирования изображений
+
+                // Проверяем тип файла
+                if (!$imageEditor->validateType($allowedTypes)) {
+                    $this->deleteSavedPhotos($savedPhotos);
+                    http_response_code(400);
+                    // echo json_encode(["message" => 'Недопустимый тип фото, порядковый номер фото: ' . $key + 1]);
+                    echo json_encode(['code' => 622]);
+                    return;
+                }
+
+                // Проверяем размер файла
+                if (!$imageEditor->validateSize($maxSize)) {
+                    $this->deleteSavedPhotos($savedPhotos);
+                    http_response_code(413);
+                    // echo json_encode(["message" => 'Фото превышает допустимый размер, порядковый номер фото: ' . $key + 1]);
+                    echo json_encode(['code' => 623]);
+                    return;
+                }
+
+                // Проверяем разрешение изображения
+                if (!$imageEditor->validateResolution($minResolution)) {
+                    $this->deleteSavedPhotos($savedPhotos);
+                    http_response_code(400);
+                    // echo json_encode(["message" => 'Фото имеет слишком маленькое разрешение, порядковый номер фото: ' . $key + 1 . '. Минимальное разрешение должно быть 600 * 450 пикселей (или наоборот)']);
+                    echo json_encode(['code' => 624]);
+                    return;
+                }
+
+                // Обработка фотографий в зависимости от их индекса
+                switch ($key) {
+                    case 0:
+                        // Обрабатываем cover_photo как обложку
+                        $coverPhotoName = $imageEditor->generateUniqueName(); // Генерируем уникальное имя для обложки
+                        // Сохранить фото
+                        $imageEditor->createImage();
+                        $imageEditor->resizeToFit();
+                        $imageEditor->saveOriginal($filePath . $coverPhotoName . '.jpg');
+                        $adPhotos[0] = $coverPhotoName;
+                        $savedPhotos[] = $filePath . $coverPhotoName . '.jpg';
+                        // Обрабатываем photo_1
+                        $this->processPhoto($imageEditor, $filePath, $adPhotos, $savedPhotos, 1);
+                        break;
+
+                    case 1:
+                        // Обрабатываем photo_2
+                        $this->processPhoto($imageEditor, $filePath, $adPhotos, $savedPhotos, 2);
+                        break;
+
+                    case 2:
+                        // Обрабатываем photo_3
+                        $this->processPhoto($imageEditor, $filePath, $adPhotos, $savedPhotos, 3);
+                        break;
+                }
+            }
+        }
+
+        // Получаем переведенные данные
+        $translatedData = $this->translateAd($title, $description);
+
+        // Создаем новое объявление
+        // Создаем запись в таблице "ads"
+        $ad = R::dispense('ads');
+        // id пользователя
+        $ad->user_id = $user->id;
+        // Категория объявления
+        $ad->category = $category;
+        // Заголовок объявления на русском
+        $ad->title_ru = $translatedData['title_ru'];
+        // Описание объявления на русском
+        $ad->description_ru = $translatedData['description_ru'];
+        // Заголовок объявления на английском
+        $ad->title_en = $translatedData['title_en'];
+        // Описание объявления на английском
+        $ad->description_en = $translatedData['description_en'];
+        // Сохраняем фотографии в базе данных
+        $ad->cover_photo = isset($adPhotos[0]) ? (string) $adPhotos[0] : null;
+        $ad->photo_1 = isset($adPhotos[1]) ? (string) $adPhotos[1] : null;
+        $ad->photo_2 = isset($adPhotos[2]) ? (string) $adPhotos[2] : null;
+        $ad->photo_3 = isset($adPhotos[3]) ? (string) $adPhotos[3] : null;
+        // Контактная информация
+        $ad->contact = $contact;
+        // Статус объявления
+        $ad->status = 1;
+        // Дата создания
+        $ad->created_at = date('Y-m-d H:i:s');
+        // Счетчик просмотров (изначально 0)
+        $ad->viewed = 0;
+        // Сохраняем объявление в базе данных
+        R::store($ad);
 
         // Возвращаем ответ
         header('Content-Type: application/json');
@@ -912,6 +1220,74 @@ class AdController {
         echo json_encode(['success' => true]);
     }
 
+    // Пометить объявление как удалённое и удалить связанные фотографии
+    public function deleteAdByTgId($id, $telegram_user_id) {
+        // Проверка на наличие user_id
+        if (empty($telegram_user_id) || empty($id) || mb_strlen($telegram_user_id, 'UTF-8') > 25) {
+            // Выводим сообщение на экран
+            http_response_code(400);
+            echo json_encode(['code' => 411]);
+            return;
+        }
+
+        // Поиск пользователя по user_id
+        $user = R::findOne('users', 'telegram_user_id = ?', [$telegram_user_id]);
+
+        // Проверка, существует ли пользователь и активен ли он
+        if (!$user || $user->status != 1) {
+            http_response_code(400);
+            echo json_encode(['code' => 401]);
+            return;
+        }
+
+        // Обновление даты последнего визита
+        $user->last_visit = date('Y-m-d H:i:s');
+        R::store($user);
+
+        // Загрузить объявление по ID
+        $ad = R::load('ads', $id);
+
+        // Проверка объявления
+        if (!$ad->id) {
+            //
+            http_response_code(400);
+            echo json_encode(['code' => 421]);
+            return;
+        }
+
+        // Проверка id владельца
+        if ($ad->user_id != $user->id) {
+            //
+            http_response_code(400);
+            echo json_encode(['code' => 422]);
+            return;
+        }
+
+        // Проверка статуса объявления
+        if ($ad->status != 1) {
+            //
+            http_response_code(400);
+            echo json_encode(['code' => 423]);
+            return;
+        }
+
+        // Удалить связанные фотографии, если они существуют
+        $this->deletePhotoIfExists($ad->cover_photo);
+        $this->deletePhotoIfExists($ad->photo_1);
+        $this->deletePhotoIfExists($ad->photo_2);
+        $this->deletePhotoIfExists($ad->photo_3);
+
+        // Обновить статус объявления и дату
+        $ad->status = 0; // Статус объявления
+        $ad->closed_at = date('Y-m-d H:i:s'); // Дата удаления
+        R::store($ad);
+
+        // Сообщение об успехе
+        header('Content-Type: application/json');
+        // Объявление было успешно удалено
+        echo json_encode(['success' => true]);
+    }
+
     // Вспомогательный метод для удаления фото, если оно существует
     private function deletePhotoIfExists($photoName) {
         if ($photoName) {
@@ -966,7 +1342,7 @@ class AdController {
         $this->deletePhotoIfExists($ad->photo_3);
 
         // Обновить статус объявления и дату
-        $ad->status = 0; // Статус объявления
+        $ad->status = 2; // Статус объявления (заблокировано)
         $ad->closed_at = date('Y-m-d H:i:s'); // Дата удаления
         R::store($ad);
 
@@ -1000,8 +1376,8 @@ class AdController {
         // Вычисление даты 10 дней назад
         $dateLimit = date('Y-m-d H:i:s', strtotime('-12 days'));
 
-        // Поиск всех объявлений, созданных более 10 дней назад и активных
-        $oldAds = R::find('ads', 'created_at < ? AND status = 1', [$dateLimit]);
+        // Поиск всех объявлений, созданных более 10 дней назад и не удаленных
+        $oldAds = R::find('ads', 'created_at < ? AND status IN (1, 2)', [$dateLimit]);
 
         // Проверка, есть ли объявления для закрытия
         if (empty($oldAds)) {
@@ -1071,6 +1447,70 @@ class AdController {
         // Возвращаем ответ
         header('Content-Type: application/json');
         echo json_encode(['success' => true]);
+    }
+
+    // Функция для определения языка текста
+    private function detectLanguage($text, $apiKey) {
+        $url = "https://translation.googleapis.com/language/translate/v2/detect?q=" . urlencode($text) . "&key=" . $apiKey;
+
+        // Отправка запроса для определения языка
+        $response = file_get_contents($url);
+        $result = json_decode($response, true);
+
+        if (isset($result['data']['detections'][0][0]['language'])) {
+            return $result['data']['detections'][0][0]['language'];
+        }
+        return null;
+    }
+
+    // Функция для перевода текста на указанный язык
+    private function translateText($text, $targetLang, $apiKey) {
+        // $url = "https://translation.googleapis.com/language/translate/v2?q=" . urlencode($text) . "&target=" . $targetLang . "&key=" . $apiKey;
+
+        $url = "https://translation.googleapis.com/language/translate/v2?"
+        . "q=" . urlencode($text)
+        . "&target=" . $targetLang
+        . "&format=text" // Указываем format=text, чтобы сохранить переносы строк
+        . "&key=" . $apiKey;
+
+        // Отправка запроса для перевода текста
+        $response = file_get_contents($url);
+        $result = json_decode($response, true);
+
+        if (isset($result['data']['translations'][0])) {
+            return $result['data']['translations'][0]['translatedText'];
+        }
+        return null;
+    }
+
+    // Функция для перевода объявления, с использованием отдельного определения языка
+    private function translateAd($unknownLangTitle, $unknownLangDescription) {
+        $apiKey = 'AIzaSyBSIuw-3YoYkTjoWuPl5S7xfdVepO-2Tkw';
+
+        // Определяем исходный язык на основе текста описания
+        $originalLang = $this->detectLanguage($unknownLangDescription, $apiKey);
+        $targetLang = ($originalLang === 'en') ? 'ru' : 'en';
+
+        // Переводим заголовок и описание на целевой язык
+        $translatedTitle = $this->translateText($unknownLangTitle, $targetLang, $apiKey);
+        $translatedDescription = $this->translateText($unknownLangDescription, $targetLang, $apiKey);
+
+        // Возвращаем оригинал и переводы в зависимости от исходного языка
+        if ($originalLang === 'ru') {
+            return [
+                'title_ru' => $unknownLangTitle,
+                'description_ru' => $unknownLangDescription,
+                'title_en' => $translatedTitle,
+                'description_en' => $translatedDescription
+            ];
+        } else {
+            return [
+                'title_en' => $unknownLangTitle,
+                'description_en' => $unknownLangDescription,
+                'title_ru' => $translatedTitle,
+                'description_ru' => $translatedDescription
+            ];
+        }
     }
 
 }

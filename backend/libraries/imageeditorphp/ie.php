@@ -82,7 +82,7 @@ class ImageEditor
     }
 
     // Изменение размера изображения до стандарта и вставка watermark по центру
-    public function resizeToFit($text = 'Limonade.pro') {
+    public function resizeToFit($text = 'Limonade') {
         // Устанавливаем целевые размеры в зависимости от ориентации
         $targetWidth = $this->orientation === 'h' ? 600 : 450;
         $targetHeight = $this->orientation === 'h' ? 450 : 600;

@@ -1,321 +1,300 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Объявления</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-	<link rel="icon" type="image/png" href="https://www.limonade.pro/backend/uploads/images/templates/icon.png">
-	<style>
-		[v-cloak] {
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Объявления</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script> -->
+	<script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    <style>
+        /* Ваши стили можно разместить здесь */
+        [v-cloak] {
 			display: none;
 		}
-		.description-text {
+		body {
+			font-family: "Roboto", sans-serif;
+			background-color: #fff; /* Базовый цвет на случай, если изображения не загрузятся */
+			margin: 0;
+		}
+		/* Градиентный фон */
+		body::before {
+			content: "";
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-image: url('https://www.limonade.pro/backend/uploads/images/templates/bg_4.png');
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+			background-attachment: fixed;
+			z-index: -2; /* Градиентный фон находится под прозрачным фоном */
+		}
+		/* Прозрачный фон с рисунками */
+		body::after {
+			content: "";
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-image: url('https://www.limonade.pro/backend/uploads/images/templates/bg_1.png');
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+			background-attachment: fixed;
+			z-index: -1; /* Прозрачный фон с рисунками накладывается поверх градиента */
+			opacity: 0.15; /* Уровень прозрачности (от 0 до 1) */
+		}
+        .btn-transparent-bg {
+            background-color: rgba(108, 117, 125, 0.7) !important; /* Прозрачный фон */
+            border-color: rgba(108, 117, 125, 0.0) !important; /* Прозрачный бордер */
+            color: white; /* Установите цвет текста (можете изменить по необходимости) */
+        }
+        .description-text {
 			display: -webkit-box;
-			-webkit-line-clamp: 2; /* Количество строк */
+			-webkit-line-clamp: 4; /* Количество строк */
 			-webkit-box-orient: vertical;
 			overflow: hidden;
 			text-overflow: ellipsis;
-			max-height: 3em; /* Высота для двух строк текста */
+			max-height: 5em; /* Высота для 4 строк текста */
 		}
-		.big-top-margin {
-			margin-top: 56px;
+        .big-top-margin {
+			margin-top: 58px;
 		}
 		.inspect-text {
 			font-size: 0.5rem; /* Можно уменьшить размер текста как нужно */
 		}
-		.no-border-top {
-			border-top: none;
+		.card-img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover; /* Заполняет весь контейнер, обрезая края, если изображение не помещается */
+			object-position: center; /* Центрирует изображение в контейнере */
+			/*border-radius: 0; /* Убирает закругления у самого изображения */
+			border-radius: 20px 0 0 20px; /* Явно задаём нужные закругления: левый верхний и нижний углы */
 		}
-		.custom-rounded-img {
-			border-radius: 0 0 0 0.25rem; /* Верхние углы и правый нижний угол прямые, нижний левый закругленный */
+		.card-img-2 {
+			width: 100%;
+			height: 100%;
+			object-fit: cover; /* Заполняет весь контейнер, обрезая края, если изображение не помещается */
+			object-position: center; /* Центрирует изображение в контейнере */
+			/*border-radius: 0; /* Убирает закругления у самого изображения */
+			border-radius: 20px 0 0 0; /* Явно задаём нужные закругления: левый верхний и нижний углы */
 		}
-	</style>
+		.card-img-3 {
+			width: 100%;
+			height: 100%;
+			object-fit: cover; /* Заполняет весь контейнер, обрезая края, если изображение не помещается */
+			object-position: center; /* Центрирует изображение в контейнере */
+			/*border-radius: 0; /* Убирает закругления у самого изображения */
+			border-radius: 20px 20px 0 0; /* Явно задаём нужные закругления: левый верхний и нижний углы */
+		}
+		/* CSS для увеличенного закругления углов карточки */
+		.custom-rounded {
+			border-radius: 20px; /* Замените значение на нужное вам для большей закругленности */
+		}
+		.custom-rounded-right {
+			border-radius: 20px 20px 0 20px; /* Замените значение на нужное вам для большей закругленности */
+		}
+		.custom-rounded-left {
+			border-radius: 20px 20px 20px 0; /* Замените значение на нужное вам для большей закругленности */
+		}
+		.card-green-bg {
+			background-color: #EFFEDD;
+		}
+		.btn-blue-bg {
+			background-color: #72B5E9 !important;
+			border-color: #72B5E9 !important;
+			color: white; /* Установите цвет текста (можете изменить по необходимости) */
+		}
+		/* Переопределяем цвет активного элемента в выпадающем меню */
+		.dropdown-item.active {
+			background-color: #72B5E9 !important;
+			color: #fff; /* Дополнительно, если хотите изменить текст на белый */
+		}
+    </style>
 </head>
 <body>
-	<div id="app" v-cloak>
+    <div id="app" v-cloak>
+
 		<div class="d-none d-md-block">
-			<div class="d-flex justify-content-center p-4 fs-3" >
-				Этот сайт работает только на мобильных устройствах...<br>
-				This site only works on mobile devices...
+
+			<div class="container big-top-margin d-flex justify-content-center mb-4">
+
+				<div class="card shadow-sm custom-rounded w-100" style="max-width: 350px;">
+					<div class="row g-0">
+						<div class="col-4">
+							<div class="overflow-hidden h-100">
+								<img src="https://www.limonade.pro/backend/uploads/images/templates/not_found.jpg" class="img-fluid card-img" alt="image">
+							</div>
+						</div>
+						<div class="col-8">
+							<div class="card-body">
+								<h5 class="card-title">Page 404</h5>
+								<div class="card-text lh-sm">
+									<p>
+										Этот бот работает только на мобильных устройствах...
+									</p>
+								</div>
+								<div class="card-text lh-sm">
+									<small class="text-body-secondary">
+										Воспользуйтесь мобильным устройством
+									</small>
+								</div>
+								
+							</div>
+						</div>
+					</div>
+				</div>
+		
 			</div>
+
         </div>
 
 		<div class="d-block d-md-none big-top-margin">
 
 			<div class="container">
 
-				<nav class="navbar bg-body-tertiary fixed-top shadow-sm">
-					<div class="container-fluid">
+				<nav class="navbar bg-transparent fixed-top">
+					<div class="container-fluid d-flex justify-content-around">
 						
-						<button @click="loadNewsList(); loadAdsList()" class="btn btn-sm btn-success shadow-sm">
-							<img src="/backend/uploads/images/templates/icon.png" class="rounded me-1" alt="Limonade" width="24" height="24">
-							LIMONADE
+						<button @click="cleanCategory(); loadAdsList()" class="btn btn-secondary btn-transparent-bg">
+							<!-- <i class="bi bi-house-door-fill"></i> -->
+							<i class="bi bi-house"></i>
 						</button>
 
 						<div class="dropdown">
-							<button class="btn btn-sm btn-warning shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-								<i class="bi bi-building-fill"></i>
+							<button ref="dropdownButton" class="btn btn-secondary dropdown-toggle btn-transparent-bg"
+								data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+								<i class="bi bi-search"></i>
+							</button>
+							<div class="dropdown-menu shadow-sm p-3" style="width: 300px;">
+
+								<label for="textSearch" class="form-label">
+									<!-- Введите текст -->
+									{{ getTranslation('menu.searchAd.writeStr') }}
+									<!-- Счетчик оставшихся символов для текста -->
+									<span :class="getCharCountClass(searchText, searchTextLimit)">
+										({{ getRemainingChars(searchText, searchTextLimit) }})
+									</span>
+								</label>
+								<input @keyup.enter="searchByTextOrCategory()" v-model="searchText" type="text"
+									class="form-control form-control-sm mb-3 shadow-sm"
+									id="textSearch" :placeholder="getTranslation('menu.searchAd.searchTextPlaceholder')">
+
+								<label for="categorySelect" class="form-label">
+									<!-- Или выберите категорию -->
+									{{ getTranslation('menu.searchAd.selectStr') }}
+								<!-- <span class="text text-danger">*</span> -->
+								</label>
+								<select v-model="selectedMainCategory" @change="loadSubcategories('main')"
+									class="form-select form-select-sm shadow-sm" id="categorySelect" aria-label="Small select example">
+									<option value="">
+										<!-- Не выбрано -->
+										{{ getTranslation('menu.searchAd.notSelectedStr') }}
+									</option>
+									<option v-for="(cat, key) in categories" :key="key" :value="key">{{ key }}</option>
+								</select>
+								
+								<select v-if="selectedMainCategory && subcategories1" v-model="selectedSubcategory1" @change="loadSubcategories('sub1')"
+									class="form-select form-select-sm mt-3 shadow-sm" id="subcategory1Select" aria-label="Small select example">
+									<option value="">
+										<!-- Выберите подкатегорию -->
+										{{ getTranslation('menu.searchAd.selectSubStr') }}
+									</option>
+									<option v-for="(sub, key) in subcategories1" :key="key" :value="key">{{ key }}</option>
+								</select>
+								
+								<select v-if="selectedSubcategory1 && subcategories2" v-model="selectedSubcategory2"
+									class="form-select form-select-sm mt-3 shadow-sm" id="subcategory2Select" aria-label="Small select example">
+									<option value="">
+										<!-- Выберите подкатегорию -->
+										{{ getTranslation('menu.searchAd.selectSubStr') }}
+									</option>
+									<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
+								</select>
+
+								<div v-if="searchText.length > 3 || categoryCode.length > 0" class="d-flex justify-content-end mt-3">
+									<button @click="searchByTextOrCategory()" class="btn btn-sm btn-blue-bg">
+										<!-- :disabled="searchText.length < 4 && categoryCode.length < 1"> -->
+										<!-- Искать -->
+										<i class="bi bi-search"></i>
+										{{ getTranslation('menu.searchAd.searchButton') }}
+									</button>
+								</div>
+								
+							</div>
+						</div>
+
+						<div class="dropdown">
+							<button class="btn btn-secondary dropdown-toggle btn-transparent-bg fw-medium" data-bs-toggle="dropdown" aria-expanded="false">
+								<!-- <i class="bi bi-building-fill"></i> -->
+								<i class="bi bi-building"></i>
 								{{ cityButton }}
 							</button>
-							<ul class="dropdown-menu">
-								<li><h6 class="dropdown-header">{{ getTranslation('navBar.selectCity') }}</h6></li>
-								<li><a class="dropdown-item active" href="">{{ translations[currentLanguage].navBar.cities[0] }}</a></li>
-								<li><a class="dropdown-item disabled" href="">{{ translations[currentLanguage].navBar.cities[1] }}</a></li>
-								<li><a class="dropdown-item disabled" href="">{{ translations[currentLanguage].navBar.cities[2] }}</a></li>
+							<ul class="dropdown-menu shadow-sm">
+								<li>
+									<div class="dropdown-item active">
+										{{ translations[currentLanguage].navBar.cities[0] }}
+									</div>
+								</li>
+								<li>
+									<div class="dropdown-item disabled">
+										{{ translations[currentLanguage].navBar.cities[1] }}
+									</div>
+								</li>
+								<li>
+									<div class="dropdown-item disabled">
+										{{ translations[currentLanguage].navBar.cities[2] }}
+									</div>
+								</li>
 							</ul>
 						</div>
 
-						<div class="btn-group btn-group-sm shadow-sm" role="group" aria-label="Small button group">
-							<button @click="setLanguage('RU')" type="button" 
-								:class="['btn', 'btn-sm', currentLanguage === 'RU' ? 'btn-warning' : 'btn-outline-warning']">
-								<i class="bi bi-translate"></i>
-								RU
-							</button>
-							<button @click="setLanguage('EN')" type="button" 
-									:class="['btn', 'btn-sm', currentLanguage === 'EN' ? 'btn-warning' : 'btn-outline-warning']">EN</button>
-							<!-- <button type="button" class="btn btn-outline-warning">VN</button> -->
-						</div>
-
-						<button class="btn btn-sm btn-primary shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
-							aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-							<!-- Меню -->
-							<i class="bi bi-list"></i>
-							<!-- {{ getTranslation('navBar.menuButton') }} -->
+						<button @click="setLanguage()" class="btn btn-secondary btn-transparent-bg fw-medium">
+							<i class="bi bi-translate"></i>
+							{{ currentLanguage.toLowerCase() }}
 						</button>
 
-						<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-							<div class="offcanvas-header">
-								<h5 class="offcanvas-title" id="offcanvasNavbarLabel">
-									<!-- Меню -->
-									{{ getTranslation('navBar.menuButton') }}
-								</h5>
-								<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-							</div>
-							<div class="offcanvas-body">
-
-								<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-								<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
-		
-								<div class="accordion shadow-sm rounded" id="accordionExample">
-									<div class="accordion-item" v-if="!phpAdId">
-										<h2 class="accordion-header">
-											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true"
-												aria-controls="collapseOne">
-												<!-- Фильтровать поиск -->
-												{{ getTranslation('menu.searchAd.searchAdTab') }}
-											</button>
-										</h2>
-										<div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
-											<div class="accordion-body">
-								
-												<label for="textSearch" class="form-label">
-													<!-- Введите текст -->
-													{{ getTranslation('menu.searchAd.writeStr') }}
-													<!-- Счетчик оставшихся символов для текста -->
-													<span :class="getCharCountClass(searchText, searchTextLimit)">
-														({{ getRemainingChars(searchText, searchTextLimit) }})
-													</span>
-												</label>
-												<input v-model="searchText" type="text" class="form-control form-control-sm mb-3 shadow-sm"
-													id="textSearch" :placeholder="getTranslation('menu.searchAd.searchTextPlaceholder')">
-			
-												<label for="categorySelect" class="form-label">
-													<!-- Или выберите категорию -->
-													{{ getTranslation('menu.searchAd.selectStr') }}
-												<!-- <span class="text text-danger">*</span> -->
-												</label>
-												<select v-model="selectedMainCategory" @change="loadSubcategories('main')"
-													class="form-select form-select-sm mb-3 shadow-sm" id="categorySelect" aria-label="Small select example">
-													<option value="">
-														<!-- Не выбрано -->
-														{{ getTranslation('menu.searchAd.notSelectedStr') }}
-													</option>
-													<option v-for="(cat, key) in categories" :key="key" :value="key">{{ key }}</option>
-												</select>
-												
-												<select v-if="selectedMainCategory && subcategories1" v-model="selectedSubcategory1" @change="loadSubcategories('sub1')"
-													class="form-select form-select-sm mb-3 shadow-sm" id="subcategory1Select" aria-label="Small select example">
-													<option value="">
-														<!-- Выберите подкатегорию -->
-														{{ getTranslation('menu.searchAd.selectSubStr') }}
-													</option>
-													<option v-for="(sub, key) in subcategories1" :key="key" :value="key">{{ key }}</option>
-												</select>
-												
-												<select v-if="selectedSubcategory1 && subcategories2" v-model="selectedSubcategory2"
-													class="form-select form-select-sm mb-3 shadow-sm" id="subcategory2Select" aria-label="Small select example">
-													<option value="">
-														<!-- Выберите подкатегорию -->
-														{{ getTranslation('menu.searchAd.selectSubStr') }}
-													</option>
-													<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
-												</select>
-											
-												<button @click="searchByTextOrCategory()" class="btn btn-sm btn-primary mb-2 shadow-sm"
-													:disabled="searchText.length < 4 && categoryCode.length < 1">
-													<!-- Искать -->
-													<i class="bi bi-search"></i>
-													{{ getTranslation('menu.searchAd.searchButton') }}
-												</button>
-			
-											</div>
-										</div>
+						<div v-if="!isLinkOpened" class="dropdown">
+							<button class="btn btn-secondary dropdown-toggle btn-transparent-bg" data-bs-toggle="dropdown" aria-expanded="false">
+								<i class="bi bi-tools"></i>
+								<!-- создать -->
+							</button>
+							<ul class="dropdown-menu shadow-sm dropdown-menu-end">
+								<li>
+									<div @click="cleanCategory(); showScreen('create')" class="dropdown-item" href="">
+										<!-- создать объявление -->
+										<i class="bi bi-wrench-adjustable"></i>
+										<!-- <i class="bi bi-wrench-adjustable-circle"></i> -->
+										{{ getTranslation('menu.myAds.createButton') }}
 									</div>
-									<div class="accordion-item" v-if="!phpAdId">
-										<h2 class="accordion-header">
-										<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
-											aria-controls="collapseTwo">
-											<!-- Мои объявления -->
-											{{ getTranslation('menu.myAds.myAdsTab') }}
-										</button>
-										</h2>
-										<div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-										<div class="accordion-body">
-											<div class="container">
-												<div class="row mb-3">
-													<label class="form-label">
-														<!-- Создать новое объявление -->
-														{{ getTranslation('menu.myAds.createStr') }}
-													</label>
-													<div class="form-text">
-														<!-- Объявление будет размещено бесплатно... -->
-														{{ getTranslation('menu.myAds.createDescriptionStr1') }}
-														<br>
-														<!-- Для создания объявления вам необходимо... -->
-														{{ getTranslation('menu.myAds.createDescriptionStr2') }}
-													</div>
-												</div>
-												<div @click="cleanCategory(); showScreen('create')" class="btn btn-sm btn-primary mb-2 shadow-sm">
-													<!-- Создать -->
-													<i class="bi bi-wrench-adjustable"></i>
-													{{ getTranslation('menu.myAds.createButton') }}
-												</div>
-			
-												<hr class="divider">
-			
-												<div class="row mb-3">
-													<label class="form-label">
-														<!-- Найти все мои объявления -->
-														{{ getTranslation('menu.myAds.findStr') }}
-													</label>
-													<div class="col-6">
-														<label for="inputPassword1" class="form-label">
-															<!-- Пароль -->
-															{{ getTranslation('menu.myAds.passwordStr') }}
-															<span class="text text-danger">*</span>
-															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
-																({{ getRemainingChars(authPassword, authPasswordLimit) }})
-															</span>
-														</label>
-													</div>
-													<div class="col">
-														<input v-model="authPassword" type="password" id="inputPassword1" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
-													</div>
-													<div id="passwordHelpBlock" class="form-text">
-														<!-- Необходимо ввести ваш ID номер... -->
-														{{ getTranslation('menu.myAds.findDescriptionStr') }}
-														<a href="https://t.me/limonade_start_bot" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_start_bot</a>
-													</div>
-												</div>
-												<button @click="loadUserAds()" class="btn btn-sm btn-primary mb-2 shadow-sm" :disabled="authPassword.length < 5">
-													<!-- Искать -->
-													<i class="bi bi-search"></i>
-													{{ getTranslation('menu.myAds.findButton') }}
-												</button>
-											</div>
-										</div>
-										</div>
+								</li>
+								<li>
+									<div @click="loadUserAds()" class="dropdown-item" href="">
+										<!-- искать созданные -->
+										<i class="bi bi-search"></i>
+										{{ getTranslation('menu.myAds.findButton') }}
 									</div>
-									<div class="accordion-item" v-if="!phpAdId">
-										<h2 class="accordion-header">
-										<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false"
-											aria-controls="collapseThree">
-											<!-- Мои новости -->
-											{{ getTranslation('menu.myNews.myNewsTab') }}
-										</button>
-										</h2>
-										<div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-										<div class="accordion-body">
-											<div class="container">
-												<div class="row mb-2">
-													<label class="form-label">
-														<!-- Предложить новость -->
-														{{ getTranslation('menu.myNews.titleStr') }}
-													</label>
-													<div class="form-text">
-														<!-- Если у вас есть новости о нашем... -->
-														{{ getTranslation('menu.myNews.descriptionStr1') }}
-														<a href="https://t.me/limonade_pro" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_pro</a>
-														<br>
-														<!-- Мы принимаем новости на русском... -->
-														{{ getTranslation('menu.myNews.descriptionStr2') }}
-													</div>
-												</div>
-			
-											</div>
-										</div>
-										</div>
-									</div>
-									<div class="accordion-item">
-										<h2 class="accordion-header">
-										<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false"
-											aria-controls="collapseFour">
-											<!-- О нас -->
-											{{ getTranslation('menu.aboutUs.aboutUsTab') }}
-										</button>
-										</h2>
-										<div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-											<div class="accordion-body">
-												<div class="container">
-													<div class="row mb-2">
-														<div class="form-text">
-															<img src="https://www.limonade.pro/backend/uploads/images/templates/about_us.jpg" class="rounded float-start shadow-sm me-2 mb-2" alt="...">
-															{{ getTranslation('menu.aboutUs.descriptionStr1') }}
-															<br>
-															{{ getTranslation('menu.aboutUs.descriptionStr2') }}
-															<br>
-															{{ getTranslation('menu.aboutUs.descriptionStr3') }}
-															<br>
-															{{ getTranslation('menu.aboutUs.descriptionStr4') }}
-															<br>
-															{{ getTranslation('menu.aboutUs.descriptionStr5') }}
-															<a href="https://t.me/limonade_pro" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_pro</a>
-															<br>
-															{{ getTranslation('menu.aboutUs.descriptionStr6') }}
-														</div>
-													</div>
-				
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
+								</li>
+							</ul>
 						</div>
+
 					</div>
 				</nav>
 
-				<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-				<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
-
-				<nav>
-					<div class="nav nav-tabs" id="nav-tab" role="tablist">
-						<button @click="phpAdId ? (() => { loadNewsList(); loadAdsList(); })() : showScreen('adList')"
-							:class="{'nav-link': true, 'active': showAdList || showAdDetail || showCreateAd}"
-							id="nav-ad-tab" type="button" role="tab"
-							aria-controls="nav-ad" aria-selected="showAdList || showAdDetail || showCreateAd">{{ getTranslation('ads.adTab') }}</button>
-						<button @click="showScreen('newsList')"
-							v-if="!phpAdId"
-							:class="{'nav-link': true, 'active': showNewsList || showNewsDetail}"
-							id="nav-news-tab" type="button" role="tab"
-							aria-controls="nav-news" aria-selected="showNewsList || showNewsDetail">{{ getTranslation('news.newsTab') }}</button>
-					</div>
-				</nav>
+				<div v-if="errorMessage" class="alert alert-danger custom-rounded">{{ errorMessage }}</div>
+				<div v-if="successMessage" class="alert alert-success custom-rounded">{{ successMessage }}</div>
 
 				<div v-if="isLoading" class="d-flex justify-content-center p-5">
-					<div class="spinner-grow text-warning" role="status">
+					<div class="spinner-grow text-secondary" role="status">
 						<span class="visually-hidden">
 							<!-- Загружается... -->
 							{{ getTranslation('ads.isLoading') }}
@@ -323,587 +302,413 @@
 					</div>
 				</div>
 
-				<div v-if="!isLoading" class="tab-content" id="nav-tabContent">
-					<div :class="{'tab-pane': true, 'fade': true, 'show active': showAdList || showAdDetail || showCreateAd}"
-						id="nav-ad" role="tabpanel" aria-labelledby="nav-ad-tab" tabindex="0">
+				<div v-if="!isLoading && showAdList" v-for="(ad, index) in adsList" :key="ad.id" class="row mb-3">
 
-						<div class="mt-1">
+					<div :class="['col-11', { 'offset-1': (index + 1) % 3 === 0 }]">
 						
-							<div v-if="showAdList" v-for="(ad, index) in adsList" :key="ad.id" class="row mb-3">
-								<div class="col">
-									<!-- Условно добавляем класс rounded-top-0 для первого объявления -->
-									<div :class="['card', 'shadow-sm', {'rounded-top-0': index === 0}]">
-										<div class="row g-0">
-											<div class="col-5">
-												<!-- Условно меняем класс rounded-start для первого объявления -->
-												<img :src="ad.cover_photo" :class="['img-fluid', index === 0 ? 'custom-rounded-img' : 'rounded-start']" alt="image">
-											</div>
-											<div class="col-7">
-												<div class="card-body">
-													<h5 class="card-title text-truncate">{{ ad.title }}</h5>
-													<p class="card-text description-text">{{ ad.description }}</p>
-													<p class="card-text">
-														<small class="text-body-secondary text-truncate">
-															<!-- Создано  -->
-															<!-- <i class="bi bi-calendar-date"></i> -->
-															<i class="bi bi-calendar-date-fill"></i>
-															{{ getTranslation('ads.createdStr') }}
-															{{ ad.created_at.split(' ')[0] }}
-														</small>
-													</p>
-													<div class="btn btn-sm btn-primary shadow-sm" @click="loadAdDetail(ad.id)">
-														<!-- Посмотреть -->
-														<!-- <i class="bi bi-eye"></i> -->
-														<i class="bi bi-eye-fill"></i>
-														{{ getTranslation('ads.viewDetailsButton') }}
-													</div>
-												</div>
-											</div>
-										</div>
+						<div class="card shadow-sm" :class="(index + 1) % 3 === 0 ? 'card-green-bg custom-rounded-right' : 'custom-rounded-left'">
+							<div class="row g-0">
+								<div class="col-5">
+									<div class="overflow-hidden h-100">
+										<img @click="loadAdDetail(ad.id)" :src="ad.cover_photo" class="img-fluid"
+											:class="(index + 1) % 3 === 0 ? 'card-img' : 'card-img-2'" alt="image">
+									</div>
+								</div>
+								<div class="col-7">
+									<div class="card-body">
+										<h5 class="card-title text-truncate">{{ ad['title_' + currentLanguage.toLowerCase()] }}</h5>
+										<p class="card-text description-text lh-sm">{{ ad['description_' + currentLanguage.toLowerCase()] }}</p>
+										<p class="card-text">
+											<small class="text-body-secondary text-truncate">
+												<!-- Создано  -->
+												<!-- <i class="bi bi-calendar-date"></i> -->
+												<i class="bi bi-calendar-date-fill"></i>
+												{{ formatDate(ad.created_at) }}
+											</small>
+										</p>
 									</div>
 								</div>
 							</div>
-
-							<div v-if="showAdList" class="d-flex justify-content-center mb-3">
-							
-								<button v-if="adCurrentPage > 1" @click="adCurrentPage = 1; loadAdsList(adCurrentPage)"
-									class="btn btn-sm btn-primary me-2 shadow-sm" type="button">
-									<!-- В начало -->
-									<!-- <i class="bi bi-skip-backward"></i> -->
-									<i class="bi bi-skip-backward-fill"></i>
-									{{ getTranslation('ads.backToTopButton') }}
-								</button>
-								<button v-if="adCurrentPage > 2" @click="adCurrentPage -= 1; loadAdsList(adCurrentPage)"
-									class="btn btn-sm btn-secondary me-2 shadow-sm" type="button">
-									<!-- Назад -->
-									<i class="bi bi-backspace-fill"></i>
-									{{ getTranslation('ads.showLessButton') }}
-								</button>
-								<button v-if="adsList.length > 2" class="btn btn-sm btn-outline-primary me-2 shadow-sm">
-									<!-- Номер страницы -->
-									{{ adCurrentPage }}
-								</button>
-								<button v-if="adsList.length >= 10" @click="adCurrentPage += 1; loadAdsList(adCurrentPage)"
-									class="btn btn-sm btn-primary shadow-sm" type="button">
-									<!-- Вперед -->
-									<!-- <i class="bi bi-fast-forward"></i> -->
-									<!-- <i class="bi bi-fast-forward-fill"></i> -->
-									<i class="bi bi-backspace-reverse-fill"></i>
-									{{ getTranslation('ads.showMoreButton') }}
-								</button>
-
-							</div>
-
-							<div v-if="showAdDetail" class="row mb-3">
-								<div class="col">
-									<div class="card shadow-sm rounded-top-0">
-
-										<div v-if="currentAd.photo_1 || currentAd.photo_2 || currentAd.photo_3" id="carouselExampleIndicators" class="carousel slide">
-
-											<div class="carousel-indicators">
-												<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-												<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2" v-if="currentAd.photo_2"></button>
-												<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3" v-if="currentAd.photo_3"></button>
-											</div>
-
-											<div class="carousel-inner">
-												<div class="carousel-item active" v-if="currentAd.photo_1">
-													<img :src="currentAd.photo_1" class="d-block w-100" alt="image 1">
-												</div>
-												<div class="carousel-item" v-if="currentAd.photo_2">
-													<img :src="currentAd.photo_2" class="d-block w-100" alt="image 2">
-												</div>
-												<div class="carousel-item" v-if="currentAd.photo_3">
-													<img :src="currentAd.photo_3" class="d-block w-100" alt="image 3">
-												</div>
-											</div>
-
-											<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-												<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-												<span class="visually-hidden">Previous</span>
-											</button>
-
-											<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-												<span class="carousel-control-next-icon" aria-hidden="true"></span>
-												<span class="visually-hidden">Next</span>
-											</button>
-
-										</div>
-
-										<div class="card-body">
-											<h5 class="card-title">{{ currentAd.title }}</h5>
-											
-											<!-- <div v-for="categoryName in getCategoryNames(currentAd.category)" :key="categoryName" class="d-inline-block">
-												<button class="btn btn-sm btn-warning mb-1 me-2 shadow-sm">
-													{{ categoryName }}
-												</button>
-											</div> -->
-
-											<div v-for="(categoryName, index) in getCategoryNames(currentAd.category)" 
-												:key="categoryName" 
-												class="d-inline-block">
-												<button 
-													:class="{
-														'd-none': currentAd.category.startsWith('3') && index === 1
-													}" 
-													class="btn btn-sm btn-warning mb-1 me-2 shadow-sm">
-													{{ categoryName }}
-												</button>
-											</div>
-
-
-											<p class="card-text" style="white-space: pre-line;">{{ currentAd.description }}</p>
-											<h6 class="card-subtitle mb-2 text-body-secondary">
-												
-												<i class="bi bi-send-fill"></i>
-												{{ currentAd.contact }}
-											</h6>
-		
-											<div class="row mb-3">
-												<div class="col">
-													<p class="card-text"><small class="text-body-secondary">
-														<!-- Создано  -->
-														<!-- <i class="bi bi-calendar-date"></i> -->
-														<i class="bi bi-calendar-date-fill"></i>
-														{{ getTranslation('ads.adDetails.createdStr') }}
-														{{ currentAd.created_at.split(' ')[0] }}</small> <span v-if="!isAdOwner" class="inspect-text fw-light opacity-25">{{ inspect }}</span></p>
-												</div>
-												<div v-if="isAdOwner" class="col">
-													<p class="card-text"><small class="text-body-secondary">
-														<!-- Просмотрено  -->
-														<i class="bi bi-eye-fill"></i>
-														{{ getTranslation('ads.adDetails.viewedStr') }}
-														{{ currentAd.viewed }}</small></p>
-												</div>
-											</div>
-											
-											<div class="row">
-												<div v-if="!phpAdId" class="col-4 fixed-bottom ms-4" style="width: 100px; margin-bottom: 2rem;">
-													<button class="btn btn-sm btn-secondary shadow-sm " 
-														@click="returnToAdList()">
-														<!-- Назад -->
-														<!-- <i class="bi bi-skip-backward"></i> -->
-														<!-- <i class="bi bi-skip-backward-fill"></i> -->
-														<i class="bi bi-backspace-fill"></i>
-														{{ getTranslation('ads.adDetails.backButton') }}
-													</button>
-												</div>
-												<div v-if="phpAdId" class="col-6">
-													<button class="btn btn-sm btn-primary shadow-sm" @click="loadNewsList(); loadAdsList()">
-														<!-- Показать другие... -->
-														{{ getTranslation('ads.adDetails.showOthersButton') }}
-													</button>
-												</div>
-												<div v-if="!isAdOwner" class="col-2" :class="{ 'offset-4': !phpAdId }">
-													<button @click="openDislike()" :class="['btn', 'btn-sm', 'shadow-sm', dislike ? 'btn-danger' : 'btn-outline-danger']">
-														<!-- Пожаловаться -->
-														<!-- <i class="bi bi-hand-thumbs-down"></i> -->
-														<i class="bi bi-hand-thumbs-down-fill"></i>
-													</button>
-												</div>
-												<div v-if="!phpAdId" class="col-6">
-													<button class="btn btn-sm btn-primary shadow-sm" @click="copyLink(currentAd.id)">
-														<!-- Скопировать ссылку -->
-														<!-- <i class="bi bi-clipboard"></i>  -->
-														<i class="bi bi-clipboard-fill"></i>
-														{{ copyIcon ? getTranslation('ads.adDetails.copiedLinkButton') : getTranslation('ads.adDetails.copyLinkButton') }}
-													</button>
-												</div>
-											</div>
-		
-										</div>
-
-										<div v-if="!isAdOwner && dislike" class="card-footer">
-											<div class="row mb-3">
-												<div class="col form-text">
-													<!-- Если вы считаете, что данное... -->
-													{{ getTranslation('ads.adDetails.dislike.dislikeDescription') }}
-												</div>
-											</div>
-
-											<div class="mb-3">
-												<label for="FormControlTextarea11" class="form-label">
-													<!-- Описание -->
-													{{ getTranslation('ads.adDetails.dislike.dislikeTitleStr') }}
-													<span class="text text-danger">*</span>
-													<span :class="getCharCountClass(dislikeText, dislikeTextLimit)">
-														({{ getRemainingChars(dislikeText, dislikeTextLimit) }})
-													</span>
-												</label>
-												<textarea v-model="dislikeText" class="form-control form-control-sm shadow-sm" id="FormControlTextarea11" rows="3" placeholder=""></textarea>
-											</div>
-
-											<button @click="dislikeAd(currentAd.id)" class="btn btn-sm btn-danger mb-2 shadow-sm" :style="phpAdId ? {} : { marginLeft: '7rem' }"
-												:disabled="dislikeText.length < 5">
-												<!-- Отправить жалобу -->
-												<i class="bi bi-envelope-open-fill"></i>
-												{{ getTranslation('ads.adDetails.dislike.dislikeButton') }}
-											</button>
-										</div>
-		
-										<div v-if="isAdOwner" class="card-footer">
-											<div class="row mb-3">
-												<div class="col-6">
-													<label for="inputPassword3" class="form-label">
-														<!-- Пароль -->
-														{{ getTranslation('ads.adDetails.delete.passwordStr') }}
-														<span class="text text-danger">*</span>
-														<span :class="getCharCountClass(authPassword, authPasswordLimit)">
-															({{ getRemainingChars(authPassword, authPasswordLimit) }})
-														</span>
-													</label>
-												</div>
-												<div class="col">
-													<input v-model="authPassword" type="password" id="inputPassword3" class="form-control form-control-sm shadow-sm" aria-describedby="passwordHelpBlock">
-												</div>
-												<div id="passwordHelpBlock" class="form-text">
-													<!-- Для удаления необходимо ввести... -->
-													{{ getTranslation('ads.adDetails.delete.passwordDescription') }}
-												  	<a href="https://t.me/limonade_start_bot" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_start_bot</a>
-												</div>
-											</div>
-											<button @click="deleteAd(currentAd.id)" class="btn btn-sm btn-danger mb-2 shadow-sm" style="margin-left: 7rem;"
-												:disabled="authPassword.length < 5">
-												<!-- Удалить объявление -->
-												<!-- <i class="bi bi-trash"></i> -->
-												<i class="bi bi-trash3-fill"></i>
-												{{ getTranslation('ads.adDetails.delete.deleteButton') }}
-											</button>
-										</div>
-									</div>
-								</div>
-							</div>
-		
-							<div v-if="showCreateAd" class="row mb-3">
-								<div class="col">
-									<div class="card shadow-sm rounded-top-0">
-										<div class="card-body">
-											<h5 class="card-title">
-												<!-- Создать новое объявление -->
-												{{ getTranslation('ads.adCreate.createStr') }}
-											</h5>
-											<h6 class="card-subtitle mb-2 text-body-secondary">
-												<!-- Объявление будет размещено бесплатно... -->
-												{{ getTranslation('ads.adCreate.createDescriptionStr1') }}
-											</h6>
-											<div class="form-text mb-3">
-												<!-- 'Фото' не обязательно, но это... -->
-												<i class="bi bi-camera-fill"></i>
-												{{ getTranslation('ads.adCreate.createDescriptionStr2') }}
-											</div>
-											
-											<div class="mb-3">
-												<label for="formFile1" class="form-label">
-													<!-- Заглавное фото -->
-													{{ getTranslation('ads.adCreate.photoTitleStr1') }}
-												</label>
-												<span class="form-text"> // jpeg, png, gif, < 5MB</span>
-												<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm" id="formFile1" type="file">
-											</div>
-				
-											<div v-if="photoInputs[1]" class="mb-3">
-												<label for="formFile2" class="form-label">
-													<!-- Фото 2 -->
-													{{ getTranslation('ads.adCreate.photoTitleStr2') }}
-												</label>
-												<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm" id="formFile2" type="file">
-											</div>
-											
-											<div v-if="photoInputs[2]" class="mb-3">
-												<label for="formFile3" class="form-label">
-													<!-- Фото 3 -->
-													{{ getTranslation('ads.adCreate.photoTitleStr3') }}
-												</label>
-												<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm" id="formFile3" type="file">
-											</div>
-										
-											<div class="mb-3">
-												<label for="FormControlInput1" class="form-label">
-													<!-- Название -->
-													{{ getTranslation('ads.adCreate.adTitleStr') }}
-													<span class="text text-danger">*</span>
-													<!-- Счетчик оставшихся символов для названия -->
-													<span :class="getCharCountClass(newAd.title, newAd.titleLimit)">
-														({{ getRemainingChars(newAd.title, newAd.titleLimit) }})
-													</span>
-												</label>
-												<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput1"
-													:placeholder="getTranslation('ads.adCreate.adTitlePlaceholderStr')">
-											</div>
-			
-											<div class="mb-3">
-												<label for="categorySelect" class="form-label">
-													<!-- Категория -->
-													{{ getTranslation('ads.adCreate.adCategoryStr') }}
-													<span class="text text-danger">*</span>
-												</label>
-												<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm shadow-sm" id="categorySelect" aria-label="Small select example">
-													<option value="">
-														<!-- Не выбрано -->
-														{{ getTranslation('ads.adCreate.adNotSelectedCategoryStr') }}
-													</option>
-													<option v-for="(cat, key) in categories" :key="key" :value="key">{{ key }}</option>
-												</select>
-											</div>
-											
-											<!-- Выбор подкатегории 1 -->
-											<div v-if="selectedMainCategory && subcategories1" class="mb-3">
-												<!-- <label for="subcategory1Select" class="form-label">Подкатегория</label> -->
-												<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm shadow-sm" id="subcategory1Select" aria-label="Small select example">
-													<option value="">
-														<!-- Выберите подкатегорию -->
-														{{ getTranslation('ads.adCreate.adSubCategoryStr') }}
-													</option>
-													<option v-for="(sub, key) in subcategories1" :key="key" :value="key">{{ key }}</option>
-												</select>
-											</div>
-											
-											<!-- Выбор подкатегории 2 -->
-											<div v-if="selectedSubcategory1 && subcategories2" class="mb-3">
-												<!-- <label for="subcategory2Select" class="form-label">Подкатегория</label> -->
-												<select v-model="selectedSubcategory2" class="form-select form-select-sm shadow-sm" id="subcategory2Select" aria-label="Small select example">
-													<option value="">
-														<!-- Выберите подкатегорию -->
-														{{ getTranslation('ads.adCreate.adSubCategoryStr') }}
-													</option>
-													<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
-												</select>
-											</div>
-			
-											<div class="mb-3">
-												<label for="FormControlTextarea1" class="form-label">
-													<!-- Описание -->
-													{{ getTranslation('ads.adCreate.adDescriptionStr') }}
-													<span class="text text-danger">*</span>
-													<span :class="getCharCountClass(newAd.description, newAd.descriptionLimit)">
-														({{ getRemainingChars(newAd.description, newAd.descriptionLimit) }})
-													</span>
-												</label>
-												<textarea v-model="newAd.description" class="form-control form-control-sm shadow-sm" id="FormControlTextarea1" rows="3"
-													:placeholder="getTranslation('ads.adCreate.adDescriptionPlaceholderStr')"></textarea>
-											</div>
-						
-											<div class="mb-3">
-												<label for="FormControlInput3" class="form-label">
-													<!-- Контакт -->
-													{{ getTranslation('ads.adCreate.adContactStr') }}
-													<span class="text text-danger">*</span>
-													<span :class="getCharCountClass(newAd.contact, newAd.contactLimit)">
-														({{ getRemainingChars(newAd.contact, newAd.contactLimit) }})
-													</span>
-												</label>
-												<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput3"
-													:placeholder="getTranslation('ads.adCreate.adContactPlaceholderStr')">
-											</div>
-											
-											<div class="row mb-3">
-												<div class="col-6">
-													<label for="inputPassword2" class="form-label">
-														<!-- Пароль -->
-														{{ getTranslation('ads.adCreate.passwordStr') }}
-														<span class="text text-danger">*</span>
-														<span :class="getCharCountClass(authPassword, authPasswordLimit)">
-															({{ getRemainingChars(authPassword, authPasswordLimit) }})
-														</span>
-													</label>
-												</div>
-												<div class="col">
-													<input v-model="authPassword" type="password" id="inputPassword2" class="form-control form-control-sm shadow-sm"
-														aria-describedby="passwordHelpBlock">
-												</div>
-												<div id="passwordHelpBlock" class="form-text">
-													<!-- Зайдите в Telegram-бот: -->
-													{{ getTranslation('ads.adCreate.createDescriptionStr3') }}
-												<a href="https://t.me/limonade_start_bot" class="link-primary" target="_blank" rel="noopener noreferrer">t.me/limonade_start_bot</a>
-												<!-- , нажмите 'старт', получите ваш ID номер, введите его сюда в качестве пароля. -->
-													{{ getTranslation('ads.adCreate.createDescriptionStr4') }}
-												</div>
-											</div>
-											<button @click="createAd()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
-												<!-- Опубликовать объявление -->
-												<!-- <i class="bi bi-envelope"></i> -->
-												<i class="bi bi-envelope-open-fill"></i>
-												{{ getTranslation('ads.adCreate.createButton') }}
-											</button>
-						
-										</div>
-									</div>
-								</div>
-							</div>
-		
-						</div>
+						</div>					
 
 					</div>
-					<div :class="{'tab-pane': true, 'fade': true, 'show active': showNewsList || showNewsDetail}"
-						id="nav-news" role="tabpanel" aria-labelledby="nav-news-tab" tabindex="0">
 
-						<div class="mt-1">
-						
-							<div v-if="showNewsList" v-for="(news, index) in newsList" :key="news.id" class="row mb-3">
-								<div class="col">
-									<!-- Условно добавляем класс rounded-top-0 для первого объявления -->
-									<div :class="['card', 'shadow-sm', {'rounded-top-0': index === 0}]">
-										<div class="row g-0">
-											<div class="col-5">
-												<!-- Условно меняем класс rounded-start для первого объявления -->
-												<img :src="news.cover_photo" :class="['img-fluid', index === 0 ? 'custom-rounded-img' : 'rounded-start']" alt="image">
-											</div>
-											<div class="col-7">
-												<div class="card-body">
-													<h5 class="card-title text-truncate">{{ news['title_' + currentLanguage.toLowerCase()] }}</h5>
-													<p class="card-text description-text">{{ news['description_' + currentLanguage.toLowerCase()] }}</p>
-													<p class="card-text">
-														<small class="text-body-secondary text-truncate">
-															<!-- Создано  -->
-															{{ getTranslation('news.createdStr') }}
-															{{ news.created_at.split(' ')[0] }}
-														</small>
-													</p>
-													<div class="btn btn-sm btn-primary shadow-sm" @click="loadNewsDetail(news.id)">
-														<!-- Посмотреть -->
-														<!-- <i class="bi bi-eye"></i> -->
-														<i class="bi bi-eye-fill"></i>
-														{{ getTranslation('news.viewDetailsButton') }}
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-		
-							<div v-if="showNewsList" class="d-flex justify-content-center mb-3">
-
-								<button v-if="newsCurrentPage > 1" @click="newsCurrentPage = 1; loadNewsList(newsCurrentPage)"
-									class="btn btn-sm btn-primary me-2 shadow-sm" type="button">
-									<!-- В начало -->
-									<!-- <i class="bi bi-skip-backward"></i> -->
-									<i class="bi bi-skip-backward-fill"></i>
-									{{ getTranslation('news.backToTopButton') }}
-								</button>
-								<button v-if="newsCurrentPage > 2" @click="newsCurrentPage -= 1; loadNewsList(newsCurrentPage)"
-									class="btn btn-sm btn-secondary me-2 shadow-sm" type="button">
-									<!-- Назад -->
-									<!-- <i class="bi bi-backspace-fill"></i> -->
-									<i class="bi bi-backspace-fill"></i>
-									{{ getTranslation('news.showLessButton') }}
-								</button>
-								<button v-if="newsList.length > 2" class="btn btn-sm btn-outline-primary me-2 shadow-sm">
-									<!-- Номер страницы -->
-									{{ newsCurrentPage }}
-								</button>
-								<button v-if="newsList.length >= 10" @click="newsCurrentPage += 1; loadNewsList(newsCurrentPage)"
-									class="btn btn-sm btn-primary shadow-sm" type="button">
-									<!-- Вперед -->
-									<!-- <i class="bi bi-fast-forward"></i> -->
-									<!-- <i class="bi bi-fast-forward-fill"></i> -->
-									<i class="bi bi-backspace-reverse-fill"></i>
-									{{ getTranslation('news.showMoreButton') }}
-								</button>
-						
-								<!-- loadAdsList(adCurrentPage) -->
-								
-							</div>
-		
-							<div v-if="showNewsDetail" class="row mb-3">
-								<div class="col">
-									<div class="card shadow-sm rounded-top-0">
-
-										<div v-if="currentNews.photo_1 || currentNews.photo_2 || currentNews.photo_3" id="carouselExampleIndicators2" class="carousel slide">
-
-											<div class="carousel-indicators">
-												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="1" aria-label="Slide 2" v-if="currentNews.photo_2"></button>
-												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="2" aria-label="Slide 3" v-if="currentNews.photo_3"></button>
-												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="3" aria-label="Slide 4" v-if="currentNews.photo_4"></button>
-												<button type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide-to="4" aria-label="Slide 5" v-if="currentNews.photo_5"></button>
-											</div>
-
-											<div class="carousel-inner">
-												<div class="carousel-item active" v-if="currentNews.photo_1">
-													<img :src="currentNews.photo_1" class="d-block w-100" alt="image 1">
-												</div>
-												<div class="carousel-item" v-if="currentNews.photo_2">
-													<img :src="currentNews.photo_2" class="d-block w-100" alt="image 2">
-												</div>
-												<div class="carousel-item" v-if="currentNews.photo_3">
-													<img :src="currentNews.photo_3" class="d-block w-100" alt="image 3">
-												</div>
-												<div class="carousel-item" v-if="currentNews.photo_4">
-													<img :src="currentNews.photo_4" class="d-block w-100" alt="image 4">
-												</div>
-												<div class="carousel-item" v-if="currentNews.photo_5">
-													<img :src="currentNews.photo_5" class="d-block w-100" alt="image 5">
-												</div>
-											</div>
-
-											<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide="prev">
-												<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-												<span class="visually-hidden">Previous</span>
-											</button>
-
-											<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators2" data-bs-slide="next">
-												<span class="carousel-control-next-icon" aria-hidden="true"></span>
-												<span class="visually-hidden">Next</span>
-											</button>
-
-										</div>
-
-										<div class="card-body">
-											<h5 class="card-title">{{ currentNews['title_' + currentLanguage.toLowerCase()] }}</h5>
-											<p class="card-text" style="white-space: pre-line;">{{ currentNews['description_' + currentLanguage.toLowerCase()] }}</p>
-											<h6 class="card-subtitle mb-2 text-body-secondary">
-												{{ currentNews['author_' + currentLanguage.toLowerCase()] }}
-											</h6>
-		
-											<div class="row mb-3">
-												<div class="offset-4 col">
-													<p class="card-text"><small class="text-body-secondary">
-														<!-- Создано  -->
-														<!-- <i class="bi bi-calendar-date"></i> -->
-														<i class="bi bi-calendar-date-fill"></i>
-														{{ getTranslation('news.newsDetails.createdStr') }}
-														{{ currentNews.created_at.split(' ')[0] }}</small> <span class="inspect-text fw-light opacity-25">{{ inspect }}</span></p>
-												</div>
-											</div>
-											
-											<div class="row">
-												<div class="col-4 fixed-bottom ms-4" style="width: 100px; margin-bottom: 2rem;">
-													<button class="btn btn-sm btn-secondary shadow-sm" @click="returnToNewsList()">
-														<!-- Назад -->
-														<!-- <i class="bi bi-skip-backward"></i> -->
-														<!-- <i class="bi bi-skip-backward-fill"></i> -->
-														<i class="bi bi-backspace-fill"></i>
-														{{ getTranslation('news.newsDetails.backButton') }}
-													</button>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-		
-						</div>
-
-					</div>
 				</div>
 
+				<div v-if="!isLoading && showAdList" class="d-flex justify-content-center mb-3">
+							
+					<button v-if="adCurrentPage > 1" @click="adCurrentPage = 1; loadAdsList(adCurrentPage)"
+						class="btn btn-secondary btn-transparent-bg me-2">
+						<!-- В начало -->
+						<!-- <i class="bi bi-skip-backward"></i> -->
+						<i class="bi bi-skip-start-fill"></i>
+						<!-- {{ getTranslation('ads.backToTopButton') }} -->
+					</button>
+					<button v-if="adCurrentPage > 2" @click="adCurrentPage -= 1; loadAdsList(adCurrentPage)"
+						class="btn btn-secondary btn-transparent-bg fw-medium me-2">
+						<!-- Назад -->
+						<!-- <i class="bi bi-backspace-fill"></i> -->
+						<i class="bi bi-caret-left-fill"></i>
+						{{ getTranslation('ads.showLessButton') }}
+					</button>
+					<button v-if="adsList.length > 2 || adCurrentPage > 1" class="btn btn-outline-secondary btn-transparent-bg fw-medium me-2">
+						<!-- Номер страницы -->
+						{{ adCurrentPage }}
+					</button>
+					<button v-if="adsList.length >= 10" @click="adCurrentPage += 1; loadAdsList(adCurrentPage)"
+						class="btn btn-secondary btn-transparent-bg fw-medium">
+						<!-- Вперед -->
+						<!-- <i class="bi bi-fast-forward"></i> -->
+						<!-- <i class="bi bi-fast-forward-fill"></i> -->
+						<!-- <i class="bi bi-backspace-reverse-fill"></i> -->
+						<i class="bi bi-caret-right-fill"></i>
+						{{ getTranslation('ads.showMoreButton') }}
+					</button>
+
+				</div>
+
+				<div v-if="!isLoading && showAdDetail" class="row mb-5">
+
+					<div class="col-11">
+
+						<div class="card shadow-sm custom-rounded-left">
+
+							<div v-if="currentAd.photo_1 || currentAd.photo_2 || currentAd.photo_3" id="carouselExampleIndicators" class="carousel slide carousel-fade">
+
+								<div class="carousel-indicators">
+									<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+									<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2" v-if="currentAd.photo_2"></button>
+									<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3" v-if="currentAd.photo_3"></button>
+								</div>
+
+								<div class="carousel-inner">
+									<div class="carousel-item active" v-if="currentAd.photo_1">
+										<div class="overflow-hidden h-100">
+											<img :src="currentAd.photo_1" class="d-block w-100 img-fluid card-img-3" alt="image 1">
+										</div>
+									</div>
+									<div class="carousel-item" v-if="currentAd.photo_2">
+										<div class="overflow-hidden h-100">
+											<img :src="currentAd.photo_2" class="d-block w-100 img-fluid card-img-3" alt="image 2">
+										</div>
+									</div>
+									<div class="carousel-item" v-if="currentAd.photo_3">
+										<div class="overflow-hidden h-100">
+											<img :src="currentAd.photo_3" class="d-block w-100 img-fluid card-img-3" alt="image 3">
+										</div>
+									</div>
+								</div>
+
+								<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+									<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+									<span class="visually-hidden">Previous</span>
+								</button>
+
+								<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+									<span class="carousel-control-next-icon" aria-hidden="true"></span>
+									<span class="visually-hidden">Next</span>
+								</button>
+
+							</div>
+
+							<div class="card-body">
+								<h5 class="card-title lh-sm">{{ currentAd['title_' + currentLanguage.toLowerCase()] }}</h5>
+
+								<div v-for="(categoryName, index) in getCategoryNames(currentAd.category)" 
+									:key="categoryName" 
+									class="d-inline-block mb-2">
+									<button :class="{ 'd-none': currentAd.category.startsWith('3') && index === 1 }"
+										class="btn btn-sm btn-blue-bg mb-1 me-2">
+										{{ categoryName }}
+									</button>
+								</div>
+
+								<p class="card-text lh-sm" style="white-space: pre-line;">{{ currentAd['description_' + currentLanguage.toLowerCase()] }}</p>
+
+								<h6 class="card-subtitle mb-2 text-body-secondary">
+									<!-- Контакт  -->
+									<i class="bi bi-send-fill"></i>
+									{{ currentAd.contact }}
+								</h6>
+
+								<div class="row">
+									<div class="col">
+										<p class="card-text"><small class="text-body-secondary">
+											<!-- Создано  -->
+											<!-- <i class="bi bi-calendar-date"></i> -->
+											<i class="bi bi-calendar-date-fill"></i>
+											{{ getTranslation('ads.adDetails.createdStr') }}
+											{{ formatDateLong(currentAd.created_at) }}</small> <span v-if="!isAdOwner"
+												class="inspect-text fw-light opacity-25">{{ inspect }}</span></p>
+									</div>
+									<div v-if="isAdOwner" class="col">
+										<p class="card-text"><small class="text-body-secondary">
+											<!-- Просмотрено  -->
+											<i class="bi bi-eye-fill"></i>
+											{{ getTranslation('ads.adDetails.viewedStr') }}
+											{{ currentAd.viewed }}</small></p>
+									</div>
+								</div>
+							</div>
+
+							<div v-if="!isAdOwner && dislike" class="card-footer">
+								<div class="row mb-3">
+									<div class="col form-text lh-sm">
+										<!-- Если вы считаете, что данное... -->
+										{{ getTranslation('ads.adDetails.dislike.dislikeDescription') }}
+									</div>
+								</div>
+
+								<div class="mb-3">
+									<label for="FormControlTextarea11" class="form-label">
+										<!-- Описание -->
+										{{ getTranslation('ads.adDetails.dislike.dislikeTitleStr') }}
+										<span class="text text-danger">*</span>
+										<span :class="getCharCountClass(dislikeText, dislikeTextLimit)">
+											({{ getRemainingChars(dislikeText, dislikeTextLimit) }})
+										</span>
+									</label>
+									<textarea v-model="dislikeText" class="form-control form-control-sm shadow-sm lh-sm" id="FormControlTextarea11" rows="3"
+										placeholder=""></textarea>
+								</div>
+
+								<button v-if="dislikeText.length > 4" @click="dislikeAd(currentAd.id)" class="btn btn-sm btn-blue-bg mb-2">
+									<!-- Отправить жалобу -->
+									<!-- <i class="bi bi-envelope-open-fill"></i> -->
+									<i class="bi bi-envelope-open"></i>
+									{{ getTranslation('ads.adDetails.dislike.dislikeButton') }}
+								</button>
+							</div>
+
+							<div v-if="isAdOwner && deleteButton" class="card-footer">
+								<div class="row mb-3">
+									<div class="col form-text lh-sm">
+										<!-- Для удаления необходимо ввести... -->
+										{{ getTranslation('ads.adDetails.delete.description') }}
+									</div>
+								</div>
+
+								<button @click="deleteAd(currentAd.id)" class="btn btn-sm btn-danger mb-2">
+									<!-- Удалить объявление -->
+									<i class="bi bi-trash3"></i>
+									<!-- <i class="bi bi-trash3-fill"></i> -->
+									{{ getTranslation('ads.adDetails.delete.deleteButton') }}
+								</button>
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<nav v-if="!isLoading && showAdDetail" class="navbar bg-transparent fixed-bottom">
+
+					<div class="container-fluid d-flex justify-content-start">
+
+						<button v-if="!isLinkOpened" @click="returnToAdList()" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
+							<!-- Назад -->
+							<i class="bi bi-caret-left-fill"></i>
+							{{ getTranslation('ads.adDetails.backButton') }}
+						</button>
+
+						<button v-if="isLinkOpened" @click="loadAdsList()" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
+							<!-- Показать другие -->
+							<!-- <i class="bi bi-play-fill"></i> -->
+							<i class="bi bi-fast-forward-fill"></i>
+							{{ getTranslation('ads.adDetails.showOthersButton') }}
+						</button>
+
+						<button v-if="!isAdOwner" @click="openDislike()" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
+							<!-- Пожаловаться -->
+							<!-- <i class="bi bi-exclamation-circle-fill"></i> -->
+							<i class="bi bi-exclamation-circle"></i>
+						</button>
+
+						<button v-if="isAdOwner" @click="openDelete()" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
+							<!-- Удалить объявление -->
+							<i class="bi bi-trash3"></i>
+							<!-- <i class="bi bi-trash3-fill"></i> -->
+							<!-- {{ getTranslation('ads.adDetails.delete.deleteButton') }} -->
+						</button>
+
+						<button v-if="!isLinkOpened" @click="copyLink(currentAd.id)" class="btn btn-secondary btn-transparent-bg fw-medium">
+							<!-- Скопировать ссылку -->
+							<i class="bi bi-clipboard"></i>
+							<!-- <i class="bi bi-clipboard-fill"></i> -->
+							{{ copyIcon ? getTranslation('ads.adDetails.copiedLinkButton') : getTranslation('ads.adDetails.copyLinkButton') }}
+						</button>
+
+					</div>
+
+				</nav>
+
+				<div v-if="!isLoading && showCreateAd" class="row mb-5">
+
+					<div class="col-11 offset-1">
+
+						<div class="card shadow-sm custom-rounded-right">
+							<div class="card-body">
+								<h5 class="card-title">
+									<!-- Создать новое объявление -->
+									{{ getTranslation('ads.adCreate.createStr') }}
+								</h5>
+								<h6 class="card-subtitle mb-2 text-body-secondary lh-sm">
+									<!-- Объявление будет размещено бесплатно... -->
+									{{ getTranslation('ads.adCreate.createDescriptionStr1') }}
+								</h6>
+								<div class="form-text mb-3 lh-sm">
+									<!-- 'Фото' не обязательно, но это... -->
+									<i class="bi bi-camera-fill"></i>
+									{{ getTranslation('ads.adCreate.createDescriptionStr2') }}
+								</div>
+								
+								<div class="mb-3">
+									<label for="formFile1" class="form-label">
+										<!-- Заглавное фото -->
+										{{ getTranslation('ads.adCreate.photoTitleStr1') }}
+									</label>
+									<span class="form-text"> // jpeg, png, gif, < 5MB</span>
+									<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm" id="formFile1" type="file">
+								</div>
+	
+								<div v-if="photoInputs[1]" class="mb-3">
+									<label for="formFile2" class="form-label">
+										<!-- Фото 2 -->
+										{{ getTranslation('ads.adCreate.photoTitleStr2') }}
+									</label>
+									<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm" id="formFile2" type="file">
+								</div>
+								
+								<div v-if="photoInputs[2]" class="mb-3">
+									<label for="formFile3" class="form-label">
+										<!-- Фото 3 -->
+										{{ getTranslation('ads.adCreate.photoTitleStr3') }} 
+										<span class="text text-danger">
+											{{ getTranslation('ads.adCreate.photoTitleStr4') }}
+										</span>
+									</label>
+									<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm" id="formFile3" type="file">
+								</div>
+							
+								<div class="mb-3">
+									<label for="FormControlInput1" class="form-label">
+										<!-- Название -->
+										{{ getTranslation('ads.adCreate.adTitleStr') }}
+										<span class="text text-danger">*</span>
+										<!-- Счетчик оставшихся символов для названия -->
+										<span :class="getCharCountClass(newAd.title, newAd.titleLimit)">
+											({{ getRemainingChars(newAd.title, newAd.titleLimit) }})
+										</span>
+									</label>
+									<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput1"
+										:placeholder="getTranslation('ads.adCreate.adTitlePlaceholderStr')">
+								</div>
+
+								<div class="mb-3">
+									<label for="categorySelect" class="form-label">
+										<!-- Категория -->
+										{{ getTranslation('ads.adCreate.adCategoryStr') }}
+										<span class="text text-danger">*</span>
+									</label>
+									<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm shadow-sm" id="categorySelect" aria-label="Small select example">
+										<option value="">
+											<!-- Не выбрано -->
+											{{ getTranslation('ads.adCreate.adNotSelectedCategoryStr') }}
+										</option>
+										<option v-for="(cat, key) in categories" :key="key" :value="key">{{ key }}</option>
+									</select>
+								</div>
+								
+								<!-- Выбор подкатегории 1 -->
+								<div v-if="selectedMainCategory && subcategories1" class="mb-3">
+									<!-- <label for="subcategory1Select" class="form-label">Подкатегория</label> -->
+									<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm shadow-sm" id="subcategory1Select" aria-label="Small select example">
+										<option value="">
+											<!-- Выберите подкатегорию -->
+											{{ getTranslation('ads.adCreate.adSubCategoryStr') }}
+										</option>
+										<option v-for="(sub, key) in subcategories1" :key="key" :value="key">{{ key }}</option>
+									</select>
+								</div>
+								
+								<!-- Выбор подкатегории 2 -->
+								<div v-if="selectedSubcategory1 && subcategories2" class="mb-3">
+									<!-- <label for="subcategory2Select" class="form-label">Подкатегория</label> -->
+									<select v-model="selectedSubcategory2" class="form-select form-select-sm shadow-sm" id="subcategory2Select" aria-label="Small select example">
+										<option value="">
+											<!-- Выберите подкатегорию -->
+											{{ getTranslation('ads.adCreate.adSubCategoryStr') }}
+										</option>
+										<option v-for="(sub, key) in subcategories2" :key="key" :value="key">{{ key }}</option>
+									</select>
+								</div>
+
+								<div class="mb-3">
+									<label for="FormControlTextarea1" class="form-label">
+										<!-- Описание -->
+										{{ getTranslation('ads.adCreate.adDescriptionStr') }}
+										<span class="text text-danger">*</span>
+										<span :class="getCharCountClass(newAd.description, newAd.descriptionLimit)">
+											({{ getRemainingChars(newAd.description, newAd.descriptionLimit) }})
+										</span>
+									</label>
+									<textarea v-model="newAd.description" class="form-control form-control-sm shadow-sm lh-sm" id="FormControlTextarea1" rows="5"
+										:placeholder="getTranslation('ads.adCreate.adDescriptionPlaceholderStr')"></textarea>
+								</div>
+			
+								<div class="mb-2">
+									<label for="FormControlInput3" class="form-label">
+										<!-- Контакт -->
+										{{ getTranslation('ads.adCreate.adContactStr') }}
+										<span class="text text-danger">*</span>
+										<span :class="getCharCountClass(newAd.contact, newAd.contactLimit)">
+											({{ getRemainingChars(newAd.contact, newAd.contactLimit) }})
+										</span>
+									</label>
+									<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput3"
+										:placeholder="getTranslation('ads.adCreate.adContactPlaceholderStr')">
+								</div>
+			
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+
+				<nav v-if="!isLoading && showCreateAd" class="navbar bg-transparent fixed-bottom">
+
+					<div class="container-fluid d-flex justify-content-end">
+						
+						<button @click="showScreen('adList')" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
+							<!-- Назад -->
+							<i class="bi bi-caret-left-fill"></i>
+							{{ getTranslation('ads.adDetails.backButton') }}
+						</button>
+						<button @click="createAd()" class="btn btn-secondary btn-transparent-bg fw-medium">
+							<!-- Опубликовать объявление -->
+							<i class="bi bi-envelope-open"></i>
+							<!-- <i class="bi bi-envelope-open-fill"></i> -->
+							{{ getTranslation('ads.adCreate.createButton') }}
+						</button>
+
+					</div>
+
+				</nav>
+
 			</div>
+
 		</div>
-	</div>
 
-	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    </div>
 
-	<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
-	<!-- <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script> -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-	<script>
+    <script>
+        // Создание нового Vue приложения
         const app = Vue.createApp({
             data() {
                 return {
-					// отвечает за показ экрана со списком объявлений
+                    // отвечает за показ экрана со списком объявлений
 					showAdList: true,
 					// отвечает за показ экрана только с одним объявлением
 					showAdDetail: false,
@@ -913,21 +718,14 @@
 					showNewsList: false,
 					// отвечает за показ экрана только с одним объявлением
 					showNewsDetail: false,
-					// содержит массив объявлений
+                    // содержит массив объявлений
                     adsList: [],
-					// содержит массив новостей
-                    newsList: [],
-					// содержит объект одного объявления
+                    // содержит объект одного объявления
                     currentAd: {
 						photo_1: null,
 						created_at: ''
 					},
-					// содержит объект одной новости
-                    currentNews: {
-						photo_1: null,
-						created_at: ''
-					},
-					// содержит объект нового объявления (ещё не созданного)
+                    // содержит объект нового объявления (ещё не созданного)
 					newAd: {
 						title: '',
 						// лимит названия
@@ -940,7 +738,7 @@
 						contactLimit: 50,
 						category: ''
 					},
-					// управляет видимостью полей для фото
+                    // управляет видимостью полей для фото
 					photoInputs: [true, false, false], // скрываем фото 2 и фото 3
 					// содержит массив загруженных фото
         			photos: [],
@@ -952,17 +750,11 @@
                     errorMessage: null,
 					// содержит номер текущей страницы с объявлениями
 					adCurrentPage: 1,
-					// содержит номер текущей страницы с новостями
-					newsCurrentPage: 1,
 					// указывает, является ли пользователь создателем данного объявления
 					isAdOwner: false,
-					// содержит пароль для авторизации
-					authPassword: '',
-					// лимит пароля
-					authPasswordLimit: 16,
 					// язык интерфейса по умолчанию
 					currentLanguage: 'RU',
-					// словарь интерфейса
+                    // словарь интерфейса
 					translations: {
 						RU: {
 							navBar: {
@@ -972,9 +764,9 @@
 								selectCity: 'Выберите город',
 								//
 								cities: [
-									'НЯЧАНГ',
-									'// ДАНАНГ',
-									'// ДАЛАТ',
+									'Нячанг',
+									'Дананг',
+									'Далат',
 								],
 								// langButton: 'RU',
 								menuButton: 'Меню',
@@ -984,21 +776,21 @@
 									searchAdTab: 'Фильтровать объявления',
 									writeStr: 'Введите текст',
 									searchTextPlaceholder: 'Плюшевый мишка',
-									selectStr: 'Или выберите категорию',
+									selectStr: 'Выберите категорию',
 									notSelectedStr: 'Не выбрано',
 									selectSubStr: 'Выберите подкатегорию',
-									searchButton: 'Искать',
+									searchButton: 'искать',
 								},
 								myAds: {
 									myAdsTab: 'Мои объявления',
 									createStr: 'Создать новое объявление',
 									createDescriptionStr1: 'Объявление будет размещено бесплатно на 10 дней. Опубликованное объявление нельзя отредактировать, только удалить и создать новое.',
 									createDescriptionStr2: 'Для создания объявления вам необходимо будет войти в Телеграм.',
-									createButton: 'Создать',
+									createButton: 'создать объявление',
 									findStr: 'Найти все мои объявления',
 									passwordStr: 'Пароль',
 									findDescriptionStr: 'Необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в нашем Telegram-боте:',
-									findButton: 'Искать',
+									findButton: 'искать созданные',
 								},
 								myNews: {
 									myNewsTab: 'Мои новости',
@@ -1021,9 +813,9 @@
 								isLoading: 'Загружается...',
 								createdStr: 'Создано:',
 								viewDetailsButton: 'Посмотреть',
-								showLessButton: 'Назад',
+								showLessButton: 'назад',
 								// showMoreButton: 'Показать еще...',
-								showMoreButton: 'Вперед',
+								showMoreButton: 'вперед',
 								backToTopButton: 'В начало',
 								adDetails: {
 									titleStr: '',
@@ -1032,20 +824,20 @@
 									contactStr: '',
 									createdStr: 'Создано:',
 									viewedStr: 'Просмотрено:',
-									backButton: 'Назад',
-									showOthersButton: 'Показать другие...',
-									copyLinkButton: 'Получить ссылку',
-									copiedLinkButton: 'Ссылка в памяти',
+									backButton: 'назад',
+									showOthersButton: 'Показать другие',
+									copyLinkButton: 'ссылка',
+									copiedLinkButton: 'скопирована',
 									dislike: {
 										dislikeOpenButton: '',
 										dislikeDescription: 'Если вы считаете, что данное объявление содержит оскорбительные или неприемлемые материалы, пожалуйста, сообщите нам об этом.',
 										dislikeTitleStr: 'Описание',
-										dislikeButton: 'Отправить жалобу',
+										dislikeButton: 'отправить жалобу',
 									},
 									delete: {
 										passwordStr: 'Пароль',
-										passwordDescription: 'Для удаления необходимо ввести ваш ID номер в качестве пароля. Его вы получили ранее в нашем Telegram-боте:',
-										deleteButton: 'Удалить объявление',
+										description: 'Внимание! После удаления объявление нельзя будет восстановить.',
+										deleteButton: 'удалить',
 									},
 								},
 								adCreate: {
@@ -1054,7 +846,8 @@
 									createDescriptionStr2: "Фото не обязательно, но это поможет вашему объявлению выделиться на фоне других.",
 									photoTitleStr1: 'Заглавное фото',
 									photoTitleStr2: 'Фото 2',
-									photoTitleStr3: 'Фото 3 (Максимум 3)',
+									photoTitleStr3: 'Фото 3',
+									photoTitleStr4: '(Максимум 3)',
 									adTitleStr: 'Название',
 									adTitlePlaceholderStr: 'Уроки йоги для домашних котов',
 									adCategoryStr: 'Категория',
@@ -1067,7 +860,7 @@
 									passwordStr: 'Пароль',
 									createDescriptionStr3: 'Зайдите в наш Telegram-бот:',
 									createDescriptionStr4: ", нажмите '/start', получите ваш ID номер, введите его сюда в качестве пароля.",
-									createButton: 'Опубликовать объявление',
+									createButton: 'опубликовать',
 								},
 							},
 							news: {
@@ -1106,13 +899,13 @@
 								206: '',
 								210: 'Пожалуйста, введите пароль',
 								211: 'Пароль слишком длинный',
-								212: '',
+								212: 'Не найден id пользователя или он слишком длинный',
 								213: '',
 								214: '',
 								220: 'Вы достигли лимита объявлений',
 								221: '',
 								222: '',
-								230: 'Пожалуйста, введите текст или выберите категорию',
+								230: 'Пожалуйста, введите текст (больше трех символов) или выберите категорию',
 								231: 'Текст слишком длинный',
 								232: '',
 								233: '',
@@ -1127,9 +920,13 @@
 								// Ошибки связанные с одним объявлением
 								400: 'Не удалось найти активного объявления',
 								401: 'Не удалось найти активного пользователя. Возможно ошибка в пароле',
-								402: '',
+								402: 'Этот метод находится в доработке',
 								403: '',
 								404: '',
+								410: 'Не распознан id пользователя',
+								411: 'Не найден id пользователя или он слишком длинный',
+								412: '',
+								413: '',
 								420: 'Ошибка с паролем или ID',
 								421: 'Не удалось найти объявление',
 								422: 'Ошибка доступа',
@@ -1173,6 +970,9 @@
 								604: '',
 								605: '',
 								606: '',
+								610: 'Не распознан id пользователя',
+								611: '',
+								612: '',
 								620: 'Ошибка при загрузке одного из файлов',
 								621: 'Один из файлов не является изображением',
 								622: 'Одно из фото недопустимого формата. Можно jpeg, png, gif',
@@ -1231,9 +1031,9 @@
 								selectCity: 'Select city',
 								//
 								cities: [
-									'NHA TRANG',
-									'// DA NANG',
-									'// DALAT',
+									'Nha trang',
+									'Da nang',
+									'Dalat',
 								],
 								// langButton: 'EN',
 								menuButton: 'Menu',
@@ -1243,21 +1043,21 @@
 									searchAdTab: 'Filter ads',
 									writeStr: 'Enter text',
 									searchTextPlaceholder: 'Teddy bear',
-									selectStr: 'Or select a category',
+									selectStr: 'Select a category',
 									notSelectedStr: 'Not selected',
 									selectSubStr: 'Select a subcategory',
-									searchButton: 'Search',
+									searchButton: 'search',
 								},
 								myAds: {
 									myAdsTab: 'My ads',
 									createStr: 'Create a new ad',
 									createDescriptionStr1: 'The ad will be posted for free for 10 days. The published ad cannot be edited, only deleted and a new one created.',
 									createDescriptionStr2: 'To create an ad, you will need to visit to Telegram.',
-									createButton: 'Create',
+									createButton: 'create an ad',
 									findStr: 'Find all my ads',
 									passwordStr: 'Password',
 									findDescriptionStr: 'You need to enter your ID number as a password. You received it earlier in our Telegram bot:',
-									findButton: 'Search',
+									findButton: 'search created',
 								},
 								myNews: {
 									myNewsTab: 'My news',
@@ -1280,9 +1080,9 @@
 								isLoading: 'Loading...',
 								createdStr: 'Created:',
 								viewDetailsButton: 'View details',
-								showLessButton: 'Back',
+								showLessButton: 'back',
 								// showMoreButton: 'Show more...',
-								showMoreButton: 'Forward',
+								showMoreButton: 'forward',
 								backToTopButton: 'Back to top',
 								adDetails: {
 									titleStr: '',
@@ -1291,20 +1091,20 @@
 									contactStr: '',
 									createdStr: 'Created:',
 									viewedStr: 'Viewed:',
-									backButton: 'Back',
-									showOthersButton: 'Show others...',
-									copyLinkButton: 'Copy link',
-									copiedLinkButton: 'Link copied',
+									backButton: 'back',
+									showOthersButton: 'Show others',
+									copyLinkButton: 'link',
+									copiedLinkButton: 'copied',
 									dislike: {
 										dislikeOpenButton: '',
 										dislikeDescription: 'If you believe this ad contains offensive or inappropriate material, please let us know.',
 										dislikeTitleStr: 'Description',
-										dislikeButton: 'Submit the complaint',
+										dislikeButton: 'send the complaint',
 									},
 									delete: {
 										passwordStr: 'Password',
-										passwordDescription: 'To delete, you need to enter your ID number as a password. You received it earlier in our Telegram bot:',
-										deleteButton: 'Delete the Ad',
+										description: 'Attention! Once deleted, the ad cannot be restored.',
+										deleteButton: 'delete',
 									},
 								},
 								adCreate: {
@@ -1313,7 +1113,8 @@
 									createDescriptionStr2: "Photos are not required, but they will help your listing stand out from the crowd.",
 									photoTitleStr1: 'Main photo',
 									photoTitleStr2: 'Photo 2',
-									photoTitleStr3: 'Photo 3 (Maximum 3)',
+									photoTitleStr3: 'Photo 3',
+									photoTitleStr4: '(Maximum 3)',
 									adTitleStr: 'Title',
 									adTitlePlaceholderStr: 'Yoga lessons for home cats',
 									adCategoryStr: 'Category',
@@ -1326,7 +1127,7 @@
 									passwordStr: 'Password',
 									createDescriptionStr3: 'Go to our Telegram bot:',
 									createDescriptionStr4: ", press '/start', get your ID number, enter it here as a password.",
-									createButton: 'Post the ad',
+									createButton: 'post the ad',
 								},
 							},
 							news: {
@@ -1364,13 +1165,13 @@
 								206: '',
 								210: 'Please enter your password',
 								211: 'The password is too long',
-								212: '',
+								212: 'User id not found or too long',
 								213: '',
 								214: '',
 								220: 'You have reached the ads limit',
 								221: '',
 								222: '',
-								230: 'Please enter text or select a category',
+								230: 'Please enter text (more than three characters) or select a category',
 								231: 'The text is too long',
 								232: '',
 								233: '',
@@ -1385,9 +1186,13 @@
 								// Ошибки связанные с одним объявлением
 								400: 'Could not find active ad',
 								401: 'Could not find active user. Possible password error',
-								402: '',
+								402: 'This method is under development',
 								403: '',
 								404: '',
+								410: 'User id not recognized',
+								411: 'User id not found or too long',
+								412: '',
+								413: '',
 								420: 'Error with password or ID',
 								421: 'Could not find the ad',
 								422: 'Access error',
@@ -1431,6 +1236,9 @@
 								604: '',
 								605: '',
 								606: '',
+								610: 'User id not recognized',
+								611: '',
+								612: '',
 								620: 'Error loading one of the files',
 								621: 'One of the files is not an image.',
 								622: 'One of the photos is not a valid format. Jpeg, png, gif are acceptable',
@@ -1482,7 +1290,7 @@
 							},
 						},
 					},
-					// содержит весь список категорий с кодами на русском
+                    // содержит весь список категорий с кодами на русском
 					categoriesRu: {
 						'Жильё': { code: '1', subcategories: {
 								'Аренда': { code: 'A', subcategories: {
@@ -1904,44 +1712,68 @@
 					searchText: '',
 					// лимит искомого текста
 					searchTextLimit: 50,
+					// Флаг, показывающий, что объявление открыто по ссылке
+					isLinkOpened: false,
 					// флаг указывающий скопирована ссылка в буфер или нет
 					copyIcon: false,
-					// Если phpAdId не передан, по умолчанию будет 0
-					phpAdId: 0,
 					// переменная для инспектирования
 					inspect: '',
+					//
+					deleteButton: false,
 					// указатель открытия панели жалобы
 					dislike: false,
 					// текст жалобы
 					dislikeText: '',
 					// лимит текста жалобы
 					dislikeTextLimit: 400,
+					// данные пользователя
+					user: {
+						id: null,
+						// Адрес в телеграме
+						username: '',
+						// Имя
+						firstName: '',
+						// Язык интерфейса
+						languageCode: '',
+						// Тема оформления
+						colorTheme: '',
+						// Ссылка на аватар
+						photoUrl: '',
+					},
+					// Склеенный контакт для создания нового объявления
+					userFullContact: '',
                 };
             },
             mounted() {
-				// если переменная php не пустая, загружаем одно обьявление
-				if (this.phpAdId) {
-                    this.loadAdDetail(this.phpAdId);
-                } else {
-					// если переменная php пустая, загружаем список обьявлений
-					// также это будет срабатывать при первой загрузке страницы или при обновлении
-					this.loadNewsList();
-                    this.loadAdsList();
-                }
-				// Обработчик события beforeunload
-				window.addEventListener("beforeunload", this.handleBeforeUnload);
+				// Проверка параметра 'ad' в URL
+				const adId = new URLSearchParams(window.location.search).get('ad');
+				// Если параметр ad есть, значит открываем конкретное объявление
+				if (adId) {
+					// Устанавливаем флаг
+					this.isLinkOpened = true;
+					// Загружаем детали объявления
+					this.loadAdDetail(adId);
+					// Убираем параметр ad из URL
+					window.history.replaceState(null, null, 'https://www.limonade.pro/web');
+				} else {
+					// Иначе загружаем список объявлений
+					this.loadAdsList();
+				}
+				// Проверяем обьект Телеграм
+				this.initializeTelegram();
+				// Склеенный контакт для создания нового объявления
+				this.newAd.contact = this.userFullContact;
             },
-			beforeDestroy() {
-				// Удаляем обработчик события
-				window.removeEventListener("beforeunload", this.handleBeforeUnload);
+			created() {
+				// this.initializeTelegram();
 			},
 			watch: {
-				// Наблюдаем за изменением второго уровня подкатегорий (третий выпадающий список)
+                // Наблюдаем за изменением второго уровня подкатегорий (третий выпадающий список)
 				selectedSubcategory2() {
 					this.updateCategoryCode();
 				}
-			},
-			computed: {
+            },
+            computed: {
 				// Автоматически возвращает первый город в зависимости от текущего языка
 				cityButton() {
 					// return this.translations[this.currentLanguage]['navBar']['cities'][0];
@@ -1953,7 +1785,59 @@
 				}
 			},
             methods: {
-				// метод очистки категорий
+				initializeTelegram() {
+					// если нет доступа к объекту Телеграм
+					if (typeof window.Telegram === 'undefined' && !window.Telegram.WebApp) {
+
+						this.errorMessage = 'Объект Telegram.WebApp недоступен';
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+
+					// this.successMessage = 'Объект window.Telegram.WebApp доступен';
+					// setTimeout(() => { this.successMessage = ''; }, 3000);
+
+					// Взять объект Телеграм
+					const tg = window.Telegram.WebApp;
+					// Развернуть экран в полноэкранный режим
+					tg.expand();
+					// Ограничить сваливание экрана
+					tg.disableVerticalSwipes();
+
+					// Узнать информацию о пользователе
+					const tgUser = tg.initDataUnsafe.user;
+					// если обьект не пустой
+					if (tgUser) {
+						// собираем даныне о нем
+						this.user = {
+							id: tgUser.id,
+							// Адрес в телеграме
+							username: tgUser.username,
+							// Имя
+							firstName: tgUser.first_name,
+							// Язык интерфейса
+							languageCode: tgUser.language_code,
+							// Тема оформления
+							colorTheme: tg.colorScheme,
+							// Ссылка на аватар
+							photoUrl: tgUser.photo_url,
+						};
+					}
+
+					// Подготавливаем значение user_contact из userName и userContact
+					//
+					userName = this.user.firstName ?? 'Noname';
+					//
+					separator = ', telegram @';
+					//
+					userContact = this.user.username ?? '???';
+					// Склеить строку Контакт
+					this.userFullContact = userName + separator + userContact;
+
+					// this.successMessage = this.user.languageCode;
+
+				},
+                // метод очистки категорий
 				cleanCategory() {
 					this.selectedMainCategory = '';
 					this.selectedSubcategory1 = '';
@@ -1968,19 +1852,19 @@
 					this.showAdList = screen === 'adList';
 					this.showAdDetail = screen === 'adDetail';
 					this.showCreateAd = screen === 'create';
-					this.showNewsList = screen === 'newsList';
-					this.showNewsDetail = screen === 'newsDetail';
-
 					// метод закрытия бокового меню
-					this.closeSidebar();
 				},
-				// искать по тексту/ по категории
+                // искать по тексту/ по категории
 				searchByTextOrCategory() {
+					// Закрытие выпадающего меню
+					const dropdown = new bootstrap.Dropdown(this.$refs.dropdownButton);
+					dropdown.hide();
+
 					// Плавная прокрутка вверх страницы после загрузки объявлений
 					window.scrollTo({top: 0, behavior: 'smooth'});
 					// Проверяем, введен ли текст и его длина
 					if (this.searchText.length < 4 && this.categoryCode.length < 1) {
-						// this.errorMessage = 'Пожалуйста, введите текст или выберите категорию';
+						// this.errorMessage = 'Пожалуйста, введите текст (больше трех символов) или выберите категорию';
 						this.errorMessage = this.getTranslation('errors.' + 230);
 
 					} else if (this.getRemainingChars(this.searchText, this.searchTextLimit) < 0) {
@@ -2002,15 +1886,14 @@
 					window.scrollTo({top: 0, behavior: 'smooth'});
 					this.showScreen('adList');
 					this.isAdOwner = false;
-					this.authPassword = '';
-					this.phpAdId = 0;
 
 					// Формируем URL для запроса
-    				let url = `api/ad/get_list?page=${adCurrentPage}`;
+    				let url = `ad/get_list?page=${adCurrentPage}`;
 
 					// Добавляем параметр searchText, если он не пустой
 					if (this.searchText.length > 0) {
 						url += `&text=${this.searchText}`;
+						url += `&lang=${this.currentLanguage.toLowerCase()}`;
 					}
 
 					// Добавляем параметр categoryCode, если он не пустой
@@ -2031,47 +1914,16 @@
 							} else {
 								this.adsList = response.data;
 							}
-							// this.adCurrentPage = adCurrentPage;
+							this.adCurrentPage = adCurrentPage;
 							// this.cleanCategory();
+							// Обнуляем флаг, чтобы вернуть к стандартному состоянию
+							this.isLinkOpened = false;
                         })
                         .catch((error) => {
 							//
                             this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							//
 							this.cleanCategory();
-							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-							setTimeout(() => { this.errorMessage = ''; }, 3000);
-                        })
-                        .finally(() => {
-                            this.isLoading = false;
-                        });
-                },
-				// метод загрузки с сервера списка новостей
-                loadNewsList(newsCurrentPage = 1) {
-					// Плавная прокрутка страницы вверх после загрузки новостей
-					window.scrollTo({top: 0, behavior: 'smooth'});
-					this.showScreen('newsList');
-					this.cleanCategory();
-					this.isAdOwner = false;
-					this.authPassword = '';
-					this.phpAdId = 0;
-
-					// отправляем данные на сервер
-					this.isLoading = true;
-                    axios.get(`api/news/get_list?page=${newsCurrentPage}`)
-                        .then(response => {
-							//
-							if (Array.isArray(response.data) && response.data.length == 0) {
-								this.errorMessage = this.getTranslation('errors.' + 310);
-								setTimeout(() => { this.errorMessage = ''; }, 3000);
-
-							} else {
-								this.newsList = response.data;
-							}
-                        })
-                        .catch((error) => {
-							//
-                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })
@@ -2081,9 +1933,11 @@
                 },
                 // метод загрузки с сервера одного объявления по ID
                 loadAdDetail(id) {
+					// Плавная прокрутка страницы вверх после загрузки объявлений
+					window.scrollTo({top: 0, behavior: 'smooth'});
 					// отправляем данные на сервер
                     this.isLoading = true;
-                    axios.get(`api/ad/get_one/${id}`)
+                    axios.get(`ad/get_one/${id}`)
                         .then(response => {
 							// загрузить данные по обьявлению
                             this.currentAd = response.data;
@@ -2092,12 +1946,6 @@
 							this.dislikeText = '';
 							// поместить в переменную для инспектирования
 							this.inspect = this.currentAd.user_id + '.' + this.currentAd.id;
-							// если это была загрузка по ссылке, нужно почистить url
-							if (this.phpAdId) {
-								// Изменить URL в адресной строке
-								window.history.replaceState(null, null, 'https://www.limonade.pro/');
-								// this.phpAdId = 0;
-							}
                         })
                         .catch((error) => {
 							//
@@ -2109,60 +1957,26 @@
                             this.isLoading = false;
                         });
                 },
-				//
-				loadNewsDetail(id) {
-					// this.showScreen('newsDetail');
-					// отправляем данные на сервер
-                    this.isLoading = true;
-                    axios.get(`api/news/get_one/${id}`)
-                        .then(response => {
-							// загрузить данные по новости
-                            this.currentNews = response.data;
-							this.showScreen('newsDetail');
-							// поместить в переменную для инспектирования
-							this.inspect = this.currentNews.id;
-                        })
-                        .catch((error) => {
-							//
-                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
-							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-							setTimeout(() => { this.errorMessage = ''; }, 3000);
-                        })
-                        .finally(() => {
-                            this.isLoading = false;
-                        });
-				},
-				// метод, возвращающий пользователя от просмотра одного объявления назад к списку уже загруженных объявлений
+                // метод, возвращающий пользователя от просмотра одного объявления назад к списку уже загруженных объявлений
 				returnToAdList() {
+					// Переход к экрану со списком объявлений
 					this.showScreen('adList');
+					// Очистка текущего объявления
 					this.currentAd = {photo_1: null, created_at: ''};
 					this.copyIcon = false;
 					this.dislike = false;
 					this.dislikeText = '';
+					this.deleteButton = false;
 				},
-				// метод, возвращающий пользователя от просмотра одной новости назад к списку уже загруженных новостей
-				returnToNewsList() {
-					this.showScreen('newsList');
-					this.currentNews = {photo_1: null, created_at: ''};
-					// this.copyIcon = false;
-				},
-				// метод загрузки с сервера только списка своих собственных объявлений
+                // метод загрузки с сервера только списка своих собственных объявлений
 				loadUserAds() {
 					// Плавная прокрутка вверх страницы после загрузки объявлений
 					window.scrollTo({top: 0, behavior: 'smooth'});
-					// Проверяем, введен ли пароль и его длина
-					if (this.authPassword.length < 5) {
-						// this.errorMessage = 'Пожалуйста, введите пароль';
-						this.errorMessage = this.getTranslation('errors.' + 210);
-
-					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
-						// this.errorMessage = 'Пароль слишком длинный';
-						this.errorMessage = this.getTranslation('errors.' + 211);
+					// Проверяем, есть ли user.id
+					if (!this.user.id) {
+						// this.errorMessage = 'Не распознан id пользователя';
+						this.errorMessage = this.getTranslation('errors.' + 610);
 					}
-
-					// this.showScreen('adList');
-					// this.cleanCategory();
-
 					// Если есть сообщение об ошибке, показываем его и выходим из метода
 					if (this.errorMessage) {
 						setTimeout(() => { this.errorMessage = ''; }, 3000);
@@ -2172,14 +1986,13 @@
 					this.adCurrentPage = 1;
 					// отправляем данные на сервер
 					this.isLoading = true;
-                    axios.get(`api/ad/get_list_by_user/${this.authPassword}`)
+                    axios.get(`ad/get_list_by_user/${this.user.id}`)
                         .then(response => {
 							// console.log(response.data);
                             this.adsList = response.data;
 							this.showScreen('adList');
 							this.cleanCategory();
 							this.isAdOwner = true;
-							this.authPassword = '';
                         })
                         .catch((error) => {
 							//
@@ -2191,10 +2004,15 @@
                             this.isLoading = false;
                         });
 				},
-				// метод создания нового объявления (и отправка его на сервер)
+                // метод создания нового объявления (и отправка его на сервер)
 				createAd() {
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
+					// Проверяем, есть ли user.id
+					if (!this.user.id) {
+						// this.errorMessage = 'Не распознан id пользователя';
+						this.errorMessage = this.getTranslation('errors.' + 610);
+					}
 					// Проверяем, введены ли параметры объявления и их длина
 					if (this.newAd.title.length < 3) {
 						// this.errorMessage = 'Пожалуйста, напишите название';
@@ -2228,13 +2046,6 @@
 						// this.errorMessage = 'Контакт слишком длинный';
 						this.errorMessage = this.getTranslation('errors.' + 638);
 
-					} else if (this.authPassword.length < 5) {
-						// this.errorMessage = 'Пожалуйста, введите пароль';
-						this.errorMessage = this.getTranslation('errors.' + 634);
-
-					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
-						// this.errorMessage = 'Пароль слишком длинный';
-						this.errorMessage = this.getTranslation('errors.' + 639);
 					}
 					// Проверяем наличие фотографий (максимум 3)
 					if (this.photos.length > 3) {
@@ -2254,7 +2065,7 @@
 					formData.append('category', this.newAd.category);
 					formData.append('description', this.newAd.description);
 					formData.append('contact', this.newAd.contact);
-					formData.append('password', this.authPassword);
+					formData.append('telegram_user_id', this.user.id);
 
 					// добавляем фотографии в FormData
 					for (let i = 0; i < this.photos.length; i++) {
@@ -2263,20 +2074,19 @@
 					
 					// отправляем данные на сервер
 					this.isLoading = true;
-					axios.post('api/ad/create', formData, {headers: {'Content-Type': 'multipart/form-data'}})
+					axios.post('ad/create', formData, {headers: {'Content-Type': 'multipart/form-data'}})
 						.then(response => {
 							this.successMessage = this.getTranslation('errors.' + 650);
 							// очищаем форму
-							this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, category: '' };
+							this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: this.userFullContact, contactLimit: 50, category: '' };
 							this.adCurrentPage = 1;
 							this.cleanCategory();
 							this.loadAdsList();
-							// очищаем пароль
-							this.authPassword = '';
 							//
 							this.photoInputs = [true, false, false];
 							// Очистить поле файла через ref
 							// this.$refs.fileInput.value = '';
+							// ref="fileInput"
 							// очищаем массив фото
 							this.photos = [];
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
@@ -2285,20 +2095,6 @@
 						.catch((error) => {
 							//
 							this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
-
-							// this.errorMessage = 'Не удалось создать объявление';	
-							// if (error.response) {
-							// 	// Сервер вернул ответ с ошибкой
-							// 	console.error('Данные ответа с ошибкой:', error.response.data);
-							// 	console.error('Код ответа:', error.response.status);
-							// 	console.error('Заголовки ответа:', error.response.headers);
-							// } else if (error.request) {
-							// 	// Запрос был отправлен, но ответа не было
-							// 	console.error('Запрос без ответа:', error.request);
-							// } else {
-							// 	// Другая ошибка, связанная с настройкой запроса
-							// 	console.error('Ошибка настройки запроса:', error.message);
-							// }
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.errorMessage = ''; }, 3000);
 						})
@@ -2306,7 +2102,7 @@
 							this.isLoading = false;
 						});
 				},
-				// метод обработки изменения файла в поле загрузки, обновляющий массив с фото
+                // метод обработки изменения файла в поле загрузки, обновляющий массив с фото
 				handleFileChange(event, index) {
 					// сохраняем выбранное фото в массиве
 					const file = event.target.files[0];
@@ -2317,18 +2113,14 @@
 						}
 					}
 				},
-				// метод удаления существующего объявления
+                // метод удаления существующего объявления
 				deleteAd(id) {
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
-					// Проверяем, введен ли пароль и его длина
-					if (this.authPassword.length < 5) {
-						// this.errorMessage = 'Пожалуйста, введите пароль';
-						this.errorMessage = this.getTranslation('errors.' + 440);
-
-					} else if (this.getRemainingChars(this.authPassword, this.authPasswordLimit) < 0) {
-						// this.errorMessage = 'Пароль слишком длинный';
-						this.errorMessage = this.getTranslation('errors.' + 441);
+					/// Проверяем, есть ли user.id
+					if (!this.user.id) {
+						// this.errorMessage = 'Не распознан id пользователя';
+						this.errorMessage = this.getTranslation('errors.' + 610);
 					}
 					// Если есть сообщение об ошибке, показываем его и выходим из метода
 					if (this.errorMessage) {
@@ -2338,7 +2130,7 @@
 
 					// отправляем данные на сервер
 					this.isLoading = true;
-					axios.get(`api/ad/delete/${id}/${this.authPassword}`)
+					axios.get(`ad/delete/${id}/${this.user.id}`)
 						.then(response => {
 							//
 							this.successMessage = this.getTranslation('errors.' + 460);
@@ -2346,7 +2138,7 @@
 							this.adsList = this.adsList.filter(ad => ad.id !== id);
 							this.showScreen('adList');
 							this.currentAd = {photo_1: null, created_at: ''};
-							this.authPassword = '';
+							this.deleteButton = false;
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							setTimeout(() => { this.successMessage = ''; }, 3000);
 						})
@@ -2360,15 +2152,23 @@
 							this.isLoading = false;
 						});
 				},
-				//
+                //
 				openDislike() {
 					this.dislike = !this.dislike;
 					// Гарантируем, что прокрутка произойдет после обновления DOM
 					this.$nextTick(() => {
-						window.scrollBy({ top: 200, behavior: 'smooth' });
+						window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 					});
 				},
 				//
+				openDelete() {
+					this.deleteButton = !this.deleteButton;
+					// Гарантируем, что прокрутка произойдет после обновления DOM
+					this.$nextTick(() => {
+						window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+					});
+				},
+                //
 				dislikeAd(id) {
 					// Плавная прокрутка страницы вверх после загрузки объявлений
 					window.scrollTo({top: 0, behavior: 'smooth'});
@@ -2393,7 +2193,7 @@
 
 					// отправляем данные на сервер
 					this.isLoading = true;
-					axios.post(`api/ad/dislike/${id}`, formData, {headers: {'Content-Type': 'multipart/form-data'}})
+					axios.post(`ad/dislike/${id}`, formData, {headers: {'Content-Type': 'multipart/form-data'}})
                         .then(response => {
 							//
 							this.successMessage = this.getTranslation('errors.' + 470);
@@ -2413,8 +2213,11 @@
                             this.isLoading = false;
                         });
 				},
-				// Генерация кнопок категорий
+                // Генерация кнопок категорий
 				getCategoryNames(categoryCode) {
+					// Преобразуем в строку
+					categoryCode = String(categoryCode);
+
 					const categoryNames = [];
 					// let currentLevel = this.categories;
 					// Выбираем правильный массив категорий в зависимости от локали
@@ -2443,17 +2246,10 @@
 
 					return categoryNames;
 				},
-				// метод закрытия бокового меню и возврата на базовый экран
-				closeSidebar() {
-					const offcanvasElement = document.getElementById('offcanvasNavbar');
-					const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);
-					if (bsOffcanvas) {
-						bsOffcanvas.hide(); // Скрыть offcanvas
-					}
-				},
-				// метод копирования ссылки в буфер обмена
+                // метод копирования ссылки в буфер обмена
 				copyLink(id) {
-					const url = `https://www.limonade.pro/html/ad/get_one/${id}`;
+					//
+					const url = `https://t.me/limonade_start_bot?start=id_${id}`;
 					navigator.clipboard.writeText(url)
 						.then(() => {
 							this.copyIcon = true;
@@ -2464,25 +2260,34 @@
 							// console.error("Ошибка при копировании ссылки: ", err);
 						});
 				},
-				// метод установки языка
-				setLanguage(lang) {
-                    this.currentLanguage = lang;
+                // метод установки языка
+				setLanguage() {
+                    if (this.currentLanguage === "RU") {
+						this.currentLanguage = "EN";
+					} else {
+						this.currentLanguage = "RU";
+					}
 					this.cleanCategory();
                 },
 				// метод получения выбранного перевода
 				getTranslation(key) {
-					const keys = key.split('.'); // Разбиваем ключ по точкам
-					let translation = this.translations[this.currentLanguage]; // Начинаем с объекта перевода для текущего языка
+					// Разбиваем ключ по точкам
+					const keys = key.split('.');
+					// Начинаем с объекта перевода для текущего языка
+					let translation = this.translations[this.currentLanguage];
 
 					// Проходим по всем частям ключа и углубляемся в объект
 					for (const k of keys) {
+						//
 						if (translation[k] === undefined) {
-							return ''; // Если ключ не найден, возвращаем пустую строку или любое другое значение по умолчанию
+							// Если ключ не найден, возвращаем пустую строку или любое другое значение по умолчанию
+							return '';
 						}
-						translation = translation[k]; // Переходим к следующему уровню объекта
+						// Переходим к следующему уровню объекта
+						translation = translation[k];
 					}
-
-					return translation; // Возвращаем найденный перевод
+					// Возвращаем найденный перевод
+					return translation;
 				},
 				// метод обновления выбранных категорий
 				loadSubcategories(level) {
@@ -2533,18 +2338,41 @@
 						'text-success': remainingChars >= 0 // если символов достаточно
 					};
 				},
-				// Метод для обработки beforeunload
-				handleBeforeUnload(event) {
-					event.preventDefault();
-					event.returnValue = '';  // Обязательное условие для отображения сообщения
+				// изменить формат даты на сокращенный
+				formatDate(dateString) {
+					// Преобразуем строку в объект даты
+					const date = new Date(dateString);
+					// Определяем нужные параметры для форматирования
+					const day = date.getDate();
+					// Получаем месяц в коротком формате, например, "Oct"
+					const month = date.toLocaleString('en', { month: 'short' });
+					// Возвращаем в формате "день месяц"
+					return `${day} ${month}`;
 				},
+				//
+				formatDateLong(dateString) {
+					// Преобразуем строку в объект даты
+					const date = new Date(dateString);
+					// Определяем нужные параметры для форматирования
+					const day = date.getDate();
+					// Получаем месяц в полном формате, например, "October"
+					const month = date.toLocaleString('en', { month: 'long' });
+					// Возвращаем в формате "день месяц"
+					return `${day} ${month}`;
+				},
+				//
+				// onKeyUp(event) {
+				// 	if (event.key === "Enter" || event.keyCode === 13) {
+				// 		this.searchByTextOrCategory();
+				// 	}
+				// },
             }
         });
-		// Устанавливаем глобальный базовый URL для всех запросов axios
-        axios.defaults.baseURL = 'https://www.limonade.pro/';
+        // Устанавливаем глобальный базовый URL для всех запросов axios
+        axios.defaults.baseURL = 'https://www.limonade.pro/web';
 
-        app.mount('#app');
+		app.mount('#app');
     </script>
-
+    
 </body>
 </html>

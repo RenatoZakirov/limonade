@@ -2,9 +2,11 @@
 
 class NewsController {
     private $adm_pass;
+    private $adm_user_id;
 
-    public function __construct($adm_pass) {
+    public function __construct($adm_pass, $adm_user_id) {
         $this->adm_pass = $adm_pass;
+        $this->adm_user_id = $adm_user_id;
     }
 
     // Получить все новости с пагинацией
