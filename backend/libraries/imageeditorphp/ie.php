@@ -172,7 +172,8 @@ class ImageEditor
 
         // Создаем новое изображение (шаблон) с белым фоном
         $this->paddedImage = imagecreatetruecolor($targetWidth, $targetHeight);
-        $backgroundColor = imagecolorallocate($this->paddedImage, 255, 255, 255);
+        // $backgroundColor = imagecolorallocate($this->paddedImage, 255, 255, 255); // 108, 117, 125
+        $backgroundColor = imagecolorallocate($this->paddedImage, 108, 117, 125);
         imagefill($this->paddedImage, 0, 0, $backgroundColor);
 
         // Вычисляем коэффициент масштабирования, чтобы вписать изображение в шаблон

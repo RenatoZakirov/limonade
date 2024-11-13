@@ -17,12 +17,68 @@
         [v-cloak] {
 			display: none;
 		}
+		/* Светлая тема */
+		:root {
+			--background-color: none; /* #ffffff; */
+			--secondary-background-color: #F1F1F1;
+			--text-color: #000000;
+			--secondary-text-color: #999999;
+
+			--input-bg-color: #F1F1F1;
+			--input-focus-bg-color: #ffffff;
+			--input-text-color: #000000;
+			--input-secondary-text-color: #999999;
+			--input-border-color: #F1F1F1;
+
+			--card-bg-color: #ffffff;
+			--card-secondary-bg-color: #EFFDDE;
+			--card-text-color: #000000;
+			--card-secondary-text-color: #6DB566;
+
+			--btn-blue-bg-color: #40A7E3;
+			--btn-blue-text-color: #ffffff;
+
+			/* Стили фона для светлой темы */
+			/* --bg-solid-color: none; /* Отключаем однотонный фон в светлой теме */
+			--bg-image-gradient: url('https://www.limonade.pro/backend/uploads/images/templates/bg_gradient.png');
+    		--bg-image-overlay: url('https://www.limonade.pro/backend/uploads/images/templates/bg_green.jpg');
+		}
+		/* Темная тема */
+		.dark-theme {
+			--background-color: #0E1621; /* done 131B28 */
+			--secondary-background-color: #202B36;
+			--text-color: #ffffff;
+			--secondary-text-color: #7F91A4;
+
+			--input-bg-color: #202B36;
+			--input-focus-bg-color: #202B36;
+			--input-text-color: #ffffff;
+			--input-secondary-text-color: #7F91A4;
+			--input-border-color: #202B36;
+
+			--card-bg-color: #182533;
+			--card-secondary-bg-color: #2B5378;
+			--card-text-color: #ffffff;
+			--card-secondary-text-color: #7DA8D3;
+
+			--btn-blue-bg-color: #3F96D0;
+			--btn-blue-text-color: #ffffff;
+
+			/* Для темной темы одноцветный фон */
+			/* --bg-solid-color: #131B28; /* Фон для темной темы 10171F */
+			/* Убираем градиент */
+			--bg-image-gradient: none;
+			--bg-image-overlay: url('https://www.limonade.pro/backend/uploads/images/templates/bg_black.jpg');
+		}
+		/* Основные стили body */
 		body {
 			font-family: "Roboto", sans-serif;
-			background-color: #fff; /* Базовый цвет на случай, если изображения не загрузятся */
 			margin: 0;
+			background-color: var(--background-color);
+			color: var(--text-color);
 		}
-		/* Градиентный фон */
+
+		/* Градиентный или однотонный фон */
 		body::before {
 			content: "";
 			position: fixed;
@@ -30,14 +86,15 @@
 			left: 0;
 			width: 100%;
 			height: 100%;
-			background-image: url('https://www.limonade.pro/backend/uploads/images/templates/bg_4.png');
+			background-image: var(--bg-image-gradient), var(--background-color);
 			background-size: cover;
 			background-position: center;
 			background-repeat: no-repeat;
 			background-attachment: fixed;
-			z-index: -2; /* Градиентный фон находится под прозрачным фоном */
+			z-index: -2;
 		}
-		/* Прозрачный фон с рисунками */
+
+		/* Полупрозрачный наложенный рисунок */
 		body::after {
 			content: "";
 			position: fixed;
@@ -45,84 +102,153 @@
 			left: 0;
 			width: 100%;
 			height: 100%;
-			background-image: url('https://www.limonade.pro/backend/uploads/images/templates/bg_1.png');
+			background-image: var(--bg-image-overlay);
 			background-size: cover;
 			background-position: center;
 			background-repeat: no-repeat;
 			background-attachment: fixed;
-			z-index: -1; /* Прозрачный фон с рисунками накладывается поверх градиента */
-			opacity: 0.15; /* Уровень прозрачности (от 0 до 1) */
+			z-index: -1;
+			/* Уровень прозрачности (от 0 до 1) */
+			opacity: 0.15;
 		}
+		.dropdown-menu {
+			background-color: var(--card-bg-color);
+			color: var(--text-color);
+		}
+		.form-control, .form-select, textarea, input[type="file"] {
+			background-color: var(--input-bg-color);
+			color: var(--input-text-color);
+			border-color: var(--input-border-color);
+		}
+		/* Стили для placeholder */
+		.form-control::placeholder, textarea::placeholder {
+			color: var(--input-secondary-text-color);
+			/* opacity: 0.7; */
+		}
+		/* Стили для focus-состояния */
+		.form-control:focus, .form-select:focus, textarea:focus, input[type="file"]:focus {
+			outline: none;
+			box-shadow: none;
+			background-color: var(--input-focus-bg-color);
+			color: var(--input-text-color);
+			border-color: var(--input-border-color);
+			/* box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); */
+		}
+		.card {
+			background-color: var(--card-bg-color);
+			color: var(--card-text-color);
+		}
+		.card-secondary-bg {
+			/* background-color: #EFFEDD; */
+			background-color: var(--card-secondary-bg-color);
+			color: var(--card-text-color);
+		}
+		.btn-blue-bg {
+			background-color: var(--btn-blue-bg-color);
+			border-color: var(--btn-blue-bg-color);
+			color: var(--btn-blue-text-color);
+		}
+		.dropdown-item {
+			background-color: var(--card-bg-color);
+			color: var(--card-text-color);
+		}
+		/* Переопределяем цвет активного элемента в выпадающем меню */
+		.dropdown-item:hover,
+		.dropdown-item:active,
+		.dropdown-item.active {
+			background-color: var(--secondary-background-color);
+			color: var(--secondary-text-color);
+		}
+		.card-subtitle, .text-body-secondary {
+			color: var(--secondary-text-color) !important;
+		}
+		.form-text {
+			color: var(--secondary-text-color) !important;
+		}
+		.text-body-secondary-2 {
+			color: var(--card-secondary-text-color) !important;
+		}
+
         .btn-transparent-bg {
-            background-color: rgba(108, 117, 125, 0.7) !important; /* Прозрачный фон */
-            border-color: rgba(108, 117, 125, 0.0) !important; /* Прозрачный бордер */
-            color: white; /* Установите цвет текста (можете изменить по необходимости) */
+			/* Прозрачный фон */
+            background-color: rgba(108, 117, 125, 0.7) !important;
+			/* Прозрачный бордер */
+            border-color: rgba(108, 117, 125, 0.0) !important;
+            /*color: white; */
+			/* background-color: rgba(34, 46, 58, 0.7) !important;
+			border-color: rgba(34, 46, 58, 0.0) !important; */
+			/* Оставляем цвет текста белым */
+			color: #ffffff !important;
         }
         .description-text {
 			display: -webkit-box;
-			-webkit-line-clamp: 4; /* Количество строк */
+			/* Количество строк */
+			-webkit-line-clamp: 4;
 			-webkit-box-orient: vertical;
 			overflow: hidden;
 			text-overflow: ellipsis;
-			max-height: 5em; /* Высота для 4 строк текста */
+			/* Высота для 4 строк текста */
+			max-height: 5em;
 		}
         .big-top-margin {
 			margin-top: 58px;
 		}
 		.inspect-text {
-			font-size: 0.5rem; /* Можно уменьшить размер текста как нужно */
+			color: var(--secondary-text-color);
+			/* Можно уменьшить размер текста как нужно */
+			font-size: 0.5rem;
 		}
 		.card-img {
 			width: 100%;
 			height: 100%;
-			object-fit: cover; /* Заполняет весь контейнер, обрезая края, если изображение не помещается */
-			object-position: center; /* Центрирует изображение в контейнере */
+			/* Заполняет весь контейнер, обрезая края, если изображение не помещается */
+			object-fit: cover;
+			/* Центрирует изображение в контейнере */
+			object-position: center;
 			/*border-radius: 0; /* Убирает закругления у самого изображения */
-			border-radius: 20px 0 0 20px; /* Явно задаём нужные закругления: левый верхний и нижний углы */
+			/* Явно задаём нужные закругления: левый верхний и левый нижний углы */
+			border-radius: 20px 0 0 20px;
 		}
 		.card-img-2 {
 			width: 100%;
 			height: 100%;
-			object-fit: cover; /* Заполняет весь контейнер, обрезая края, если изображение не помещается */
-			object-position: center; /* Центрирует изображение в контейнере */
+			/* Заполняет весь контейнер, обрезая края, если изображение не помещается */
+			object-fit: cover;
+			/* Центрирует изображение в контейнере */
+			object-position: center;
 			/*border-radius: 0; /* Убирает закругления у самого изображения */
-			border-radius: 20px 0 0 0; /* Явно задаём нужные закругления: левый верхний и нижний углы */
+			/* Явно задаём нужные закругления: левый верхний угол */
+			border-radius: 20px 0 0 0;
 		}
 		.card-img-3 {
 			width: 100%;
 			height: 100%;
-			object-fit: cover; /* Заполняет весь контейнер, обрезая края, если изображение не помещается */
-			object-position: center; /* Центрирует изображение в контейнере */
+			/* Заполняет весь контейнер, обрезая края, если изображение не помещается */
+			object-fit: cover;
+			/* Центрирует изображение в контейнере */
+			object-position: center;
 			/*border-radius: 0; /* Убирает закругления у самого изображения */
-			border-radius: 20px 20px 0 0; /* Явно задаём нужные закругления: левый верхний и нижний углы */
+			/* Явно задаём нужные закругления: левый верхний и правый верхний углы */
+			border-radius: 20px 20px 0 0;
 		}
 		/* CSS для увеличенного закругления углов карточки */
 		.custom-rounded {
-			border-radius: 20px; /* Замените значение на нужное вам для большей закругленности */
+			/* Все углы закруглены */
+			border-radius: 20px;
 		}
 		.custom-rounded-right {
-			border-radius: 20px 20px 0 20px; /* Замените значение на нужное вам для большей закругленности */
+			/* Правый нижний угол острый */
+			border-radius: 20px 20px 0 20px;
 		}
 		.custom-rounded-left {
-			border-radius: 20px 20px 20px 0; /* Замените значение на нужное вам для большей закругленности */
+			/* Левый нижний угол острый */
+			border-radius: 20px 20px 20px 0;
 		}
-		.card-green-bg {
-			background-color: #EFFEDD;
-		}
-		.btn-blue-bg {
-			background-color: #72B5E9 !important;
-			border-color: #72B5E9 !important;
-			color: white; /* Установите цвет текста (можете изменить по необходимости) */
-		}
-		/* Переопределяем цвет активного элемента в выпадающем меню */
-		.dropdown-item.active {
-			background-color: #72B5E9 !important;
-			color: #fff; /* Дополнительно, если хотите изменить текст на белый */
-		}
+		
     </style>
 </head>
 <body>
-    <div id="app" v-cloak>
+    <div id="app" v-cloak :class="{ 'dark-theme': isDarkTheme }">
 
 		<div class="d-none d-md-block">
 
@@ -130,22 +256,24 @@
 
 				<div class="card shadow-sm custom-rounded w-100" style="max-width: 350px;">
 					<div class="row g-0">
-						<div class="col-4">
+						<div class="col-5">
 							<div class="overflow-hidden h-100">
 								<img src="https://www.limonade.pro/backend/uploads/images/templates/not_found.jpg" class="img-fluid card-img" alt="image">
 							</div>
 						</div>
-						<div class="col-8">
+						<div class="col-7">
 							<div class="card-body">
 								<h5 class="card-title">Page 404</h5>
 								<div class="card-text lh-sm">
 									<p>
-										Этот бот работает только на мобильных устройствах...
+										<!-- Этот бот работает только на узких экранах... -->
+										{{ getTranslation('errors.' + 102) }}
 									</p>
 								</div>
 								<div class="card-text lh-sm">
 									<small class="text-body-secondary">
-										Воспользуйтесь мобильным устройством
+										<!-- Воспользуйтесь мобильным устройством -->
+										{{ getTranslation('errors.' + 103) }}
 									</small>
 								</div>
 								
@@ -186,7 +314,7 @@
 									</span>
 								</label>
 								<input @keyup.enter="searchByTextOrCategory()" v-model="searchText" type="text"
-									class="form-control form-control-sm mb-3 shadow-sm"
+									class="form-control form-control-sm mb-3"
 									id="textSearch" :placeholder="getTranslation('menu.searchAd.searchTextPlaceholder')">
 
 								<label for="categorySelect" class="form-label">
@@ -195,7 +323,7 @@
 								<!-- <span class="text text-danger">*</span> -->
 								</label>
 								<select v-model="selectedMainCategory" @change="loadSubcategories('main')"
-									class="form-select form-select-sm shadow-sm" id="categorySelect" aria-label="Small select example">
+									class="form-select form-select-sm" id="categorySelect" aria-label="Small select example">
 									<option value="">
 										<!-- Не выбрано -->
 										{{ getTranslation('menu.searchAd.notSelectedStr') }}
@@ -204,7 +332,7 @@
 								</select>
 								
 								<select v-if="selectedMainCategory && subcategories1" v-model="selectedSubcategory1" @change="loadSubcategories('sub1')"
-									class="form-select form-select-sm mt-3 shadow-sm" id="subcategory1Select" aria-label="Small select example">
+									class="form-select form-select-sm mt-3" id="subcategory1Select" aria-label="Small select example">
 									<option value="">
 										<!-- Выберите подкатегорию -->
 										{{ getTranslation('menu.searchAd.selectSubStr') }}
@@ -213,7 +341,7 @@
 								</select>
 								
 								<select v-if="selectedSubcategory1 && subcategories2" v-model="selectedSubcategory2"
-									class="form-select form-select-sm mt-3 shadow-sm" id="subcategory2Select" aria-label="Small select example">
+									class="form-select form-select-sm mt-3" id="subcategory2Select" aria-label="Small select example">
 									<option value="">
 										<!-- Выберите подкатегорию -->
 										{{ getTranslation('menu.searchAd.selectSubStr') }}
@@ -246,12 +374,12 @@
 									</div>
 								</li>
 								<li>
-									<div class="dropdown-item disabled">
+									<div class="dropdown-item">
 										{{ translations[currentLanguage].navBar.cities[1] }}
 									</div>
 								</li>
 								<li>
-									<div class="dropdown-item disabled">
+									<div class="dropdown-item">
 										{{ translations[currentLanguage].navBar.cities[2] }}
 									</div>
 								</li>
@@ -306,7 +434,7 @@
 
 					<div :class="['col-11', { 'offset-1': (index + 1) % 3 === 0 }]">
 						
-						<div class="card shadow-sm" :class="(index + 1) % 3 === 0 ? 'card-green-bg custom-rounded-right' : 'custom-rounded-left'">
+						<div class="card shadow-sm" :class="(index + 1) % 3 === 0 ? 'card-secondary-bg custom-rounded-right' : 'custom-rounded-left'">
 							<div class="row g-0">
 								<div class="col-5">
 									<div class="overflow-hidden h-100">
@@ -318,8 +446,13 @@
 									<div class="card-body">
 										<h5 class="card-title text-truncate">{{ ad['title_' + currentLanguage.toLowerCase()] }}</h5>
 										<p class="card-text description-text lh-sm">{{ ad['description_' + currentLanguage.toLowerCase()] }}</p>
-										<p class="card-text">
-											<small class="text-body-secondary text-truncate">
+										<p class="card-text text-center">
+											<small class="col me-2" :class="(index + 1) % 3 === 0 ? 'text-body-secondary-2' : 'text-body-secondary'">
+												<i class="bi bi-send-fill"></i>
+												{{ ad.contact.slice(0, 8) }}
+											</small>
+											<!-- <small class="text-body-secondary text-truncate"> -->
+											<small class="col" :class="(index + 1) % 3 === 0 ? 'text-body-secondary-2' : 'text-body-secondary'">
 												<!-- Создано  -->
 												<!-- <i class="bi bi-calendar-date"></i> -->
 												<i class="bi bi-calendar-date-fill"></i>
@@ -446,12 +579,13 @@
 											<!-- Просмотрено  -->
 											<i class="bi bi-eye-fill"></i>
 											{{ getTranslation('ads.adDetails.viewedStr') }}
-											{{ currentAd.viewed }}</small></p>
+											{{ currentAd.viewed }}</small>
+										</p>
 									</div>
 								</div>
 							</div>
 
-							<div v-if="!isAdOwner && dislike" class="card-footer">
+							<div v-if="!isAdOwner && dislike" class="card-footer bg-transparent">
 								<div class="row mb-3">
 									<div class="col form-text lh-sm">
 										<!-- Если вы считаете, что данное... -->
@@ -468,7 +602,7 @@
 											({{ getRemainingChars(dislikeText, dislikeTextLimit) }})
 										</span>
 									</label>
-									<textarea v-model="dislikeText" class="form-control form-control-sm shadow-sm lh-sm" id="FormControlTextarea11" rows="3"
+									<textarea v-model="dislikeText" class="form-control form-control-sm lh-sm" id="FormControlTextarea11" rows="3"
 										placeholder=""></textarea>
 								</div>
 
@@ -480,10 +614,10 @@
 								</button>
 							</div>
 
-							<div v-if="isAdOwner && deleteButton" class="card-footer">
+							<div v-if="isAdOwner && deleteButton" class="card-footer bg-transparent">
 								<div class="row mb-3">
 									<div class="col form-text lh-sm">
-										<!-- Для удаления необходимо ввести... -->
+										<!-- Внимание! После удаления объявление нельзя будет восстановить -->
 										{{ getTranslation('ads.adDetails.delete.description') }}
 									</div>
 								</div>
@@ -569,7 +703,7 @@
 										{{ getTranslation('ads.adCreate.photoTitleStr1') }}
 									</label>
 									<span class="form-text"> // jpeg, png, gif, < 5MB</span>
-									<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm" id="formFile1" type="file">
+									<input @change="handleFileChange($event, 0)" class="form-control form-control-sm" id="formFile1" type="file">
 								</div>
 	
 								<div v-if="photoInputs[1]" class="mb-3">
@@ -577,7 +711,7 @@
 										<!-- Фото 2 -->
 										{{ getTranslation('ads.adCreate.photoTitleStr2') }}
 									</label>
-									<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm" id="formFile2" type="file">
+									<input @change="handleFileChange($event, 1)" class="form-control form-control-sm" id="formFile2" type="file">
 								</div>
 								
 								<div v-if="photoInputs[2]" class="mb-3">
@@ -588,7 +722,7 @@
 											{{ getTranslation('ads.adCreate.photoTitleStr4') }}
 										</span>
 									</label>
-									<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm" id="formFile3" type="file">
+									<input @change="handleFileChange($event, 2)" class="form-control form-control-sm" id="formFile3" type="file">
 								</div>
 							
 								<div class="mb-3">
@@ -601,7 +735,7 @@
 											({{ getRemainingChars(newAd.title, newAd.titleLimit) }})
 										</span>
 									</label>
-									<input v-model="newAd.title" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput1"
+									<input v-model="newAd.title" type="text" class="form-control form-control-sm" id="FormControlInput1"
 										:placeholder="getTranslation('ads.adCreate.adTitlePlaceholderStr')">
 								</div>
 
@@ -611,7 +745,7 @@
 										{{ getTranslation('ads.adCreate.adCategoryStr') }}
 										<span class="text text-danger">*</span>
 									</label>
-									<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm shadow-sm" id="categorySelect" aria-label="Small select example">
+									<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm" id="categorySelect" aria-label="Small select example">
 										<option value="">
 											<!-- Не выбрано -->
 											{{ getTranslation('ads.adCreate.adNotSelectedCategoryStr') }}
@@ -623,7 +757,7 @@
 								<!-- Выбор подкатегории 1 -->
 								<div v-if="selectedMainCategory && subcategories1" class="mb-3">
 									<!-- <label for="subcategory1Select" class="form-label">Подкатегория</label> -->
-									<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm shadow-sm" id="subcategory1Select" aria-label="Small select example">
+									<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm" id="subcategory1Select" aria-label="Small select example">
 										<option value="">
 											<!-- Выберите подкатегорию -->
 											{{ getTranslation('ads.adCreate.adSubCategoryStr') }}
@@ -635,7 +769,7 @@
 								<!-- Выбор подкатегории 2 -->
 								<div v-if="selectedSubcategory1 && subcategories2" class="mb-3">
 									<!-- <label for="subcategory2Select" class="form-label">Подкатегория</label> -->
-									<select v-model="selectedSubcategory2" class="form-select form-select-sm shadow-sm" id="subcategory2Select" aria-label="Small select example">
+									<select v-model="selectedSubcategory2" class="form-select form-select-sm" id="subcategory2Select" aria-label="Small select example">
 										<option value="">
 											<!-- Выберите подкатегорию -->
 											{{ getTranslation('ads.adCreate.adSubCategoryStr') }}
@@ -653,7 +787,7 @@
 											({{ getRemainingChars(newAd.description, newAd.descriptionLimit) }})
 										</span>
 									</label>
-									<textarea v-model="newAd.description" class="form-control form-control-sm shadow-sm lh-sm" id="FormControlTextarea1" rows="5"
+									<textarea v-model="newAd.description" class="form-control form-control-sm lh-sm" id="FormControlTextarea1" rows="5"
 										:placeholder="getTranslation('ads.adCreate.adDescriptionPlaceholderStr')"></textarea>
 								</div>
 			
@@ -666,7 +800,7 @@
 											({{ getRemainingChars(newAd.contact, newAd.contactLimit) }})
 										</span>
 									</label>
-									<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput3"
+									<input v-model="newAd.contact" type="text" class="form-control form-control-sm" id="FormControlInput3"
 										:placeholder="getTranslation('ads.adCreate.adContactPlaceholderStr')">
 								</div>
 			
@@ -708,8 +842,12 @@
         const app = Vue.createApp({
             data() {
                 return {
+					//
+					tg: {},
+					//
+					isDarkTheme: false,
                     // отвечает за показ экрана со списком объявлений
-					showAdList: true,
+					showAdList: false,
 					// отвечает за показ экрана только с одним объявлением
 					showAdDetail: false,
 					// отвечает за показ экрана для создания нового объявления
@@ -886,8 +1024,8 @@
 								// Общие ошибки
 								100: 'Страница не найдена',
 								101: 'Ошибка с ID',
-								102: '',
-								103: '',
+								102: 'Этот бот работает только на узких экранах...',
+								103: 'Воспользуйтесь мобильным устройством',
 								104: '',
 								// Ошибки связанные со списком объявлений
 								200: 'Ошибка с номером страницы',
@@ -1152,8 +1290,8 @@
 								// Общие ошибки
 								100: 'Page not found',
 								101: 'Error with ID',
-								102: '',
-								103: '',
+								102: 'This bot only works on narrow screens...',
+								103: 'Use a mobile device',
 								104: '',
 								// Ошибки связанные со списком объявлений
 								200: 'Error with page number',
@@ -1320,65 +1458,9 @@
 							}}
 						}},
 						'Услуги': { code: '3', subcategories: {
-								'Транспорт, грузоперевозки, визараны': { code: 'A', subcategories: {
-									'Транспорт': { code: '1' },
-									'Грузоперевозки': { code: '2' },
-									'Визараны': { code: '3' },
-									'Складские услуги': { code: '4' },
-									'Другое': { code: '5' }
-							}},
-								'Документы, визы, билеты': { code: 'B', subcategories: {
-									'Документы': { code: '1' },
-									'Визы': { code: '2' },
-									'Билеты': { code: '3' },
-									'Страховки': { code: '4' },
-									'Другое': { code: '5' }
-							}},
-								'Мобильная связь, интернет, IT': { code: 'C', subcategories: {
-									'Мобильная связь': { code: '1' },
-									'Интернет': { code: '2' },
-									'IT': { code: '3' },
-									// '': { code: '4' },
-									'Другое': { code: '5' }
-							}},
-								'Обмен валюты, переводы, банковские карты': { code: 'D', subcategories: {
-									'Обмен валюты': { code: '1' },
-									'Переводы': { code: '2' },
-									'Банковские карты': { code: '3' },
-									// '': { code: '4' },
-									'Другое': { code: '5' }
-							}},
-								'Поиск жилья, адаптация, камеры хранения': { code: 'E', subcategories: {
-									'Поиск жилья': { code: '1' },
-									'Адаптация': { code: '2' },
-									'Камеры хранения': { code: '3' },
-									// '': { code: '4' },
-									'Другое': { code: '5' }
-							}},
 								'Красота, здоровье': { code: 'F', subcategories: {
 									'Красота': { code: '1' },
 									'Здоровье': { code: '2' },
-									// '': { code: '3' },
-									// '': { code: '4' },
-									'Другое': { code: '5' }
-							}},
-								'Уборка, стирка, дезинсекция': { code: 'G', subcategories: {
-									'Уборка': { code: '1' },
-									'Стирка': { code: '2' },
-									'Дезинсекция': { code: '3' },
-									// '': { code: '4' },
-									'Другое': { code: '5' }
-							}},
-								'Ремонт электроники, телефонов, ноутбуков': { code: 'H', subcategories: {
-									'Ремонт электроники': { code: '1' },
-									'Ремонт телефонов': { code: '2' },
-									'Ремонт ноутбуков': { code: '3' },
-									// '': { code: '4' },
-									'Другое': { code: '5' }
-							}},
-								'Мелкий бытовой ремонт (муж на час)': { code: 'I', subcategories: {
-									'Мелкий бытовой ремонт': { code: '1' },
-									'Монтаж и установка техники': { code: '2' },
 									// '': { code: '3' },
 									// '': { code: '4' },
 									'Другое': { code: '5' }
@@ -1404,38 +1486,10 @@
 									// '': { code: '4' },
 									'Другое': { code: '5' }
 							}},
-								'Ремонт, строительство': { code: 'M', subcategories: {
-									'Ремонт': { code: '1' },
-									'Строительство': { code: '2' },
-									// '': { code: '3' },
-									// '': { code: '4' },
-									'Другое': { code: '5' }
-							}},
-								'Переводчик, юридические услуги': { code: 'N', subcategories: {
-									'Переводчик': { code: '1' },
-									'Юридические услуги': { code: '2' },
-									// '': { code: '3' },
-									// '': { code: '4' },
-									'Другое': { code: '5' }
-							}},
 								'Няня, детские сады, школы': { code: 'O', subcategories: {
 									'Няня': { code: '1' },
 									'Детские сады': { code: '2' },
 									'Школы': { code: '3' },
-									// '': { code: '4' },
-									'Другое': { code: '5' }
-							}},
-								'Домашние животные, передержка, выгул': { code: 'P', subcategories: {
-									'Домашние животные': { code: '1' },
-									'Передержка': { code: '2' },
-									'Выгул': { code: '3' },
-									// '': { code: '4' },
-									'Другое': { code: '5' }
-							}},
-								'Доставка товаров на дом': { code: 'Q', subcategories: {
-									'Доставка товаров на дом': { code: '1' },
-									// '': { code: '2' },
-									// '': { code: '3' },
 									// '': { code: '4' },
 									'Другое': { code: '5' }
 							}},
@@ -1446,8 +1500,92 @@
 									// '': { code: '4' },
 									'Другое': { code: '5' }
 							}},
+								'Транспорт, грузоперевозки, визараны': { code: 'A', subcategories: {
+									'Транспорт': { code: '1' },
+									'Грузоперевозки': { code: '2' },
+									'Визараны': { code: '3' },
+									'Складские услуги': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Обмен валюты, переводы, банковские карты': { code: 'D', subcategories: {
+									'Обмен валюты': { code: '1' },
+									'Переводы': { code: '2' },
+									'Банковские карты': { code: '3' },
+									// '': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Уборка, стирка, дезинсекция': { code: 'G', subcategories: {
+									'Уборка': { code: '1' },
+									'Стирка': { code: '2' },
+									'Дезинсекция': { code: '3' },
+									// '': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Домашние животные, передержка, выгул': { code: 'P', subcategories: {
+									'Домашние животные': { code: '1' },
+									'Передержка': { code: '2' },
+									'Выгул': { code: '3' },
+									// '': { code: '4' },
+									'Другое': { code: '5' }
+							}},
 								'Автосервис': { code: 'S', subcategories: {
 									'Автосервис': { code: '1' },
+									// '': { code: '2' },
+									// '': { code: '3' },
+									// '': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Ремонт электроники, телефонов, ноутбуков': { code: 'H', subcategories: {
+									'Ремонт электроники': { code: '1' },
+									'Ремонт телефонов': { code: '2' },
+									'Ремонт ноутбуков': { code: '3' },
+									// '': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Документы, визы, билеты': { code: 'B', subcategories: {
+									'Документы': { code: '1' },
+									'Визы': { code: '2' },
+									'Билеты': { code: '3' },
+									'Страховки': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Переводчик, юридические услуги': { code: 'N', subcategories: {
+									'Переводчик': { code: '1' },
+									'Юридические услуги': { code: '2' },
+									// '': { code: '3' },
+									// '': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Поиск жилья, адаптация, камеры хранения': { code: 'E', subcategories: {
+									'Поиск жилья': { code: '1' },
+									'Адаптация': { code: '2' },
+									'Камеры хранения': { code: '3' },
+									// '': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Мобильная связь, интернет, IT': { code: 'C', subcategories: {
+									'Мобильная связь': { code: '1' },
+									'Интернет': { code: '2' },
+									'IT': { code: '3' },
+									// '': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Мелкий бытовой ремонт (муж на час)': { code: 'I', subcategories: {
+									'Мелкий бытовой ремонт': { code: '1' },
+									'Монтаж и установка техники': { code: '2' },
+									// '': { code: '3' },
+									// '': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Ремонт, строительство': { code: 'M', subcategories: {
+									'Ремонт': { code: '1' },
+									'Строительство': { code: '2' },
+									// '': { code: '3' },
+									// '': { code: '4' },
+									'Другое': { code: '5' }
+							}},
+								'Доставка товаров на дом': { code: 'Q', subcategories: {
+									'Доставка товаров на дом': { code: '1' },
 									// '': { code: '2' },
 									// '': { code: '3' },
 									// '': { code: '4' },
@@ -1460,13 +1598,13 @@
 									// '': { code: '4' },
 									'Другое': { code: '5' }
 							}},
-								'Охрана, сторож': { code: 'U', subcategories: {
-									'Охрана': { code: '1' },
-									'Сторож': { code: '2' },
-									// '': { code: '3' },
-									// '': { code: '4' },
-									'Другое': { code: '5' }
-							}},
+							// 	'Охрана, сторож': { code: 'U', subcategories: {
+							// 		'Охрана': { code: '1' },
+							// 		'Сторож': { code: '2' },
+							// 		// '': { code: '3' },
+							// 		// '': { code: '4' },
+							// 		'Другое': { code: '5' }
+							// }},
 								'Другое': { code: 'Z' },
 						}},
 						'Товары': { code: '4', subcategories: {
@@ -1522,65 +1660,9 @@
 							}}
 						}},
 						'Services': { code: '3', subcategories: {
-								'Transport, cargo transportation, visarun': { code: 'A', subcategories: {
-									'Transport': { code: '1' },
-									'Cargo transportation': { code: '2' },
-									'Visarun': { code: '3' },
-									'Warehouse services': { code: '4' },
-									'Other': { code: '5' }
-							}},
-								'Documents, visas, tickets': { code: 'B', subcategories: {
-									'Documents': { code: '1' },
-									'Visas': { code: '2' },
-									'Tickets': { code: '3' },
-									'Insurance': { code: '4' },
-									'Other': { code: '5' }
-							}},
-								'Mobile communications, Internet, IT': { code: 'C', subcategories: {
-									'Mobile communications': { code: '1' },
-									'Internet': { code: '2' },
-									'IT': { code: '3' },
-									// '': { code: '4' },
-									'Other': { code: '5' }
-							}},
-								'Currency exchange, transfers, bank cards': { code: 'D', subcategories: {
-									'Currency exchange': { code: '1' },
-									'Translations': { code: '2' },
-									'Bank cards': { code: '3' },
-									// '': { code: '4' },
-									'Other': { code: '5' }
-							}},
-								'Search for housing, adaptation, storage lockers': { code: 'E', subcategories: {
-									'Search for housing': { code: '1' },
-									'Adaptation': { code: '2' },
-									'Storage rooms': { code: '3' },
-									// '': { code: '4' },
-									'Other': { code: '5' }
-							}},
 								'Beauty, health': { code: 'F', subcategories: {
 									'Beauty': { code: '1' },
 									'Health': { code: '2' },
-									// '': { code: '3' },
-									// '': { code: '4' },
-									'Other': { code: '5' }
-							}},
-								'Cleaning, washing, pest control': { code: 'G', subcategories: {
-									'Cleaning': { code: '1' },
-									'Washing': { code: '2' },
-									'Disinsection': { code: '3' },
-									// '': { code: '4' },
-									'Other': { code: '5' }
-							}},
-								'Repair of electronics, phones, laptops': { code: 'H', subcategories: {
-									'Electronics repair': { code: '1' },
-									'Phone repair': { code: '2' },
-									'Laptop repair': { code: '3' },
-									// '': { code: '4' },
-									'Other': { code: '5' }
-							}},
-								'Minor household repairs (handyman)': { code: 'I', subcategories: {
-									'Minor household repairs': { code: '1' },
-									'Assembly and installation of equipment': { code: '2' },
 									// '': { code: '3' },
 									// '': { code: '4' },
 									'Other': { code: '5' }
@@ -1606,38 +1688,10 @@
 									// '': { code: '4' },
 									'Other': { code: '5' }
 							}},
-								'Repair, construction': { code: 'M', subcategories: {
-									'Repair': { code: '1' },
-									'Construction': { code: '2' },
-									// '': { code: '3' },
-									// '': { code: '4' },
-									'Other': { code: '5' }
-							}},
-								'Translator, legal services': { code: 'N', subcategories: {
-									'Translator': { code: '1' },
-									'Legal services': { code: '2' },
-									// '': { code: '3' },
-									// '': { code: '4' },
-									'Other': { code: '5' }
-							}},
 								'Nanny, kindergartens, schools': { code: 'O', subcategories: {
 									'Nanny': { code: '1' },
 									'Kindergartens': { code: '2' },
 									'Schools': { code: '3' },
-									// '': { code: '4' },
-									'Other': { code: '5' }
-							}},
-								'Pets, boarding, walking': { code: 'P', subcategories: {
-									'Pets': { code: '1' },
-									'Boarding': { code: '2' },
-									'Walking': { code: '3' },
-									// '': { code: '4' },
-									'Other': { code: '5' }
-							}},
-								'Home delivery of goods': { code: 'Q', subcategories: {
-									'Home delivery of goods': { code: '1' },
-									// '': { code: '2' },
-									// '': { code: '3' },
 									// '': { code: '4' },
 									'Other': { code: '5' }
 							}},
@@ -1648,8 +1702,92 @@
 									// '': { code: '4' },
 									'Other': { code: '5' }
 							}},
+								'Transport, cargo transportation, visarun': { code: 'A', subcategories: {
+									'Transport': { code: '1' },
+									'Cargo transportation': { code: '2' },
+									'Visarun': { code: '3' },
+									'Warehouse services': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Currency exchange, transfers, bank cards': { code: 'D', subcategories: {
+									'Currency exchange': { code: '1' },
+									'Translations': { code: '2' },
+									'Bank cards': { code: '3' },
+									// '': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Cleaning, washing, pest control': { code: 'G', subcategories: {
+									'Cleaning': { code: '1' },
+									'Washing': { code: '2' },
+									'Disinsection': { code: '3' },
+									// '': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Pets, boarding, walking': { code: 'P', subcategories: {
+									'Pets': { code: '1' },
+									'Boarding': { code: '2' },
+									'Walking': { code: '3' },
+									// '': { code: '4' },
+									'Other': { code: '5' }
+							}},
 								'Car service': { code: 'S', subcategories: {
 									'Car service': { code: '1' },
+									// '': { code: '2' },
+									// '': { code: '3' },
+									// '': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Repair of electronics, phones, laptops': { code: 'H', subcategories: {
+									'Electronics repair': { code: '1' },
+									'Phone repair': { code: '2' },
+									'Laptop repair': { code: '3' },
+									// '': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Documents, visas, tickets': { code: 'B', subcategories: {
+									'Documents': { code: '1' },
+									'Visas': { code: '2' },
+									'Tickets': { code: '3' },
+									'Insurance': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Translator, legal services': { code: 'N', subcategories: {
+									'Translator': { code: '1' },
+									'Legal services': { code: '2' },
+									// '': { code: '3' },
+									// '': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Search for housing, adaptation, storage lockers': { code: 'E', subcategories: {
+									'Search for housing': { code: '1' },
+									'Adaptation': { code: '2' },
+									'Storage rooms': { code: '3' },
+									// '': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Mobile communications, Internet, IT': { code: 'C', subcategories: {
+									'Mobile communications': { code: '1' },
+									'Internet': { code: '2' },
+									'IT': { code: '3' },
+									// '': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Minor household repairs (handyman)': { code: 'I', subcategories: {
+									'Minor household repairs': { code: '1' },
+									'Assembly and installation of equipment': { code: '2' },
+									// '': { code: '3' },
+									// '': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Repair, construction': { code: 'M', subcategories: {
+									'Repair': { code: '1' },
+									'Construction': { code: '2' },
+									// '': { code: '3' },
+									// '': { code: '4' },
+									'Other': { code: '5' }
+							}},
+								'Home delivery of goods': { code: 'Q', subcategories: {
+									'Home delivery of goods': { code: '1' },
 									// '': { code: '2' },
 									// '': { code: '3' },
 									// '': { code: '4' },
@@ -1662,13 +1800,13 @@
 									// '': { code: '4' },
 									'Other': { code: '5' }
 							}},
-								'Security, watchman': { code: 'U', subcategories: {
-									'Security': { code: '1' },
-									'Watchman': { code: '2' },
-									// '': { code: '3' },
-									// '': { code: '4' },
-									'Other': { code: '5' }
-							}},
+							// 	'Security, watchman': { code: 'U', subcategories: {
+							// 		'Security': { code: '1' },
+							// 		'Watchman': { code: '2' },
+							// 		// '': { code: '3' },
+							// 		// '': { code: '4' },
+							// 		'Other': { code: '5' }
+							// }},
 								'Other': { code: 'Z' },
 						}},
 						'Goods': { code: '4', subcategories: {
@@ -1785,6 +1923,14 @@
 				}
 			},
             methods: {
+				//
+				applyTheme() {
+                    // Обновляем тему в зависимости от isDarkTheme
+                    const theme = this.isDarkTheme ? 'dark-theme' : '';
+                    document.documentElement.className = theme;
+                    // console.log("Theme applied:", theme);
+                },
+				//
 				initializeTelegram() {
 					// если нет доступа к объекту Телеграм
 					if (typeof window.Telegram === 'undefined' && !window.Telegram.WebApp) {
@@ -1799,6 +1945,8 @@
 
 					// Взять объект Телеграм
 					const tg = window.Telegram.WebApp;
+					// Перенести объект Телеграм во vue.js
+					this.tg = tg;
 					// Развернуть экран в полноэкранный режим
 					tg.expand();
 					// Ограничить сваливание экрана
@@ -1824,6 +1972,12 @@
 						};
 					}
 
+					if (tg.colorScheme == 'dark') {
+						this.isDarkTheme = true;
+					}
+
+					this.applyTheme();
+
 					// Подготавливаем значение user_contact из userName и userContact
 					//
 					userName = this.user.firstName ?? 'Noname';
@@ -1834,8 +1988,34 @@
 					// Склеить строку Контакт
 					this.userFullContact = userName + separator + userContact;
 
-					// this.successMessage = this.user.languageCode;
+					// tg.showAlert(tg.colorScheme);
 
+					// tg.showConfirm('Hello dude!');
+
+				},
+				//
+				// Метод для показа сообщения об успехе
+				showSuccess(message) {
+					if (this.tg) {
+						// Если объект Telegram Web App доступен, используем его метод showAlert
+						this.tg.showAlert(message);
+					} else {
+						// Иначе используем Vue алерт
+						this.successMessage = message;
+						setTimeout(() => { this.successMessage = ''; }, 3000);
+					}
+				},
+				//
+				// Метод для показа сообщения об ошибке
+				showError(message) {
+					if (this.tg) {
+						// Если объект Telegram Web App доступен, используем его метод showAlert
+						this.tg.showAlert(message);
+					} else {
+						// Иначе используем Vue алерт
+						this.errorMessage = message;
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+					}
 				},
                 // метод очистки категорий
 				cleanCategory() {
@@ -1860,20 +2040,29 @@
 					const dropdown = new bootstrap.Dropdown(this.$refs.dropdownButton);
 					dropdown.hide();
 
+					let error = null;
+
 					// Плавная прокрутка вверх страницы после загрузки объявлений
 					window.scrollTo({top: 0, behavior: 'smooth'});
 					// Проверяем, введен ли текст и его длина
 					if (this.searchText.length < 4 && this.categoryCode.length < 1) {
 						// this.errorMessage = 'Пожалуйста, введите текст (больше трех символов) или выберите категорию';
-						this.errorMessage = this.getTranslation('errors.' + 230);
+						// this.errorMessage = this.getTranslation('errors.' + 230);
+						error = this.getTranslation('errors.' + 230);
 
 					} else if (this.getRemainingChars(this.searchText, this.searchTextLimit) < 0) {
 						// this.errorMessage = 'Текст слишком длинный';
-						this.errorMessage = this.getTranslation('errors.' + 231);
+						// this.errorMessage = this.getTranslation('errors.' + 231);
+						error = this.getTranslation('errors.' + 231);
 					}
 					// Если есть сообщение об ошибке, показываем его и выходим из метода
-					if (this.errorMessage) {
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
+					// if (this.errorMessage) {
+					// 	setTimeout(() => { this.errorMessage = ''; }, 3000);
+					// 	return;
+					// }
+					if (error) {
+						// Показываем сообщение об ошибке
+						this.showError(error);
 						return;
 					}
 					// запускаем метод
@@ -1908,8 +2097,10 @@
                         .then(response => {
 							//
 							if (Array.isArray(response.data) && response.data.length == 0) {
-								this.errorMessage = this.getTranslation('errors.' + 220);
-								setTimeout(() => { this.errorMessage = ''; }, 3000);
+								// this.errorMessage = this.getTranslation('errors.' + 220);
+								// setTimeout(() => { this.errorMessage = ''; }, 3000);
+								// Показываем сообщение об ошибке
+								this.showError(this.getTranslation('errors.' + 220));
 
 							} else {
 								this.adsList = response.data;
@@ -1921,11 +2112,13 @@
                         })
                         .catch((error) => {
 							//
-                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
+                            // this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
+							// Показываем сообщение об ошибке
+							this.showError(this.getTranslation('errors.' + error.response.data['code']));
 							//
 							this.cleanCategory();
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-							setTimeout(() => { this.errorMessage = ''; }, 3000);
+							// setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })
                         .finally(() => {
                             this.isLoading = false;
@@ -1945,13 +2138,15 @@
 							this.dislike = false;
 							this.dislikeText = '';
 							// поместить в переменную для инспектирования
-							this.inspect = this.currentAd.user_id + '.' + this.currentAd.id;
+							this.inspect = this.currentAd.user_id + ':' + this.currentAd.id;
                         })
                         .catch((error) => {
 							//
-                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
+                            // this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-							setTimeout(() => { this.errorMessage = ''; }, 3000);
+							// setTimeout(() => { this.errorMessage = ''; }, 3000);
+							// Показываем сообщение об ошибке
+							this.showError(this.getTranslation('errors.' + error.response.data['code']));
                         })
                         .finally(() => {
                             this.isLoading = false;
@@ -1972,14 +2167,23 @@
 				loadUserAds() {
 					// Плавная прокрутка вверх страницы после загрузки объявлений
 					window.scrollTo({top: 0, behavior: 'smooth'});
+
+					let error = null;
+
 					// Проверяем, есть ли user.id
 					if (!this.user.id) {
 						// this.errorMessage = 'Не распознан id пользователя';
-						this.errorMessage = this.getTranslation('errors.' + 610);
+						// this.errorMessage = this.getTranslation('errors.' + 610);
+						error = this.getTranslation('errors.' + 610);
 					}
 					// Если есть сообщение об ошибке, показываем его и выходим из метода
-					if (this.errorMessage) {
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
+					// if (this.errorMessage) {
+					// 	setTimeout(() => { this.errorMessage = ''; }, 3000);
+					// 	return;
+					// }
+					if (error) {
+						// Показываем сообщение об ошибке
+						this.showError(error);
 						return;
 					}
 					
@@ -1996,9 +2200,11 @@
                         })
                         .catch((error) => {
 							//
-                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
+                            // this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-							setTimeout(() => { this.errorMessage = ''; }, 3000);
+							// setTimeout(() => { this.errorMessage = ''; }, 3000);
+							// Показываем сообщение об ошибке
+							this.showError(this.getTranslation('errors.' + error.response.data['code']));
                         })
                         .finally(() => {
                             this.isLoading = false;
@@ -2008,53 +2214,71 @@
 				createAd() {
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
+
+					let error = null;
+
 					// Проверяем, есть ли user.id
 					if (!this.user.id) {
 						// this.errorMessage = 'Не распознан id пользователя';
-						this.errorMessage = this.getTranslation('errors.' + 610);
+						// this.errorMessage = this.getTranslation('errors.' + 610);
+						error = this.getTranslation('errors.' + 610);
 					}
 					// Проверяем, введены ли параметры объявления и их длина
 					if (this.newAd.title.length < 3) {
 						// this.errorMessage = 'Пожалуйста, напишите название';
-						this.errorMessage = this.getTranslation('errors.' + 630);
+						// this.errorMessage = this.getTranslation('errors.' + 630);
+						error = this.getTranslation('errors.' + 630);
 
 					} else if (this.getRemainingChars(this.newAd.title, this.newAd.titleLimit) < 0) {
 						// this.errorMessage = 'Название слишком длинное';
-						this.errorMessage = this.getTranslation('errors.' + 635);
+						// this.errorMessage = this.getTranslation('errors.' + 635);
+						error = this.getTranslation('errors.' + 635);
 
 					} else if (this.categoryCode.length < 1) {
 						// this.errorMessage = 'Пожалуйста, выберите категорию';
-						this.errorMessage = this.getTranslation('errors.' + 631);
+						// this.errorMessage = this.getTranslation('errors.' + 631);
+						error = this.getTranslation('errors.' + 631);
 
 					} else if (this.getRemainingChars(this.categoryCode, this.categoryCodeLimit) < 0) {
 						// this.errorMessage = 'Категория слишком длинная';
-						this.errorMessage = this.getTranslation('errors.' + 636);
+						// this.errorMessage = this.getTranslation('errors.' + 636);
+						error = this.getTranslation('errors.' + 636);
 
 					} else if (this.newAd.description.length < 20) {
 						// this.errorMessage = 'Пожалуйста, напишите описание';
-						this.errorMessage = this.getTranslation('errors.' + 632);
+						// this.errorMessage = this.getTranslation('errors.' + 632);
+						error = this.getTranslation('errors.' + 632);
 
 					} else if (this.getRemainingChars(this.newAd.description, this.newAd.descriptionLimit) < 0) {
 						// this.errorMessage = 'Описание слишком длинное';
-						this.errorMessage = this.getTranslation('errors.' + 637);
+						// this.errorMessage = this.getTranslation('errors.' + 637);
+						error = this.getTranslation('errors.' + 637);
 
 					} else if (this.newAd.contact.length < 5) {
 						// this.errorMessage = 'Пожалуйста, напишите свой контакт';
-						this.errorMessage = this.getTranslation('errors.' + 633);
+						// this.errorMessage = this.getTranslation('errors.' + 633);
+						error = this.getTranslation('errors.' + 633);
 
 					} else if (this.getRemainingChars(this.newAd.contact, this.newAd.contactLimit) < 0) {
 						// this.errorMessage = 'Контакт слишком длинный';
-						this.errorMessage = this.getTranslation('errors.' + 638);
+						// this.errorMessage = this.getTranslation('errors.' + 638);
+						error = this.getTranslation('errors.' + 638);
 
 					}
 					// Проверяем наличие фотографий (максимум 3)
 					if (this.photos.length > 3) {
 						// this.errorMessage = 'Слишком много фото. Максимум 3 шт';
-						this.errorMessage = this.getTranslation('errors.' + 640);
+						// this.errorMessage = this.getTranslation('errors.' + 640);
+						error = this.getTranslation('errors.' + 640);
 					}
 					// Если есть сообщение об ошибке, показываем его и выходим из метода
-					if (this.errorMessage) {
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
+					// if (this.errorMessage) {
+					// 	setTimeout(() => { this.errorMessage = ''; }, 3000);
+					// 	return;
+					// }
+					if (error) {
+						// Показываем сообщение об ошибке
+						this.showError(error);
 						return;
 					}
 
@@ -2076,7 +2300,9 @@
 					this.isLoading = true;
 					axios.post('ad/create', formData, {headers: {'Content-Type': 'multipart/form-data'}})
 						.then(response => {
-							this.successMessage = this.getTranslation('errors.' + 650);
+							// this.successMessage = this.getTranslation('errors.' + 650);
+							// Показываем сообщение об успехе
+							this.showSuccess(this.getTranslation('errors.' + 650));
 							// очищаем форму
 							this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: this.userFullContact, contactLimit: 50, category: '' };
 							this.adCurrentPage = 1;
@@ -2090,13 +2316,15 @@
 							// очищаем массив фото
 							this.photos = [];
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-							setTimeout(() => { this.successMessage = ''; }, 3000);
+							// setTimeout(() => { this.successMessage = ''; }, 3000);
 						})
 						.catch((error) => {
 							//
-							this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
+							// this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-							setTimeout(() => { this.errorMessage = ''; }, 3000);
+							// setTimeout(() => { this.errorMessage = ''; }, 3000);
+							// Показываем сообщение об ошибке
+							this.showError(this.getTranslation('errors.' + error.response.data['code']));
 						})
 						.finally(() => {
 							this.isLoading = false;
@@ -2117,14 +2345,23 @@
 				deleteAd(id) {
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
+
+					let error = null;
+
 					/// Проверяем, есть ли user.id
 					if (!this.user.id) {
 						// this.errorMessage = 'Не распознан id пользователя';
-						this.errorMessage = this.getTranslation('errors.' + 610);
+						// this.errorMessage = this.getTranslation('errors.' + 610);
+						error = this.getTranslation('errors.' + 610);
 					}
 					// Если есть сообщение об ошибке, показываем его и выходим из метода
-					if (this.errorMessage) {
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
+					// if (this.errorMessage) {
+					// 	setTimeout(() => { this.errorMessage = ''; }, 3000);
+					// 	return;
+					// }
+					if (error) {
+						// Показываем сообщение об ошибке
+						this.showError(error);
 						return;
 					}
 
@@ -2133,20 +2370,24 @@
 					axios.get(`ad/delete/${id}/${this.user.id}`)
 						.then(response => {
 							//
-							this.successMessage = this.getTranslation('errors.' + 460);
+							// this.successMessage = this.getTranslation('errors.' + 460);
+							// Показываем сообщение об успехе
+							this.showSuccess(this.getTranslation('errors.' + 460));
 							// удаляем объявление из массива adsList
 							this.adsList = this.adsList.filter(ad => ad.id !== id);
 							this.showScreen('adList');
 							this.currentAd = {photo_1: null, created_at: ''};
 							this.deleteButton = false;
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-							setTimeout(() => { this.successMessage = ''; }, 3000);
+							// setTimeout(() => { this.successMessage = ''; }, 3000);
 						})
 						.catch((error) => {
 							//
-                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
+                            // this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-							setTimeout(() => { this.errorMessage = ''; }, 3000);
+							// setTimeout(() => { this.errorMessage = ''; }, 3000);
+							// Показываем сообщение об ошибке
+							this.showError(this.getTranslation('errors.' + error.response.data['code']));
 						})
 						.finally(() => {
 							this.isLoading = false;
@@ -2172,18 +2413,28 @@
 				dislikeAd(id) {
 					// Плавная прокрутка страницы вверх после загрузки объявлений
 					window.scrollTo({top: 0, behavior: 'smooth'});
+
+					let error = null;
+
 					// Проверяем, введен ли текст жалобы и ее длину
 					if (this.dislikeText.length < 20) {
 						// this.errorMessage = 'Пожалуйста, введите текст жалобы';
-						this.errorMessage = this.getTranslation('errors.' + 450);
+						// this.errorMessage = this.getTranslation('errors.' + 450);
+						error = this.getTranslation('errors.' + 450);
 
 					} else if (this.getRemainingChars(this.dislikeText, this.dislikeTextLimit) < 0) {
 						// this.errorMessage = 'Текст жалобы слишком длинный';
-						this.errorMessage = this.getTranslation('errors.' + 451);
+						// this.errorMessage = this.getTranslation('errors.' + 451);
+						error = this.getTranslation('errors.' + 451);
 					}
 					// Если есть сообщение об ошибке, показываем его и выходим из метода
-					if (this.errorMessage) {
-						setTimeout(() => { this.errorMessage = ''; }, 3000);
+					// if (this.errorMessage) {
+					// 	setTimeout(() => { this.errorMessage = ''; }, 3000);
+					// 	return;
+					// }
+					if (error) {
+						// Показываем сообщение об ошибке
+						this.showError(error);
 						return;
 					}
                     
@@ -2196,18 +2447,22 @@
 					axios.post(`ad/dislike/${id}`, formData, {headers: {'Content-Type': 'multipart/form-data'}})
                         .then(response => {
 							//
-							this.successMessage = this.getTranslation('errors.' + 470);
+							// this.successMessage = this.getTranslation('errors.' + 470);
+							// Показываем сообщение об успехе
+							this.showSuccess(this.getTranslation('errors.' + 470));
 							//
 							this.dislike = false;
 							this.dislikeText = '';
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-							setTimeout(() => { this.successMessage = ''; }, 3000);
+							// setTimeout(() => { this.successMessage = ''; }, 3000);
                         })
                         .catch((error) => {
 							//
-                            this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
+                            // this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-							setTimeout(() => { this.errorMessage = ''; }, 3000);
+							// setTimeout(() => { this.errorMessage = ''; }, 3000);
+							// Показываем сообщение об ошибке
+							this.showError(this.getTranslation('errors.' + error.response.data['code']));
                         })
                         .finally(() => {
                             this.isLoading = false;
@@ -2249,7 +2504,7 @@
                 // метод копирования ссылки в буфер обмена
 				copyLink(id) {
 					//
-					const url = `https://t.me/limonade_start_bot?start=id_${id}`;
+					const url = `https://t.me/limonade_vietnam_bot?start=id_${id}`;
 					navigator.clipboard.writeText(url)
 						.then(() => {
 							this.copyIcon = true;

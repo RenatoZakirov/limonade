@@ -1335,11 +1335,13 @@ class AdController {
             return;
         }
 
+        // Пока не удаляем фото. В надежде что это обьявление можно будет восстановить
+        // Далее фотки удалятся все равно методом повальной чистки старых обьявлений
         // Удалить связанные фотографии, если они существуют
-        $this->deletePhotoIfExists($ad->cover_photo);
-        $this->deletePhotoIfExists($ad->photo_1);
-        $this->deletePhotoIfExists($ad->photo_2);
-        $this->deletePhotoIfExists($ad->photo_3);
+        // $this->deletePhotoIfExists($ad->cover_photo);
+        // $this->deletePhotoIfExists($ad->photo_1);
+        // $this->deletePhotoIfExists($ad->photo_2);
+        // $this->deletePhotoIfExists($ad->photo_3);
 
         // Обновить статус объявления и дату
         $ad->status = 2; // Статус объявления (заблокировано)
