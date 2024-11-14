@@ -92,8 +92,10 @@ class AdController {
     // Метод для поиска объявлений с постепенным сокращением категории
     private function findAdsByCategoryAndText($category, $searchText, $lang, $perPage, $offset) {
         // Определяем названия колонок в зависимости от языка
-        $titleColumn = "title_" . $lang;
-        $descriptionColumn = "description_" . $lang;
+        // $titleColumn = "title_" . $lang;
+        // $descriptionColumn = "description_" . $lang;
+        $titleColumn = ($lang === 'ru' || $lang === 'en') ? "title_$lang" : null;
+        $descriptionColumn = ($lang === 'ru' || $lang === 'en') ? "description_$lang" : null;
 
         // Пытаемся найти объявления по категории, постепенно сокращая её
         while ($category && mb_strlen($category, 'UTF-8') > 0) {
@@ -106,7 +108,7 @@ class AdController {
             $params[] = $categoryParam;
     
             // Добавляем условие по тексту
-            if ($searchText) {
+            if ($searchText && $titleColumn && $descriptionColumn) {
                 // Применяем регистронезависимый поиск по title и description
                 // $query .= ' AND (LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?))';
                 $query .= " AND (LOWER($titleColumn) LIKE LOWER(?) OR LOWER($descriptionColumn) LIKE LOWER(?))";
@@ -877,77 +879,111 @@ class AdController {
         // Поля и их значения по умолчанию
         $fields = [
             'telegram_user_id' => isset($_POST['telegram_user_id']) ? trim($_POST['telegram_user_id']) : null,
+            'hash_num' => isset($_POST['password']) ? trim($_POST['password']) : null,
             'title' => isset($_POST['title']) ? trim($_POST['title']) : null,
             'category' => isset($_POST['category']) ? trim($_POST['category']) : null,
             'description' => isset($_POST['description']) ? trim($_POST['description']) : null,
-            'contact' => isset($_POST['contact']) ? trim($_POST['contact']) : null,
+            'contact' => isset($_POST['contact']) ? trim($_POST['contact']) : null
         ];
 
-        // Проверка обязательных полей на наличие и пустоту
-        foreach ($fields as $key => $value) {
-            if (empty($value)) {
-                http_response_code(400);
-                // echo json_encode(["message" => "Поле $field пустое или отсутствует"]);
-                echo json_encode(['code' => 600]);
-                return;
-            }
+        // Проверка обязательных полей, кроме "telegram_user_id" или "hash_num" (одно из них должно присутствовать)
+        if (empty($fields['title']) || empty($fields['category']) || empty($fields['description']) || empty($fields['contact'])) {
+            http_response_code(400);
+            // echo json_encode(["message" => "Поле $field пустое или отсутствует"]);
+            // Поле пустое или отсутствует
+            echo json_encode(['code' => 600]);
+            return;
         }
 
         // Ограничения по длине полей
         $fieldLimits = [
             'telegram_user_id' => 26,
+            'hash_num' => 17,
             'title' => 41,
             'category' => 6,
-            'description' => 1001,
+            'description' => 1020,
             'contact' => 51
         ];
 
         // Проверка длины полей
         foreach ($fieldLimits as $field => $limit) {
-            if (mb_strlen($fields[$field], 'UTF-8') > $limit) {
+            if (!empty($fields[$field]) && mb_strlen($fields[$field], 'UTF-8') > $limit) {
                 http_response_code(400);
                 // echo json_encode([
                 //     "message" => "Длина поля $field превышает $limit символов",
                 //     "lengths" => [$field => strlen($fields[$field])]
                 // ]);
+                // Длина поля превышает лимит
                 echo json_encode(['code' => 601]);
                 return;
             }
         }
-
-        // Присвоение переменных для дальнейшего использования
+  
+        // Проверка наличия идентификатора пользователя или пароля администратора
         $telegram_user_id = $fields['telegram_user_id'];
-        $title = $fields['title'];
-        $description = $fields['description'];
-        $category = $fields['category'];
-        $contact = $fields['contact'];
-        // $permanent = ($_POST['permanent'] ?? 'false') === 'true';
+        $hash_num = $fields['hash_num'];
 
-        // Поиск пользователя по hash_num
-        $user = R::findOne('users', 'telegram_user_id = ?', [$telegram_user_id]);
+        // Если оба поля пустые — ошибка
+        if (empty($telegram_user_id) && empty($hash_num)) {
+            http_response_code(400);
+            // Не указан ни пользователь, ни пароль
+            echo json_encode(['code' => 600]);
+            return;
+        }
 
+        // Проверка, является ли это запрос от администратора
+        $isAdmin = false;
+
+        if ($hash_num) {
+            if ($hash_num === $this->adm_pass) {
+                // Администратор подтвердил пароль
+                $user = R::findOne('users', 'hash_num = ?', [$hash_num]);
+                $isAdmin = true;
+
+            } else {
+                http_response_code(400);
+                // Проблема с паролем
+                echo json_encode(['code' => 604]);
+                return;
+            }
+        } else {
+            // Если нет пароля, ищем пользователя по telegram_user_id
+            $user = R::findOne('users', 'telegram_user_id = ?', [$telegram_user_id]);
+            $isAdmin = $telegram_user_id == $this->adm_user_id;
+        }
+
+        // Проверка, найден ли пользователь и активен ли он
         if (!$user || $user->status != 1) {
             http_response_code(400);
+            // Пользователь не найден или неактивен
             echo json_encode(['code' => 602]);
             return;
         }
 
         // Обновление даты последнего визита
         $user->last_visit = date('Y-m-d H:i:s');
+        //
         R::store($user);
 
-        if ($telegram_user_id != $this->adm_user_id) {
-
-            // Проверка количества активных объявлений пользователя
+        // Проверка лимита объявлений для обычного пользователя
+        if (!$isAdmin) {
             $ads_limit = 3;
             $activeAdsCount = R::count('ads', 'user_id = ? AND status IN (1, 2)', [$user->id]);
-
+            // Проверяем лимит обьявлений
             if ($activeAdsCount >= $ads_limit) {
                 http_response_code(400);
+                // Лимит объявлений превышен
                 echo json_encode(['code' => 603]);
                 return;
             }
         }
+        
+        // Сохраняем остальные данные
+        $title = $fields['title'];
+        $description = $fields['description'];
+        $category = $fields['category'];
+        $contact = $fields['contact'];
+        // $permanent = ($_POST['permanent'] ?? 'false') === 'true';        
 
         // Проверяем, есть ли загруженные фотографии в $_FILES
         if (isset($_FILES['photos'])) {
@@ -1376,7 +1412,7 @@ class AdController {
         }
 
         // Вычисление даты 10 дней назад
-        $dateLimit = date('Y-m-d H:i:s', strtotime('-12 days'));
+        $dateLimit = date('Y-m-d H:i:s', strtotime('-10 days'));
 
         // Поиск всех объявлений, созданных более 10 дней назад и не удаленных
         $oldAds = R::find('ads', 'created_at < ? AND status IN (1, 2)', [$dateLimit]);
@@ -1386,7 +1422,7 @@ class AdController {
             // http_response_code(400);
             // echo json_encode(['code' => 422]);
             header('Content-Type: text/html');
-            echo 'Объявления старше 12 дней не найдены...';
+            echo 'Объявления старше 10 дней не найдены...';
             return;
         }
 

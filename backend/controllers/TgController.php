@@ -196,7 +196,7 @@ class TgController {
                 // Закрыть объявление
                 $this->closeMessage($tmpPath, $message, $chatId);
                 // $this->deleteFilesInDirectory($tmpPath_2);
-                $this->sendMessage($chatId, 'Ошибка: недопустимый тип фото, порядковый номер фото: ' . ($existingPhotos + 1));
+                $this->sendMessage($chatId, 'Ошибка: недопустимый тип фото, порядковый номер фото: ' . ($existingPhotos == 0 ? $existingPhotos + 1 : $existingPhotos));
                 return;
             }
 
@@ -205,7 +205,7 @@ class TgController {
                 // Закрыть объявление
                 $this->closeMessage($tmpPath, $message, $chatId);
                 // $this->deleteFilesInDirectory($tmpPath_2);
-                $this->sendMessage($chatId, 'Ошибка: недопустимо большой размер фото, порядковый номер фото: ' . ($existingPhotos + 1));
+                $this->sendMessage($chatId, 'Ошибка: недопустимо большой размер фото, порядковый номер фото: ' . ($existingPhotos == 0 ? $existingPhotos + 1 : $existingPhotos));
                 return;
             }
 
@@ -214,7 +214,7 @@ class TgController {
                 // Закрыть объявление
                 $this->closeMessage($tmpPath, $message, $chatId);
                 // $this->deleteFilesInDirectory($tmpPath_2);
-                $this->sendMessage($chatId, 'Ошибка: недопустимо маленькое разрешение фото, порядковый номер фото: ' . ($existingPhotos + 1));
+                $this->sendMessage($chatId, 'Ошибка: недопустимо маленькое разрешение фото, порядковый номер фото: ' . ($existingPhotos == 0 ? $existingPhotos + 1 : $existingPhotos));
                 return;
             }
 

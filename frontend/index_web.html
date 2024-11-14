@@ -517,7 +517,7 @@
 								<div class="carousel-inner">
 									<div class="carousel-item active" v-if="currentAd.photo_1">
 										<div class="overflow-hidden h-100">
-											<img :src="currentAd.photo_1" class="d-block w-100 img-fluid card-img-3" alt="image 1">
+											<img :src="currentAd.photo_1" class="d-block w-100 img-fluid card-img-3" alt="image 1" @load="isImageLoaded = true">
 										</div>
 									</div>
 									<div class="carousel-item" v-if="currentAd.photo_2">
@@ -532,12 +532,12 @@
 									</div>
 								</div>
 
-								<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+								<button v-if="isImageLoaded" class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
 									<span class="carousel-control-prev-icon" aria-hidden="true"></span>
 									<span class="visually-hidden">Previous</span>
 								</button>
 
-								<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+								<button v-if="isImageLoaded" class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
 									<span class="carousel-control-next-icon" aria-hidden="true"></span>
 									<span class="visually-hidden">Next</span>
 								</button>
@@ -703,7 +703,8 @@
 										{{ getTranslation('ads.adCreate.photoTitleStr1') }}
 									</label>
 									<span class="form-text"> // jpeg, png, gif, < 5MB</span>
-									<input @change="handleFileChange($event, 0)" class="form-control form-control-sm" id="formFile1" type="file">
+									<input @change="handleFileChange($event, 0)" class="form-control form-control-sm"
+										id="formFile1" type="file">
 								</div>
 	
 								<div v-if="photoInputs[1]" class="mb-3">
@@ -711,7 +712,8 @@
 										<!-- Фото 2 -->
 										{{ getTranslation('ads.adCreate.photoTitleStr2') }}
 									</label>
-									<input @change="handleFileChange($event, 1)" class="form-control form-control-sm" id="formFile2" type="file">
+									<input @change="handleFileChange($event, 1)" class="form-control form-control-sm"
+										id="formFile2" type="file">
 								</div>
 								
 								<div v-if="photoInputs[2]" class="mb-3">
@@ -722,7 +724,8 @@
 											{{ getTranslation('ads.adCreate.photoTitleStr4') }}
 										</span>
 									</label>
-									<input @change="handleFileChange($event, 2)" class="form-control form-control-sm" id="formFile3" type="file">
+									<input @change="handleFileChange($event, 2)" class="form-control form-control-sm"
+										id="formFile3" type="file">
 								</div>
 							
 								<div class="mb-3">
@@ -735,7 +738,8 @@
 											({{ getRemainingChars(newAd.title, newAd.titleLimit) }})
 										</span>
 									</label>
-									<input v-model="newAd.title" type="text" class="form-control form-control-sm" id="FormControlInput1"
+									<input v-model="newAd.title" type="text" class="form-control form-control-sm"
+										id="FormControlInput1"
 										:placeholder="getTranslation('ads.adCreate.adTitlePlaceholderStr')">
 								</div>
 
@@ -745,7 +749,8 @@
 										{{ getTranslation('ads.adCreate.adCategoryStr') }}
 										<span class="text text-danger">*</span>
 									</label>
-									<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm" id="categorySelect" aria-label="Small select example">
+									<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm"
+										id="categorySelect" aria-label="Small select example">
 										<option value="">
 											<!-- Не выбрано -->
 											{{ getTranslation('ads.adCreate.adNotSelectedCategoryStr') }}
@@ -757,7 +762,8 @@
 								<!-- Выбор подкатегории 1 -->
 								<div v-if="selectedMainCategory && subcategories1" class="mb-3">
 									<!-- <label for="subcategory1Select" class="form-label">Подкатегория</label> -->
-									<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm" id="subcategory1Select" aria-label="Small select example">
+									<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm"
+										id="subcategory1Select" aria-label="Small select example">
 										<option value="">
 											<!-- Выберите подкатегорию -->
 											{{ getTranslation('ads.adCreate.adSubCategoryStr') }}
@@ -769,7 +775,8 @@
 								<!-- Выбор подкатегории 2 -->
 								<div v-if="selectedSubcategory1 && subcategories2" class="mb-3">
 									<!-- <label for="subcategory2Select" class="form-label">Подкатегория</label> -->
-									<select v-model="selectedSubcategory2" class="form-select form-select-sm" id="subcategory2Select" aria-label="Small select example">
+									<select v-model="selectedSubcategory2" class="form-select form-select-sm" id="subcategory2Select"
+										aria-label="Small select example">
 										<option value="">
 											<!-- Выберите подкатегорию -->
 											{{ getTranslation('ads.adCreate.adSubCategoryStr') }}
@@ -787,8 +794,8 @@
 											({{ getRemainingChars(newAd.description, newAd.descriptionLimit) }})
 										</span>
 									</label>
-									<textarea v-model="newAd.description" class="form-control form-control-sm lh-sm" id="FormControlTextarea1" rows="5"
-										:placeholder="getTranslation('ads.adCreate.adDescriptionPlaceholderStr')"></textarea>
+									<textarea v-model="newAd.description" class="form-control form-control-sm lh-sm" id="FormControlTextarea1"
+										rows="5" :placeholder="getTranslation('ads.adCreate.adDescriptionPlaceholderStr')"></textarea>
 								</div>
 			
 								<div class="mb-2">
@@ -815,7 +822,7 @@
 
 					<div class="container-fluid d-flex justify-content-end">
 						
-						<button @click="showScreen('adList')" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
+						<button @click="returnToAdList()" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
 							<!-- Назад -->
 							<i class="bi bi-caret-left-fill"></i>
 							{{ getTranslation('ads.adDetails.backButton') }}
@@ -846,6 +853,8 @@
 					tg: {},
 					//
 					isDarkTheme: false,
+					//
+					isImageLoaded: false,
                     // отвечает за показ экрана со списком объявлений
 					showAdList: false,
 					// отвечает за показ экрана только с одним объявлением
@@ -2032,7 +2041,7 @@
 					this.showAdList = screen === 'adList';
 					this.showAdDetail = screen === 'adDetail';
 					this.showCreateAd = screen === 'create';
-					// метод закрытия бокового меню
+					// 
 				},
                 // искать по тексту/ по категории
 				searchByTextOrCategory() {
@@ -2075,6 +2084,7 @@
 					window.scrollTo({top: 0, behavior: 'smooth'});
 					this.showScreen('adList');
 					this.isAdOwner = false;
+					this.isImageLoaded = false;
 
 					// Формируем URL для запроса
     				let url = `ad/get_list?page=${adCurrentPage}`;
@@ -2156,12 +2166,13 @@
 				returnToAdList() {
 					// Переход к экрану со списком объявлений
 					this.showScreen('adList');
-					// Очистка текущего объявления
+					// Очистка обьекта текущего объявления
 					this.currentAd = {photo_1: null, created_at: ''};
 					this.copyIcon = false;
 					this.dislike = false;
 					this.dislikeText = '';
 					this.deleteButton = false;
+					this.isImageLoaded = false;
 				},
                 // метод загрузки с сервера только списка своих собственных объявлений
 				loadUserAds() {

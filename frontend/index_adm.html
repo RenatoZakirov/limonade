@@ -174,7 +174,8 @@
 															<span class="text text-danger">*</span>
 															<!-- {{ categoryCode }} -->
 														</label>
-														<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm shadow-sm" id="categorySelect" aria-label="Small select example">
+														<select v-model="selectedMainCategory" @change="loadSubcategories('main')" class="form-select form-select-sm shadow-sm"
+															id="categorySelect" aria-label="Small select example">
 															<option value="">
 																Не выбрано
 															</option>
@@ -183,7 +184,8 @@
 													</div>
 													
 													<div v-if="selectedMainCategory && subcategories1" class="mb-2">
-														<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm shadow-sm" id="subcategory1Select" aria-label="Small select example">
+														<select v-model="selectedSubcategory1" @change="loadSubcategories('sub1')" class="form-select form-select-sm shadow-sm"
+															id="subcategory1Select" aria-label="Small select example">
 															<option value="">
 																Выберите подкатегорию
 															</option>
@@ -192,7 +194,8 @@
 													</div>
 													
 													<div v-if="selectedSubcategory1 && subcategories2" class="mb-2">
-														<select v-model="selectedSubcategory2" class="form-select form-select-sm shadow-sm" id="subcategory2Select" aria-label="Small select example">
+														<select v-model="selectedSubcategory2" class="form-select form-select-sm shadow-sm" id="subcategory2Select"
+															aria-label="Small select example">
 															<option value="">
 																Выберите подкатегорию
 															</option>
@@ -212,13 +215,13 @@
 															id="FormControlTextarea1" rows="3"></textarea>
 													</div>
 				
-													<div class="form-check form-switch mb-3">
+													<!-- <div class="form-check form-switch mb-3">
 														<input v-model="newAd.permanent" class="form-check-input" type="checkbox" role="switch"
 															id="flexSwitchCheckDefault">
 														<label class="form-check-label" for="flexSwitchCheckDefault">
 															Сделать объявление вечным
 														</label>
-													</div>
+													</div> -->
 													
 													<div class="row mb-3">
 														<div class="col-6">
@@ -411,7 +414,7 @@
 											<span class="input-group-text">
 												<i class="bi bi-1-square-fill"></i>
 											</span>
-											<input v-model="searchAdId" type="text" class="form-control" aria-label="Server">
+											<!-- <input v-model="searchAdId" type="text" class="form-control" aria-label="Server"> -->
 											<button @click="getAd(searchAdId)" class="btn btn-outline-secondary" type="button" :disabled="authPassword.length < 5"
 												id="button-addon61">Загрузить</button>
 										</div>
@@ -794,7 +797,7 @@
 						// лимит описания
 						descriptionLimit: 1000,
 						//
-						contact: '',
+						contact: ', telegram ',
 						// лимит контакта
 						contactLimit: 50,
 						//
@@ -980,7 +983,7 @@
 						601: 'Некоторые поля нарушили лимит символов',
 						602: 'Не удалось найти активного пользователя. Возможно ошибка в пароле',
 						603: 'Превышен лимит объявлений. Максимум 3 шт',
-						604: '',
+						604: 'Проблема с паролем',
 						605: '',
 						606: '',
 						620: 'Ошибка при загрузке одного из файлов',
@@ -1287,14 +1290,14 @@
 					searchAdId: '',
                 };
             },
-			mounted() {
-				// Обработчик события beforeunload
-				window.addEventListener("beforeunload", this.handleBeforeUnload);
-			},
-			beforeDestroy() {
-				// Удаляем обработчик события
-				window.removeEventListener("beforeunload", this.handleBeforeUnload);
-			},
+			// mounted() {
+			// 	// Обработчик события beforeunload
+			// 	window.addEventListener("beforeunload", this.handleBeforeUnload);
+			// },
+			// beforeDestroy() {
+			// 	// Удаляем обработчик события
+			// 	window.removeEventListener("beforeunload", this.handleBeforeUnload);
+			// },
 			watch: {
 				// Наблюдаем за изменением второго уровня подкатегорий (третий выпадающий список)
 				selectedSubcategory2() {
@@ -1321,7 +1324,7 @@
 				//
 				cleanForm() {
 					// очищаем форму 1
-					this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, category: '', permanent: false };
+					this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: ', telegram ', contactLimit: 50, category: '', permanent: false };
 					// очищаем форму 2
 					this.currentAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, category: '', created_at: '', id: '', status: '', photos: [] };
 					// очищаем форму 3
@@ -1418,7 +1421,7 @@
 					formData.append('category', this.newAd.category);
 					formData.append('description', this.newAd.description);
 					formData.append('contact', this.newAd.contact);
-					formData.append('permanent', this.newAd.permanent);
+					// formData.append('permanent', this.newAd.permanent);
 					formData.append('password', this.authPassword);
 
 					// добавляем фотографии в FormData
@@ -1953,10 +1956,10 @@
 					};
 				},
 				// Метод для обработки beforeunload
-				handleBeforeUnload(event) {
-					event.preventDefault();
-					event.returnValue = '';  // Обязательное условие для отображения сообщения
-				},
+				// handleBeforeUnload(event) {
+				// 	event.preventDefault();
+				// 	event.returnValue = '';  // Обязательное условие для отображения сообщения
+				// },
             }
         });
 		// Устанавливаем глобальный базовый URL для всех запросов axios

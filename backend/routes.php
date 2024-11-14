@@ -142,7 +142,8 @@ class Router {
                 // Объявления
                 'api/ad/create' => function() {
                     $controller = new AdController(ADM_PASS, ADM_USER_ID);
-                    $controller->createAd();
+                    // $controller->createAd();
+                    $controller->createAdByTgId();
                 },
                 'web/ad/create' => function() {
                     $controller = new AdController(ADM_PASS, ADM_USER_ID);
