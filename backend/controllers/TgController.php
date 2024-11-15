@@ -89,6 +89,62 @@ class TgController {
         }
     }
 
+    //
+    private function getForwardedMessageInfo($message) {
+        // Для отладки — посмотрите структуру $message
+        // error_log("Message structure: " . print_r($message, true));
+        // Проверка на наличие разных полей, чтобы обработать оба варианта
+        $userContact = '';
+        $userName = '';
+        $description = '';
+    
+        if (isset($message['forward_origin'])) {
+            // Если сообщение переслано из канала
+            if ($message['forward_origin']['type'] === 'channel') {
+                $userContact = isset($message['forward_origin']['chat']['username'])
+                    ? '@' . $message['forward_origin']['chat']['username']
+                    : '';
+                $userName = isset($message['forward_origin']['chat']['title'])
+                    ? $message['forward_origin']['chat']['title']
+                    : '';
+            } else {
+                // Обработка вариантов с sender_user или других форматов
+                $userContact = isset($message['forward_origin']['sender_user']['username'])
+                    ? '@' . $message['forward_origin']['sender_user']['username']
+                    : (isset($message['forward_origin']['username'])
+                        ? '@' . $message['forward_origin']['username']
+                        : '');
+
+                $userName = isset($message['forward_origin']['sender_user']['first_name'])
+                    ? $message['forward_origin']['sender_user']['first_name']
+                    : (isset($message['forward_origin']['sender_user_name'])
+                        ? $message['forward_origin']['sender_user_name']
+                        : '');
+            }
+        }
+    
+        // Получение текста или описания сообщения (caption или text)
+        // $description = isset($message['caption']) 
+        //     ? trim($message['caption'])
+        //     : (isset($message['text']) ? trim($message['text']) : '');
+        // Обновленная логика получения текста или описания сообщения
+        if (!empty($message['caption'])) {
+            // error_log("Caption found: " . $message['caption']); // Отладка
+            $description = trim($message['caption']); // Обработка `caption`, если оно есть
+        } elseif (!empty($message['text'])) {
+            // error_log("Text found: " . $message['text']); // Отладка
+            $description = trim($message['text']); // Обработка `text`, если `caption` отсутствует
+        }
+
+        // error_log("Description result: " . $description); // Отладка
+    
+        return [
+            'userContact' => $userContact,
+            'userName' => $userName,
+            'description' => $description,
+        ];
+    }
+
     // Сохранение данных из сообщения
     public function saveMessage($chatId, $userContact, $userName, $description, $mediaGroupId, $photos) {
         // Лимиты по длине полей
@@ -106,13 +162,10 @@ class TgController {
         if (mb_strlen($fullContact, 'UTF-8') > $contact_limit) {
             // Рассчитываем излишек символов
             $excessLength = mb_strlen($fullContact, 'UTF-8') - $contact_limit;
-            
             // Укорачиваем $userName на избыточное количество символов
             $userName = mb_substr($userName, 0, mb_strlen($userName, 'UTF-8') - $excessLength, 'UTF-8');
-            
             // Пересобираем $fullContact с укороченным $userName
             $fullContact = $userName . $separator . $userContact;
-            
             // Если всё равно превышает лимит, отправляем ошибку в телеграм и выходим
             if (mb_strlen($fullContact, 'UTF-8') > $contact_limit) {
                 //
@@ -141,7 +194,14 @@ class TgController {
             $message->status = 1;
             $message->created_at = date('Y-m-d H:i:s');
 
-        } else if ($message->status == 0) {
+        // } else if ($message->status == 0) {
+        //     return;
+        // }
+        } elseif ($message && $message->status != 0 && !empty($description)) {
+            //
+            $message->description = $description;
+
+        } elseif ($message->status == 0) {
             return;
         }
     
@@ -257,49 +317,9 @@ class TgController {
         R::store($message);
     }
 
-    private function getForwardedMessageInfo($message) {
-        // Проверка на наличие разных полей, чтобы обработать оба варианта
-        $userContact = '';
-        $userName = '';
-        $description = '';
     
-        if (isset($message['forward_origin'])) {
-            // Если сообщение переслано из канала
-            if ($message['forward_origin']['type'] === 'channel') {
-                $userContact = isset($message['forward_origin']['chat']['username'])
-                    ? '@' . $message['forward_origin']['chat']['username']
-                    : '';
-                $userName = isset($message['forward_origin']['chat']['title'])
-                    ? $message['forward_origin']['chat']['title']
-                    : '';
-            } else {
-                // Обработка вариантов с sender_user или других форматов
-                $userContact = isset($message['forward_origin']['sender_user']['username'])
-                    ? '@' . $message['forward_origin']['sender_user']['username']
-                    : (isset($message['forward_origin']['username'])
-                        ? '@' . $message['forward_origin']['username']
-                        : '');
-
-                $userName = isset($message['forward_origin']['sender_user']['first_name'])
-                    ? $message['forward_origin']['sender_user']['first_name']
-                    : (isset($message['forward_origin']['sender_user_name'])
-                        ? $message['forward_origin']['sender_user_name']
-                        : '');
-            }
-        }
     
-        // Получение текста или описания сообщения (caption или text)
-        $description = isset($message['caption']) 
-            ? trim($message['caption'])
-            : (isset($message['text']) ? trim($message['text']) : '');
-    
-        return [
-            'userContact' => $userContact,
-            'userName' => $userName,
-            'description' => $description,
-        ];
-    }
-    
+    //
     private function closeMessage($tmpPath, $message, $chatId) {
         // Закрыть объявление
         $message->status = 0;
@@ -325,6 +345,7 @@ class TgController {
         }
     }
 
+    //
     private function deleteFilesInDirectory($directory) {
         // Получаем список всех файлов в директории
         $files = glob($directory . '*'); // добавляем * для выбора всех файлов
@@ -338,6 +359,7 @@ class TgController {
         }
     }
 
+    //
     private function downloadFromTelegram($fileId) {
         $botToken = $this->tg_key;
         // Получаем путь к файлу на серверах Telegram
@@ -366,6 +388,7 @@ class TgController {
         return null;
     }
 
+    //
     private function checkPhoto($chatId, $filePath, $index) {
         // Проверяем, существует ли файл
         if (!file_exists($filePath)) {
