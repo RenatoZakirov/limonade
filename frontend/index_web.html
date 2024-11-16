@@ -2301,6 +2301,7 @@
 					formData.append('description', this.newAd.description);
 					formData.append('contact', this.newAd.contact);
 					formData.append('telegram_user_id', this.user.id);
+					formData.append('lang', this.currentLanguage.toLowerCase());
 
 					// добавляем фотографии в FormData
 					for (let i = 0; i < this.photos.length; i++) {

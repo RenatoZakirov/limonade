@@ -883,7 +883,8 @@ class AdController {
             'title' => isset($_POST['title']) ? trim($_POST['title']) : null,
             'category' => isset($_POST['category']) ? trim($_POST['category']) : null,
             'description' => isset($_POST['description']) ? trim($_POST['description']) : null,
-            'contact' => isset($_POST['contact']) ? trim($_POST['contact']) : null
+            'contact' => isset($_POST['contact']) ? trim($_POST['contact']) : null,
+            'lang' => isset($_POST['lang']) ? trim($_POST['lang']) : null
         ];
 
         // Проверка обязательных полей, кроме "telegram_user_id" или "hash_num" (одно из них должно присутствовать)
@@ -902,7 +903,8 @@ class AdController {
             'title' => 41,
             'category' => 6,
             'description' => 1020,
-            'contact' => 51
+            'contact' => 51,
+            'lang' => 3
         ];
 
         // Проверка длины полей
@@ -983,7 +985,8 @@ class AdController {
         $description = $fields['description'];
         $category = $fields['category'];
         $contact = $fields['contact'];
-        // $permanent = ($_POST['permanent'] ?? 'false') === 'true';        
+        // $permanent = ($_POST['permanent'] ?? 'false') === 'true'; 
+        $lang = $fields['lang'];       
 
         // Проверяем, есть ли загруженные фотографии в $_FILES
         if (isset($_FILES['photos'])) {
@@ -1081,7 +1084,7 @@ class AdController {
         }
 
         // Получаем переведенные данные
-        $translatedData = $this->translateAd($title, $description);
+        $translatedData = $this->translateAd($title, $description, $lang);
 
         // Создаем новое объявление
         // Создаем запись в таблице "ads"
@@ -1522,11 +1525,23 @@ class AdController {
     }
 
     // Функция для перевода объявления, с использованием отдельного определения языка
-    private function translateAd($unknownLangTitle, $unknownLangDescription) {
+    private function translateAd($unknownLangTitle, $unknownLangDescription, $lang = null) {
+        //
         $apiKey = 'AIzaSyBSIuw-3YoYkTjoWuPl5S7xfdVepO-2Tkw';
 
+        // Проверка длины текста описания
+        if (mb_strlen($unknownLangDescription) < 40) {
+            // Если текст описания короткий, используем язык интерфейса
+            $originalLang = $lang; 
+        } else {
+            // Если текст описания длиннее, определяем язык через Google Translate API
+            $originalLang = $this->detectLanguage($unknownLangDescription, $apiKey);
+        }
+
         // Определяем исходный язык на основе текста описания
-        $originalLang = $this->detectLanguage($unknownLangDescription, $apiKey);
+        // $originalLang = $this->detectLanguage($unknownLangDescription, $apiKey);
+        
+        // Целевой язык: противоположный исходному
         $targetLang = ($originalLang === 'en') ? 'ru' : 'en';
 
         // Переводим заголовок и описание на целевой язык

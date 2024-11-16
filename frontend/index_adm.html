@@ -59,11 +59,13 @@
 						</div>
 
 						<div class="btn-group btn-group-sm shadow-sm" role="group" aria-label="Small button group">
-							<button @click="notAvailableLang()" type="button" class="btn btn-sm btn-warning">
-								<i class="bi bi-translate"></i>
-								RU
-							</button>
-							<button @click="notAvailableLang()" type="button" class="btn btn-sm btn-outline-warning">EN</button>
+
+							<button @click="currentLanguage = 'ru'" type="button" class="btn btn-sm"
+								:class="currentLanguage == 'ru' ? 'btn-warning' : 'btn-outline-warning'"><i class="bi bi-translate"></i>RU</button>
+
+							<button @click="currentLanguage = 'en'" type="button" class="btn btn-sm"
+								:class="currentLanguage == 'en' ? 'btn-warning' : 'btn-outline-warning'">EN</button>
+
 						</div>
 						<button @click="notAvailableMenu()" class="btn btn-sm btn-primary shadow-sm" type="button">
 							<i class="bi bi-list"></i>
@@ -1288,6 +1290,8 @@
 					photos: [],
 					//
 					searchAdId: '',
+					//
+					currentLanguage: 'ru',
                 };
             },
 			// mounted() {
@@ -1423,6 +1427,7 @@
 					formData.append('contact', this.newAd.contact);
 					// formData.append('permanent', this.newAd.permanent);
 					formData.append('password', this.authPassword);
+					formData.append('lang', this.currentLanguage.toLowerCase());
 
 					// добавляем фотографии в FormData
 					for (let i = 0; i < this.photos.length; i++) {
