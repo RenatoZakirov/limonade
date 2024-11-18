@@ -69,6 +69,20 @@
 			<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 			<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
 
+			<nav>
+				<div class="nav nav-tabs" id="nav-tab" role="tablist">
+					<button @click="showScreen('showAd')" :class="{'nav-link': true, 'active': showAd}"
+					id="nav-ad-tab" type="button" role="tab"
+					aria-controls="nav-ad" aria-selected="showAd">Объявления</button>
+					<button @click="showScreen('showNews')" :class="{'nav-link': true, 'active': showNews}"
+					id="nav-news-tab" type="button" role="tab"
+					aria-controls="nav-news" aria-selected="showNews">Новости</button>
+					<button @click="showScreen('showUser')" :class="{'nav-link': true, 'active': showUser}"
+					id="nav-user-tab" type="button" role="tab"
+					aria-controls="nav-user" aria-selected="showUser">Пользователи</button>
+				</div>
+			</nav>
+
 			<div v-if="isLoading" class="d-flex justify-content-center p-5">
 				<div class="spinner-grow text-warning" role="status">
 					<span class="visually-hidden">
@@ -77,10 +91,11 @@
 				</div>
 			</div>
 
-			<div class="row">
+			<div v-if="!isLoading" class="tab-content mb-3" id="nav-tabContent">
+				<div :class="{'tab-pane': true, 'fade': true, 'show active': showAd}"
+					id="nav-ad" role="tabpanel" aria-labelledby="nav-ad-tab" tabindex="0">
 
-				<div class="col mb-3">
-					<div class="accordion" id="accordionExample">
+					<div class="accordion mt-3" id="accordionExample">
 						<div class="accordion-item">
 							<h2 class="accordion-header">
 								<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
@@ -394,7 +409,7 @@
 											<i class="bi bi-1-square-fill"></i>
 										</span>
 										<!-- <input v-model="searchAdId" type="text" class="form-control" aria-label="Server"> -->
-										<button @click="getAd(searchAdId)" class="btn btn-secondary" type="button" :disabled="authPassword.length < 5"
+										<button @click="getAd(searchAdId)" class="btn btn-outline-secondary" type="button" :disabled="authPassword.length < 5"
 											id="button-addon61">Загрузить</button>
 									</div>
 
@@ -459,10 +474,228 @@
 						</div>
 
 					</div>
+
 				</div>
 
-				<div class="col-xs-none col-sm col-md-none mb-3">
-					<div class="accordion" id="accordionExample3">
+				<div :class="{'tab-pane': true, 'fade': true, 'show active': showNews}"
+					id="nav-news" role="tabpanel" aria-labelledby="nav-news-tab" tabindex="0">
+
+					<div class="accordion mt-3" id="accordionExample2">
+						<div class="accordion-item">
+							<h2 class="accordion-header">
+								<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
+									Создать новую новость
+								</button>
+							</h2>
+							<div id="collapseFour" class="accordion-collapse collapse show" data-bs-parent="#accordionExample2">
+								<div class="accordion-body">
+									
+									<div class="col mt-1">
+										<div class="card shadow-sm">
+											<!-- style="background-color: #f0f0f0" -->
+											<div class="card-body">
+												<h5 class="card-title">
+													Создать новую новость
+												</h5>
+												
+												<div class="mb-2">
+													<label for="formFile4" class="form-label">
+														Заглавное фото
+													</label>
+													<span class="form-text"> // jpeg, png, gif, < 5MB</span>
+													<input @change="handleFileChange($event, 0)" class="form-control form-control-sm shadow-sm"
+														id="formFile4" type="file" ref="fileInput">
+												</div>
+					
+												<div v-if="photoInputs[1]" class="mb-2">
+													<label for="formFile5" class="form-label">
+														Фото 2
+													</label>
+													<input @change="handleFileChange($event, 1)" class="form-control form-control-sm shadow-sm"
+														id="formFile5" type="file" ref="fileInput">
+												</div>
+												
+												<div v-if="photoInputs[2]" class="mb-2">
+													<label for="formFile6" class="form-label">
+														Фото 3
+													</label>
+													<input @change="handleFileChange($event, 2)" class="form-control form-control-sm shadow-sm"
+														id="formFile6" type="file" ref="fileInput">
+												</div>
+
+												<div v-if="photoInputs[3]" class="mb-2">
+													<label for="formFile7" class="form-label">
+														Фото 4
+													</label>
+													<input @change="handleFileChange($event, 3)" class="form-control form-control-sm shadow-sm"
+														id="formFile7" type="file" ref="fileInput">
+												</div>
+
+												<div v-if="photoInputs[4]" class="mb-2">
+													<label for="formFile8" class="form-label">
+														Фото 5
+													</label>
+													<input @change="handleFileChange($event, 4)" class="form-control form-control-sm shadow-sm"
+														id="formFile8" type="file" ref="fileInput">
+												</div>
+											
+												<div class="mb-2">
+													<label for="FormControlInput7" class="form-label">
+														Заголовок (ru)
+														<span class="text text-danger">*</span>
+														<!-- Счетчик оставшихся символов для названия -->
+														<span :class="getCharCountClass(newNews.title_ru, newNews.title_ruLimit)">
+															({{ getRemainingChars(newNews.title_ru, newNews.title_ruLimit) }})
+														</span>
+													</label>
+													<input v-model="newNews.title_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput7">
+												</div>
+				
+												<div class="mb-2">
+													<label for="FormControlTextarea3" class="form-label">
+														Текст (ru)
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newNews.description_ru, newNews.description_ruLimit)">
+															({{ getRemainingChars(newNews.description_ru, newNews.description_ruLimit) }})
+														</span>
+													</label>
+													<textarea v-model="newNews.description_ru" class="form-control form-select-sm shadow-sm" id="FormControlTextarea3" rows="3"></textarea>
+												</div>
+							
+												<div class="mb-2">
+													<label for="FormControlInput8" class="form-label">
+														Автор (ru)
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newNews.author_ru, newNews.author_ruLimit)">
+															({{ getRemainingChars(newNews.author_ru, newNews.author_ruLimit) }})
+														</span>
+													</label>
+													<input v-model="newNews.author_ru" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput8">
+												</div>
+
+												<div class="mb-2">
+													<label for="FormControlInput17" class="form-label">
+														Заголовок (en)
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newNews.title_en, newNews.title_ruLimit)">
+															({{ getRemainingChars(newNews.title_en, newNews.title_ruLimit) }})
+														</span>
+													</label>
+													<input v-model="newNews.title_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput17">
+												</div>
+				
+												<div class="mb-2">
+													<label for="FormControlTextarea13" class="form-label">
+														Текст (en)
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newNews.description_en, newNews.description_ruLimit)">
+															({{ getRemainingChars(newNews.description_en, newNews.description_ruLimit) }})
+														</span>
+													</label>
+													<textarea v-model="newNews.description_en" class="form-control form-select-sm shadow-sm" id="FormControlTextarea13" rows="3"></textarea>
+												</div>
+							
+												<div class="mb-2">
+													<label for="FormControlInput18" class="form-label">
+														Автор (en)
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newNews.author_en, newNews.author_ruLimit)">
+															({{ getRemainingChars(newNews.author_en, newNews.author_ruLimit) }})
+														</span>
+													</label>
+													<input v-model="newNews.author_en" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput18">
+												</div>
+												
+												<div class="row mb-3">
+													<div class="col-6">
+														<label for="inputPassword4" class="form-label">
+															Пароль
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																({{ getRemainingChars(authPassword, authPasswordLimit) }})
+															</span>
+														</label>
+													</div>
+													<div class="col">
+														<input v-model="authPassword" type="password" id="inputPassword4" class="form-control form-control-sm shadow-sm"
+															aria-describedby="passwordHelpBlock">
+													</div>
+												</div>
+												<button @click="createNews()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+													<i class="bi bi-envelope-open-fill"></i>
+													Опубликовать новость
+												</button>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+						<div class="accordion-item">
+							<h2 class="accordion-header">
+								<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+									Удалить новость
+								</button>
+							</h2>
+							<div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#accordionExample2">
+								<div class="accordion-body">
+									
+									<div class="col mt-1">
+										<div class="card shadow-sm">
+											<div class="card-body">
+												<h5 class="card-title mb-3">
+													Удалить новость
+												</h5>
+												<div class="mb-3 row">
+													<div class="col-7">
+														<label for="FormControlInput41" class="form-label">
+															ID новости
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(newsId, newsIdLimit)">
+																({{ getRemainingChars(newsId, newsIdLimit) }})
+															</span>
+														</label>
+													</div>
+													<div class="col">
+														<input v-model="newsId" type="text" class="form-control form-control-sm shadow-sm" id="FormControlInput41">
+													</div>
+												</div>
+												<div class="row mb-3">
+													<div class="col-6">
+														<label for="inputPassword41" class="form-label">
+															Пароль
+															<span class="text text-danger">*</span>
+															<span :class="getCharCountClass(authPassword, authPasswordLimit)">
+																({{ getRemainingChars(authPassword, authPasswordLimit) }})
+															</span>
+														</label>
+													</div>
+													<div class="col">
+														<input v-model="authPassword" type="password" id="inputPassword41" class="form-control form-control-sm shadow-sm"
+															aria-describedby="passwordHelpBlock">
+													</div>
+												</div>
+												<button @click="deleteNews()" class="btn btn-sm btn-success shadow-sm" :disabled="authPassword.length < 5">
+													<i class="bi bi-trash3-fill"></i>
+													Удалить новость
+												</button>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+						
+					</div>
+					
+				</div>
+
+				<div :class="{'tab-pane': true, 'fade': true, 'show active': showUser}"
+					id="nav-user" role="tabpanel" aria-labelledby="nav-user-tab" tabindex="0">
+
+					<div class="accordion mt-3" id="accordionExample3">
 						
 						<div class="accordion-item">
 							<h2 class="accordion-header">
@@ -521,8 +754,8 @@
 						</div>
 
 					</div>
-				</div>
 
+				</div>
 			</div>
 
 		</div>
@@ -1087,7 +1320,7 @@
 				//
 				cleanForm() {
 					// очищаем форму 1
-					this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: ', telegram ', contactLimit: 50, category: '' };
+					this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: ', telegram ', contactLimit: 50, category: '', permanent: false };
 					// очищаем форму 2
 					this.currentAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, category: '', created_at: '', id: '', status: '', photos: [] };
 					// очищаем форму 3
@@ -1102,7 +1335,7 @@
 					//
 					this.userId = '';
 					//
-					this.photoInputs = [true, false, false];
+					this.photoInputs = [true, false, false, false, false];
 					// Очистить поле файла через ref
 					// this.$refs.fileInput.value = '';
 					//
@@ -1324,11 +1557,7 @@
 						return;
 					}
 
-					//
 					this.currentAd.category = this.categoryCode;
-					//
-					this.currentAd.lang = this.currentLanguage;
-					// console.log(this.currentAd);
 					// Заменяем пустую строку на 0
 					id = this.searchAdId || 0;
 					// this.currentAd.searchAdId = this.searchAdId || 0;

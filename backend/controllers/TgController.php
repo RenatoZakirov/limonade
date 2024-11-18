@@ -317,8 +317,6 @@ class TgController {
         R::store($message);
     }
 
-    
-    
     //
     private function closeMessage($tmpPath, $message, $chatId) {
         // Закрыть объявление

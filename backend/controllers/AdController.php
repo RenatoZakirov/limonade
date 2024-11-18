@@ -416,7 +416,10 @@ class AdController {
             'title' => isset($inputData['title']) ? trim($inputData['title']) : null,
             'category' => isset($inputData['category']) ? trim($inputData['category']) : null,
             'description' => isset($inputData['description']) ? trim($inputData['description']) : null,
+            'lang' => isset($inputData['lang']) ? trim($inputData['lang']) : null,
         ];
+
+        // error_log('Post: ' . print_r($_POST)); die;
 
         // Проверка обязательных полей на наличие и пустоту
         foreach ($fields as $key => $value) {
@@ -432,7 +435,8 @@ class AdController {
             'contact' => 51,
             'title' => 41,
             'category' => 6,
-            'description' => 1001
+            'description' => 1001,
+            'lang' => 3
         ];
 
         // Проверка длины полей
@@ -446,9 +450,10 @@ class AdController {
 
         // Присвоение переменных для дальнейшего использования
         $title = $fields['title'];
-        $description = $fields['description'];
         $category = $fields['category'];
+        $description = $fields['description'];
         $contact = $fields['contact'];
+        $lang = $fields['lang'];
 
         //
         if (!$id) {
@@ -476,7 +481,7 @@ class AdController {
             // error_log("Ad: " . $ad);
 
             // Получаем переведенные данные
-            $translatedData = $this->translateAd($title, $description);
+            $translatedData = $this->translateAd($title, $description, $lang);
 
             // Создаем новое объявление
             // Создаем запись в таблице "ads"
@@ -986,7 +991,7 @@ class AdController {
         $category = $fields['category'];
         $contact = $fields['contact'];
         // $permanent = ($_POST['permanent'] ?? 'false') === 'true'; 
-        $lang = $fields['lang'];       
+        $lang = $fields['lang'];
 
         // Проверяем, есть ли загруженные фотографии в $_FILES
         if (isset($_FILES['photos'])) {
@@ -1525,14 +1530,16 @@ class AdController {
     }
 
     // Функция для перевода объявления, с использованием отдельного определения языка
-    private function translateAd($unknownLangTitle, $unknownLangDescription, $lang = null) {
+    private function translateAd($unknownLangTitle, $unknownLangDescription, $lang) {
         //
         $apiKey = 'AIzaSyBSIuw-3YoYkTjoWuPl5S7xfdVepO-2Tkw';
 
         // Проверка длины текста описания
         if (mb_strlen($unknownLangDescription) < 40) {
             // Если текст описания короткий, используем язык интерфейса
-            $originalLang = $lang; 
+            // $originalLang = $lang;
+            $originalLang = ($lang === 'ru') ? 'ru' : 'en';
+            // error_log('originalLang: ' . strtolower($lang));
         } else {
             // Если текст описания длиннее, определяем язык через Google Translate API
             $originalLang = $this->detectLanguage($unknownLangDescription, $apiKey);
