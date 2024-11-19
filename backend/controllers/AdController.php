@@ -113,7 +113,7 @@ class AdController {
                 // $query .= ' AND (LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?))';
                 $query .= " AND (LOWER($titleColumn) LIKE LOWER(?) OR LOWER($descriptionColumn) LIKE LOWER(?))";
                 // Поддержка частичного совпадения
-                $searchTextParam = '%' . $searchText . '%';
+                $searchTextParam = '%' . trim($searchText) . '%';
                 $params[] = $searchTextParam;
                 $params[] = $searchTextParam;
             }
@@ -140,7 +140,7 @@ class AdController {
             // $query = 'WHERE status = 1 AND (LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?)) ORDER BY created_at DESC LIMIT ? OFFSET ?';
             $query = "WHERE status = 1 AND (LOWER($titleColumn) LIKE LOWER(?) OR LOWER($descriptionColumn) LIKE LOWER(?)) ORDER BY created_at DESC LIMIT ? OFFSET ?";
             // Поддержка частичного совпадения
-            $searchTextParam = '%' . $searchText . '%';
+            $searchTextParam = '%' . trim($searchText) . '%';
             $ads = R::findAll('ads', $query, [$searchTextParam, $searchTextParam, $perPage, $offset]);
 
             // Если объявления найдены, возвращаем их
