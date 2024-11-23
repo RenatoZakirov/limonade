@@ -281,22 +281,15 @@ class TgController {
             // Обработка фотографий в зависимости от их индекса
             switch ($existingPhotos) {
                 case 0:
+                    // // Обрабатываем cover_photo как обложку
+                    // $coverPhotoName = $imageEditor->generateUniqueName(); // Генерируем уникальное имя для обложки
+
+                    // // Сохранить фото
+                    // $imageEditor->createImage();
+                    // $imageEditor->resizeToFit();
+                    // $imageEditor->saveOriginal($tmpPath . $coverPhotoName . '.jpg');
                     // Обрабатываем cover_photo как обложку
-                    $coverPhotoName = $imageEditor->generateUniqueName(); // Генерируем уникальное имя для обложки
-                    
-                    // Если ориентация горизонтальная, создаем изображение с полями
-                    // if ($imageEditor->orientation == 'h') {
-                        // $imageEditor->createImage();          // Создаем изображение
-                        // $imageEditor->resizeToFit();          // Меняем размер изображения
-                        // $imageEditor->createPaddedImage();    // Создаем изображение с добавлением полей
-                        // $imageEditor->savePadded($tmpPath . $coverPhotoName . '.jpg'); // Сохраняем с полями
-                    // } else {
-                        // Для вертикальных изображений сохраняем оригинал
-                    $imageEditor->createImage();
-                    $imageEditor->resizeToFit();
-                    $imageEditor->saveOriginal($tmpPath . $coverPhotoName . '.jpg');
-                    // }
-                    $message->cover_photo = $coverPhotoName;
+                    $message->cover_photo = $this->processPhoto($imageEditor, $tmpPath);
                     // Обрабатываем photo_1
                     $message->photo_1 = $this->processPhoto($imageEditor, $tmpPath);
                     break;
@@ -422,6 +415,28 @@ class TgController {
         ];
     }
 
+    // // Функция для обработки фотографий
+    // private function processPhoto($imageEditor, $filePath) {
+    //     // Генерация уникального имени файла
+    //     $photoName = $imageEditor->generateUniqueName();
+    //     // Создание изображения
+    //     $imageEditor->createImage();
+    //     // Изменение размера изображения
+    //     $imageEditor->resizeToFit();
+    //     //
+    //     if ($imageEditor->orientation == 'h') {
+    //         // Сохраняем оригинал горизонтального изображения
+    //         $imageEditor->saveOriginal($filePath . $photoName . '.jpg');
+    //     } else {
+    //         // Создаем изображение с добавлением полей
+    //         $imageEditor->createPaddedImage();
+    //         // Сохраняем изображение с полями
+    //         $imageEditor->savePadded($filePath . $photoName . '.jpg');
+    //     }
+    //     // Возвращаем имя файла
+    //     return (string)$photoName;
+    // }
+
     // Функция для обработки фотографий
     private function processPhoto($imageEditor, $filePath) {
         // Генерация уникального имени файла
@@ -430,16 +445,10 @@ class TgController {
         $imageEditor->createImage();
         // Изменение размера изображения
         $imageEditor->resizeToFit();
-        //
-        if ($imageEditor->orientation == 'h') {
-            // Сохраняем оригинал горизонтального изображения
-            $imageEditor->saveOriginal($filePath . $photoName . '.jpg');
-        } else {
-            // Создаем изображение с добавлением полей
-            $imageEditor->createPaddedImage();
-            // Сохраняем изображение с полями
-            $imageEditor->savePadded($filePath . $photoName . '.jpg');
-        }
+        
+        // Сохраняем оригинал горизонтального изображения
+        $imageEditor->saveOriginal($filePath . $photoName . '.jpg');
+        
         // Возвращаем имя файла
         return (string)$photoName;
     }

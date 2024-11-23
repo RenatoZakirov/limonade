@@ -6,6 +6,7 @@
     <title>Объявления</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.11.1/baguetteBox.min.css" rel="stylesheet">
 	
 	<script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
@@ -13,7 +14,8 @@
 	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
-	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.11.1/baguetteBox.min.js"></script>
+
 	<style>
         /* Ваши стили можно разместить здесь */
         [v-cloak] {
@@ -223,8 +225,7 @@
 		}
 		.card-img-3 {
 			width: 100%;
-			height: auto;
-			max-height: 250px;
+			height: 100%;
 			/* Заполняет весь контейнер, обрезая края, если изображение не помещается */
 			object-fit: cover;
 			/* Центрирует изображение в контейнере */
@@ -242,49 +243,32 @@
 			/* Правый нижний угол острый */
 			border-radius: 20px 20px 0 20px;
 		}
+
 		.custom-rounded-left {
 			/* Левый нижний угол острый */
 			border-radius: 20px 20px 20px 0;
 		}
-
-		/* Закругляем рамку модального окна */
-		.modal-content.custom-rounded-2 {
+		.card-img-top {
+			/* Убедитесь, что изображение в карточке занимает всю ширину */
 			width: 100%;
+			/* Соотношение сторон сохраняется */
 			height: auto;
-			max-height: 470px;
+			max-height: 300px;
+			/* Заполняет весь контейнер, обрезая края, если изображение не помещается */
 			object-fit: cover;
+			/* Центрирует изображение в контейнере */
 			object-position: center;
-			border: none;
-			background-color: transparent; /* Убираем белый фон */
-			overflow: hidden; /* Скрываем содержимое за границами */
+			/* Явно задаём нужные закругления: левый верхний и правый верхний углы */
+			border-radius: 20px 20px 0 0;
 		}
-		/* Закругляем только изображение в модальном окне */
-		.modal-rounded-img {
-
-			transform: translateZ(0); /* Ускоряет рендеринг */
-			touch-action: manipulation; /* Указывает, что элементы реагируют только на манипуляции */
+		/* Настройка прозрачности фона */
+		.baguetteBox-overlay {
+			background: rgba(0, 0, 0, 0.6); /* Прозрачность фона (0.6 вместо стандартного 0.8) */
 		}
-		#imageModal .modal-content {
-			border-radius: 0; /* Убираем закругление */
+		.baguetteBox-button.close {
+			display: none;
 		}
-		/* Черный цвет с большей непрозрачностью */
-		/*
-		.modal-backdrop {
-			background-color: rgba(0, 0, 0, 0.8) !important;
-		} */
-
-		/* Ограничение размеров изображений в Lightbox */
-		/*.lightbox img {
-			max-width: 90vw; /* Максимальная ширина - 90% от ширины экрана */
-			/*max-height: 90vh; /* Максимальная высота - 90% от высоты экрана */
-			/*object-fit: contain; /* Сохраняет пропорции */
-		/*}
-		/* Адаптивность для кнопки закрытия */
-		/*.lb-close {
-			top: 10px;
-			right: 10px;
-			font-size: 1.5rem;
-		}*/
+		
 		
     </style>
 </head>
@@ -438,7 +422,7 @@
 								<!-- создать -->
 							</button>
 							<ul class="dropdown-menu shadow-sm dropdown-menu-end">
-								<li class="mb-1">
+								<li>
 									<div @click="cleanCategory(); showScreen('create')" class="dropdown-item" href="">
 										<!-- создать объявление -->
 										<i class="bi bi-wrench-adjustable"></i>
@@ -545,49 +529,21 @@
 
 					<div class="col-11">
 
-						<div class="card shadow-sm custom-rounded-left">
+						<div class="card shadow-sm custom-rounded-left" style="position: relative;">
 
-							<div v-if="currentAd.photo_1 || currentAd.photo_2 || currentAd.photo_3" id="carouselExampleIndicators" class="carousel slide carousel-fade">
-
-								<div class="carousel-indicators">
-									<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-									<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2" v-if="currentAd.photo_2"></button>
-									<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3" v-if="currentAd.photo_3"></button>
+							<!-- Галерея -->
+							<div v-if="images.length > 0" class="gallery">
+								<!-- Генерация ссылок и изображений через Vue.js -->
+								<a v-for="(image, index) in images" :key="index" :href="image.url">
+								  <img :src="image.url" :alt="'Photo ' + (index + 1)" v-if="index === 0" class="card-img-top img-fluid">
+								</a>
+								<!-- Индикатор количества изображений -->
+								<div class="badge bg-dark text-white position-absolute top-0 end-0 m-2" style="opacity: 0.6;">
+								  {{ images.length }} фото
 								</div>
-
-								<div class="carousel-inner">
-									<div class="carousel-item active" v-if="currentAd.photo_1">
-										<div class="overflow-hidden h-100">
-											<img :src="currentAd.photo_1" class="d-block w-100 img-fluid card-img-3" alt="image 1" @click="showImage(currentAd.photo_1)"
-												@load="isImageLoaded = true">
-											<!-- <img :src="currentAd.photo_1" class="d-block w-100 img-fluid card-img-3" alt="image 1" @load="isImageLoaded = true"> -->
-										</div>
-									</div>
-									<div class="carousel-item" v-if="currentAd.photo_2">
-										<div class="overflow-hidden h-100">
-											<img :src="currentAd.photo_2" class="d-block w-100 img-fluid card-img-3" alt="image 2" @click="showImage(currentAd.photo_2)">
-											<!-- <img :src="currentAd.photo_2" class="d-block w-100 img-fluid card-img-3" alt="image 2"> -->
-										</div>
-									</div>
-									<div class="carousel-item" v-if="currentAd.photo_3">
-										<div class="overflow-hidden h-100">
-											<img :src="currentAd.photo_3" class="d-block w-100 img-fluid card-img-3" alt="image 3" @click="showImage(currentAd.photo_3)">
-											<!-- <img :src="currentAd.photo_3" class="d-block w-100 img-fluid card-img-3" alt="image 3"> -->
-										</div>
-									</div>
-								</div>
-
-								<button v-if="isImageLoaded" class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-									<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-									<span class="visually-hidden">Previous</span>
-								</button>
-
-								<button v-if="isImageLoaded" class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-									<span class="carousel-control-next-icon" aria-hidden="true"></span>
-									<span class="visually-hidden">Next</span>
-								</button>
-
-							</div>
+								<!-- Остальные изображения скрыты -->
+								<a v-for="(image, index) in images" :key="'hidden-' + index" :href="image.url" style="display: none;" v-if="index > 0"></a>
+							  </div>
 
 							<div class="card-body">
 								<h5 class="card-title lh-sm">{{ currentAd['title_' + currentLanguage.toLowerCase()] }}</h5>
@@ -677,17 +633,7 @@
 
 						</div>
 
-						<!-- Модальное окно -->
-						<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
-							<div class="modal-dialog modal-dialog-centered modal-lg">
-								<div class="modal-content custom-rounded-2">
-									<div class="modal-body p-0">
-										<img :src="selectedImage" class="img-fluid w-100 modal-rounded-img" loading="lazy" alt="Enlarged image">
-									</div>
-									<!-- <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button> -->
-								</div>
-							</div>
-						</div>
+						
 
 					</div>
 
@@ -946,6 +892,8 @@
 					photoInputs: [true, false, false], // скрываем фото 2 и фото 3
 					// содержит массив загруженных фото
         			photos: [],
+					// массив фото для новой карточки
+					images: [],
 					// показывает, что данные в процессе загрузки с сервера
                     isLoading: true,
 					// содержит текст всплывающей подсказки в случае успеха
@@ -1969,6 +1917,13 @@
 				this.initializeTelegram();
 				// Склеенный контакт для создания нового объявления
 				this.newAd.contact = this.userFullContact;
+
+				// Инициализация baguetteBox.js после рендера
+				baguetteBox.run('.gallery', {
+					animation: 'fadeIn',    // Анимация появления
+					noScrollbars: true,    // Убираем полосы прокрутки
+					loop: true             // Включаем зацикливание
+				});
             },
 			created() {
 				// this.initializeTelegram();
@@ -2209,6 +2164,19 @@
                         .then(response => {
 							// загрузить данные по обьявлению
                             this.currentAd = response.data;
+
+							// Преобразуем фото в массив для PhotoSwipe
+							this.images = [];
+							if (this.currentAd.photo_1) {
+								this.images.push({ url: this.currentAd.photo_1 });
+							}
+							if (this.currentAd.photo_2) {
+								this.images.push({ url: this.currentAd.photo_2 });
+							}
+							if (this.currentAd.photo_3) {
+								this.images.push({ url: this.currentAd.photo_3 });
+							}
+
 							this.showScreen('adDetail');
 							this.dislike = false;
 							this.dislikeText = '';

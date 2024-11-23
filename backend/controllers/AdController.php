@@ -1181,15 +1181,17 @@ class AdController {
         // Изменение размера изображения
         $imageEditor->resizeToFit();
         //
-        if ($imageEditor->orientation == 'h') {
-            // Сохраняем оригинал горизонтального изображения
-            $imageEditor->saveOriginal($filePath . $photoName . '.jpg');
-        } else {
-            // Создаем изображение с добавлением полей
-            $imageEditor->createPaddedImage();
-            // Сохраняем изображение с полями
-            $imageEditor->savePadded($filePath . $photoName . '.jpg');
-        }
+        // if ($imageEditor->orientation == 'h') {
+        //     // Сохраняем оригинал горизонтального изображения
+        //     $imageEditor->saveOriginal($filePath . $photoName . '.jpg');
+        // } else {
+        //     // Создаем изображение с добавлением полей
+        //     $imageEditor->createPaddedImage();
+        //     // Сохраняем изображение с полями
+        //     $imageEditor->savePadded($filePath . $photoName . '.jpg');
+        // }
+        // Сохраняем оригинал горизонтального изображения
+        $imageEditor->saveOriginal($filePath . $photoName . '.jpg');
         // Добавляем имя файла в массив
         $adPhotos[$key] = $photoName;
         // Сохраняем путь к файлу

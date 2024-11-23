@@ -17,6 +17,15 @@
 		.no-border-top {
 			border-top: none;
 		}
+		.card-img-3 {
+			width: 100%;
+			height: 100%;
+			max-height: 300px;
+			/* Заполняет весь контейнер, обрезая края, если изображение не помещается */
+			object-fit: cover;
+			/* Центрирует изображение в контейнере */
+			object-position: center;
+		}
 	</style>
 </head>
 <body>
@@ -252,7 +261,7 @@
 
 											<!-- <img src="/backend/uploads/images/templates/cat.jpg" class="card-img-top" alt=""> -->
 
-											<div v-if="currentAd.photos[0]" id="carouselExampleIndicators" class="carousel slide">
+											<div v-if="currentAd.photos[0]" id="carouselExampleIndicators" class="carousel slide carousel-fade">
 
 												<div class="carousel-indicators">
 													<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
@@ -262,13 +271,19 @@
 	
 												<div class="carousel-inner">
 													<div class="carousel-item active" v-if="currentAd.photos[0]">
-														<img :src="currentAd.photos[0]" class="d-block w-100 card-img-top" alt="image 1">
+														<div class="overflow-hidden h-100">
+															<img :src="currentAd.photos[0]" class="d-block w-100 img-fluid card-img-3" alt="image 1">
+														</div>
 													</div>
 													<div class="carousel-item" v-if="currentAd.photos[1]">
-														<img :src="currentAd.photos[1]" class="d-block w-100 card-img-top" alt="image 2">
+														<div class="overflow-hidden h-100">
+															<img :src="currentAd.photos[1]" class="d-block w-100 img-fluid card-img-3" alt="image 2">
+														</div>
 													</div>
 													<div class="carousel-item" v-if="currentAd.photos[2]">
-														<img :src="currentAd.photos[2]" class="d-block w-100 card-img-top" alt="image 3">
+														<div class="overflow-hidden h-100">
+															<img :src="currentAd.photos[2]" class="d-block w-100 img-fluid card-img-3" alt="image 3">
+														</div>
 													</div>
 												</div>
 	
