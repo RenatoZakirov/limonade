@@ -246,45 +246,25 @@
 			/* Левый нижний угол острый */
 			border-radius: 20px 20px 20px 0;
 		}
-
 		/* Закругляем рамку модального окна */
 		.modal-content.custom-rounded-2 {
 			width: 100%;
 			height: auto;
-			max-height: 470px;
+			max-height: 70vh;
 			object-fit: cover;
 			object-position: center;
 			border: none;
 			background-color: transparent; /* Убираем белый фон */
 			overflow: hidden; /* Скрываем содержимое за границами */
 		}
-		/* Закругляем только изображение в модальном окне */
-		.modal-rounded-img {
-
-			transform: translateZ(0); /* Ускоряет рендеринг */
-			touch-action: manipulation; /* Указывает, что элементы реагируют только на манипуляции */
-		}
+		
 		#imageModal .modal-content {
 			border-radius: 0; /* Убираем закругление */
 		}
 		/* Черный цвет с большей непрозрачностью */
-		/*
 		.modal-backdrop {
-			background-color: rgba(0, 0, 0, 0.8) !important;
-		} */
-
-		/* Ограничение размеров изображений в Lightbox */
-		/*.lightbox img {
-			max-width: 90vw; /* Максимальная ширина - 90% от ширины экрана */
-			/*max-height: 90vh; /* Максимальная высота - 90% от высоты экрана */
-			/*object-fit: contain; /* Сохраняет пропорции */
-		/*}
-		/* Адаптивность для кнопки закрытия */
-		/*.lb-close {
-			top: 10px;
-			right: 10px;
-			font-size: 1.5rem;
-		}*/
+			background-color: rgba(0, 0, 0, 0.9) !important;
+		}
 		
     </style>
 </head>
@@ -547,46 +527,16 @@
 
 						<div class="card shadow-sm custom-rounded-left">
 
-							<div v-if="currentAd.photo_1 || currentAd.photo_2 || currentAd.photo_3" id="carouselExampleIndicators" class="carousel slide carousel-fade">
-
-								<div class="carousel-indicators">
-									<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-									<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2" v-if="currentAd.photo_2"></button>
-									<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3" v-if="currentAd.photo_3"></button>
+							<div v-if="currentAd.photo_1" class="card-img-container">
+								<img 
+									:src="currentAd.photo_1" 
+									class="d-block w-100 img-fluid card-img-3" 
+									alt="image 1" 
+									@click="openModal()"
+								>
+								<div class="badge bg-dark text-white position-absolute top-0 end-0 m-2" style="opacity: 0.6;">
+									{{ imagesLength }} {{ getTranslation('ads.adDetails.imagesNumber') }}
 								</div>
-
-								<div class="carousel-inner">
-									<div class="carousel-item active" v-if="currentAd.photo_1">
-										<div class="overflow-hidden h-100">
-											<img :src="currentAd.photo_1" class="d-block w-100 img-fluid card-img-3" alt="image 1" @click="showImage(currentAd.photo_1)"
-												@load="isImageLoaded = true">
-											<!-- <img :src="currentAd.photo_1" class="d-block w-100 img-fluid card-img-3" alt="image 1" @load="isImageLoaded = true"> -->
-										</div>
-									</div>
-									<div class="carousel-item" v-if="currentAd.photo_2">
-										<div class="overflow-hidden h-100">
-											<img :src="currentAd.photo_2" class="d-block w-100 img-fluid card-img-3" alt="image 2" @click="showImage(currentAd.photo_2)">
-											<!-- <img :src="currentAd.photo_2" class="d-block w-100 img-fluid card-img-3" alt="image 2"> -->
-										</div>
-									</div>
-									<div class="carousel-item" v-if="currentAd.photo_3">
-										<div class="overflow-hidden h-100">
-											<img :src="currentAd.photo_3" class="d-block w-100 img-fluid card-img-3" alt="image 3" @click="showImage(currentAd.photo_3)">
-											<!-- <img :src="currentAd.photo_3" class="d-block w-100 img-fluid card-img-3" alt="image 3"> -->
-										</div>
-									</div>
-								</div>
-
-								<button v-if="isImageLoaded" class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-									<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-									<span class="visually-hidden">Previous</span>
-								</button>
-
-								<button v-if="isImageLoaded" class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-									<span class="carousel-control-next-icon" aria-hidden="true"></span>
-									<span class="visually-hidden">Next</span>
-								</button>
-
 							</div>
 
 							<div class="card-body">
@@ -678,16 +628,52 @@
 						</div>
 
 						<!-- Модальное окно -->
-						<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+						<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
 							<div class="modal-dialog modal-dialog-centered modal-lg">
 								<div class="modal-content custom-rounded-2">
-									<div class="modal-body p-0">
-										<img :src="selectedImage" class="img-fluid w-100 modal-rounded-img" loading="lazy" alt="Enlarged image">
+									<div class="modal-body p-0 position-relative">
+										<!-- Управление каруселью -->
+										<div id="carouselModal" class="carousel slide carousel-fade">
+											<!-- <div class="carousel-indicators">
+												<button 
+													v-for="(image, index) in images" 
+													:key="index" 
+													type="button" 
+													:data-bs-target="'#carouselModal'" 
+													:data-bs-slide-to="index" 
+													:class="{ active: index === 0 }" 
+													:aria-label="'Slide ' + (index + 1)">
+												</button>
+											</div> -->
+						
+											<div class="carousel-inner">
+												<div 
+													v-for="(image, index) in images" 
+													:key="index" 
+													:class="['carousel-item', { active: index === 0 }]">
+													<img :src="image" class="d-block w-100 img-fluid" :alt="'Image ' + (index + 1)">
+												</div>
+											</div>
+						
+											<!-- Кнопка "Предыдущая" -->
+											<button v-if="images.length > 1" class="carousel-control-prev" type="button" 
+												data-bs-target="#carouselModal" data-bs-slide="prev">
+												<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Previous</span>
+											</button>
+
+											<!-- Кнопка "Следующая" -->
+											<button v-if="images.length > 1" class="carousel-control-next" type="button" 
+												data-bs-target="#carouselModal" data-bs-slide="next">
+												<span class="carousel-control-next-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Next</span>
+											</button>
+										</div>
 									</div>
-									<!-- <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button> -->
 								</div>
 							</div>
 						</div>
+						
 
 					</div>
 
@@ -910,8 +896,6 @@
 					tg: {},
 					//
 					isDarkTheme: false,
-					//
-					isImageLoaded: false,
                     // отвечает за показ экрана со списком объявлений
 					showAdList: false,
 					// отвечает за показ экрана только с одним объявлением
@@ -946,6 +930,10 @@
 					photoInputs: [true, false, false], // скрываем фото 2 и фото 3
 					// содержит массив загруженных фото
         			photos: [],
+					//
+					images: [],
+					//
+					imagesLength: 0,
 					// показывает, что данные в процессе загрузки с сервера
                     isLoading: true,
 					// содержит текст всплывающей подсказки в случае успеха
@@ -1022,6 +1010,7 @@
 								showMoreButton: 'вперед',
 								backToTopButton: 'В начало',
 								adDetails: {
+									imagesNumber: 'Фото',
 									titleStr: '',
 									categoryButtons: '',
 									descriptionStr: '',
@@ -1289,6 +1278,7 @@
 								showMoreButton: 'forward',
 								backToTopButton: 'Back to top',
 								adDetails: {
+									imagesNumber: 'Photos',
 									titleStr: '',
 									categoryButtons: '',
 									descriptionStr: '',
@@ -1545,10 +1535,10 @@
 									// '': { code: '4' },
 									'Другое': { code: '5' }
 							}},
-								'Еда, напитки, кулинария': { code: 'L', subcategories: {
+								'Еда, напитки, десерты': { code: 'L', subcategories: {
 									'Еда': { code: '1' },
 									'Напитки': { code: '2' },
-									'Кулинария': { code: '3' },
+									'Десерты': { code: '3' },
 									// '': { code: '4' },
 									'Другое': { code: '5' }
 							}},
@@ -1747,10 +1737,10 @@
 									// '': { code: '4' },
 									'Other': { code: '5' }
 							}},
-								'Food, drinks, cooking': { code: 'L', subcategories: {
+								'Food, drinks, desserts': { code: 'L', subcategories: {
 									'Food': { code: '1' },
 									'Drinks': { code: '2' },
-									'Cooking': { code: '3' },
+									'Desserts': { code: '3' },
 									// '': { code: '4' },
 									'Other': { code: '5' }
 							}},
@@ -1946,8 +1936,6 @@
 					},
 					// Склеенный контакт для создания нового объявления
 					userFullContact: '',
-					//
-					selectedImage: null, // Выбранное изображение
                 };
             },
             mounted() {
@@ -2086,10 +2074,24 @@
 					}
 				},
 				//
-				showImage(imageUrl) {
-					this.selectedImage = imageUrl;
+				openModal() {
+					this.images = [this.currentAd.photo_1, this.currentAd.photo_2, this.currentAd.photo_3].filter(Boolean);
+					// Показать модальное окно
 					const modal = new bootstrap.Modal(document.getElementById('imageModal'));
 					modal.show();
+					// Реинициализация карусели
+					const carousel = document.getElementById('carouselModal');
+					const carouselInstance = bootstrap.Carousel.getInstance(carousel);
+
+					if (!carouselInstance) {
+						new bootstrap.Carousel(carousel, {
+							// Отключаем автопрокрутку
+							interval: false,
+						});
+					} else {
+						// Возвращаем на первый слайд
+						carouselInstance.to(0);
+					}
 				},
                 // метод очистки категорий
 				cleanCategory() {
@@ -2149,7 +2151,6 @@
 					window.scrollTo({top: 0, behavior: 'smooth'});
 					this.showScreen('adList');
 					this.isAdOwner = false;
-					this.isImageLoaded = false;
 
 					// Формируем URL для запроса
     				let url = `ad/get_list?page=${adCurrentPage}`;
@@ -2172,13 +2173,14 @@
                         .then(response => {
 							//
 							if (Array.isArray(response.data) && response.data.length == 0) {
-								// this.errorMessage = this.getTranslation('errors.' + 220);
-								// setTimeout(() => { this.errorMessage = ''; }, 3000);
 								// Показываем сообщение об ошибке
 								this.showError(this.getTranslation('errors.' + 220));
 
 							} else {
-								this.adsList = response.data;
+								// получаем обьявления
+								// this.adsList = response.data;
+								// Перемешиваем объявления
+								this.adsList = this.shuffleArray(response.data);
 							}
 							this.adCurrentPage = adCurrentPage;
 							// this.cleanCategory();
@@ -2186,14 +2188,10 @@
 							this.isLinkOpened = false;
                         })
                         .catch((error) => {
-							//
-                            // this.errorMessage = this.getTranslation('errors.' + error.response.data['code']);
 							// Показываем сообщение об ошибке
 							this.showError(this.getTranslation('errors.' + error.response.data['code']));
 							//
 							this.cleanCategory();
-							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
-							// setTimeout(() => { this.errorMessage = ''; }, 3000);
                         })
                         .finally(() => {
                             this.isLoading = false;
@@ -2203,12 +2201,20 @@
                 loadAdDetail(id) {
 					// Плавная прокрутка страницы вверх после загрузки объявлений
 					window.scrollTo({top: 0, behavior: 'smooth'});
+					//
+					this.images = [];
+					//
+					this.imagesLength = 0;
+
 					// отправляем данные на сервер
                     this.isLoading = true;
                     axios.get(`ad/get_one/${id}`)
                         .then(response => {
 							// загрузить данные по обьявлению
                             this.currentAd = response.data;
+							// Подсчитать количество изображений
+							this.imagesLength = [this.currentAd.photo_1, this.currentAd.photo_2, this.currentAd.photo_3].filter(Boolean).length;
+
 							this.showScreen('adDetail');
 							this.dislike = false;
 							this.dislikeText = '';
@@ -2233,11 +2239,13 @@
 					this.showScreen('adList');
 					// Очистка обьекта текущего объявления
 					this.currentAd = {photo_1: null, created_at: ''};
+					//
+					this.images = [];
+					this.imagesLength = 0;
 					this.copyIcon = false;
 					this.dislike = false;
 					this.dislikeText = '';
 					this.deleteButton = false;
-					this.isImageLoaded = false;
 				},
                 // метод загрузки с сервера только списка своих собственных объявлений
 				loadUserAds() {
@@ -2692,6 +2700,16 @@
 					// Возвращаем в формате "день месяц"
 					return `${day} ${month}`;
 				},
+				// рандомное перемешивание объявлений в массиве
+				shuffleArray(array) {
+					for (let i = array.length - 1; i > 0; i--) {
+						// Случайный индекс от 0 до i
+						const j = Math.floor(Math.random() * (i + 1));
+						// Меняем местами элементы
+						[array[i], array[j]] = [array[j], array[i]];
+					}
+					return array;
+				}
 				//
 				// onKeyUp(event) {
 				// 	if (event.key === "Enter" || event.keyCode === 13) {
