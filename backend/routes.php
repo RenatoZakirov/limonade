@@ -5,6 +5,8 @@ class Router {
     private $requestMethod;
     private $requestUri;
     private $routes = [];
+    // Мой IP для исключения
+    private $excludedIp = '113.189.101.12';
 
     public function __construct($basePath = '/') {
         $this->basePath = $basePath;
@@ -204,6 +206,11 @@ class Router {
         // Считаем просмотры для каждой страницы
         $this->incrementPageView($path);
 
+        // Учитываем только запросы к "/web" и дальше
+        if (strpos($path, 'web') === 0) {
+            $this->recordWebVisitor();
+        }
+
         // Проверяем, пустой ли путь
         if ($path === '') {
             $this->routes[$this->requestMethod]['/']();
@@ -215,7 +222,8 @@ class Router {
             // Заменим параметры на регулярные выражения
             $pattern = preg_replace('/{[^}]+}/', '([^/]+)', $route);
             if (preg_match('#^' . $pattern . '$#', $path, $matches)) {
-                array_shift($matches); // Удалим полный путь
+                // Удалим полный путь
+                array_shift($matches);
                 $this->callHandler($handler, $matches);
                 return;
             }
@@ -250,7 +258,6 @@ class Router {
     private function notFound() {
         // http_response_code(404);
         // echo json_encode(['code' => 100]);
-
         // 404
         header('Content-Type: text/html');
         $htmlContent = file_get_contents(__DIR__ . '/../frontend/404_web.html');
@@ -259,7 +266,9 @@ class Router {
 
     private function incrementUniqueVisitors() {
         $ipAddress = $_SERVER['REMOTE_ADDR'];
-        
+
+        // Пропускаем мой IP
+
         // Проверка уникальности IP за последние 24 часа
         $existingVisitor = R::findOne('visitors', 'ip_address = ? AND visit_date = ?', [
             $ipAddress, date('Y-m-d')
@@ -285,6 +294,27 @@ class Router {
             $view->last_viewed = date('Y-m-d H:i:s');
         }
         R::store($view);
+    }
+
+    private function recordWebVisitor() {
+        $ipAddress = $_SERVER['REMOTE_ADDR'];
+
+        // Пропускаем мой IP
+        if ($ipAddress === $this->excludedIp) {
+            return;
+        }
+
+        // Проверка записи IP в таблице web_visitors за текущую дату
+        $existingVisitor = R::findOne('webvisitors', 'ip_address = ? AND visit_date = ?', [
+            $ipAddress, date('Y-m-d')
+        ]);
+
+        if (!$existingVisitor) {
+            $webVisitor = R::dispense('webvisitors');
+            $webVisitor->ip_address = $ipAddress;
+            $webVisitor->visit_date = date('Y-m-d');
+            R::store($webVisitor);
+        }
     }
 }
 

@@ -25,7 +25,8 @@ R::setup($dsn, $username, $password);
 
 // Дополнительные настройки RedBeanPHP
 // R::freeze(false);
-R::freeze(true); // Установить true в продакшн для повышения производительности
+// Установить true в продакшн для повышения производительности
+R::freeze(true);
 
 // Включение логирования ошибок
 ini_set('log_errors', 1);

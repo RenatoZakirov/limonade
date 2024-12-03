@@ -491,6 +491,42 @@ class TgController {
         file_get_contents($url, false, $context);
     }
 
+    // Отправка сообщения с текстом, кнопкой и фото через Telegram API
+    private function sendMessageWithPhoto($chatId, $text, $webAppUrl, $photoUrl, $parseMode = 'Markdown') {
+        //
+        $url = "https://api.telegram.org/bot" . $this->tg_key . "/sendPhoto";
+
+        // Подготавливаем данные для сообщения
+        $data = [
+            'chat_id' => $chatId,
+            'photo' => $photoUrl,
+            'caption' => $text,
+            'parse_mode' => $parseMode,
+            'reply_markup' => json_encode([
+                'inline_keyboard' => [
+                    [
+                        [
+                            'text' => 'Посмотреть', 
+                            'web_app' => ['url' => $webAppUrl]
+                        ]
+                    ]
+                ]
+            ])
+        ];
+
+        // Настройки для отправки POST-запроса к Telegram API
+        $options = [
+            'http' => [
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data),
+            ],
+        ];
+
+        $context = stream_context_create($options);
+        file_get_contents($url, false, $context);
+    }
+
     // Обработка команды /start
     private function handleStartCommand($chatId) {
         //
@@ -530,8 +566,20 @@ class TgController {
         $text = "Нажмите на кнопку, чтобы посмотреть данное объявление";
         // ваш URL веб-приложения с параметром
         $webAppUrl = "https://www.limonade.pro/web?ad=$adId";
+        //
+        if ($ad->cover_photo) {
+            //
+            $photoUrl = 'https://www.limonade.pro/backend/uploads/images/' . $ad->cover_photo . '.jpg';
+            //
+            $this->sendMessageWithPhoto($chatId, $text, $webAppUrl, $photoUrl);
+        } else {
+            // Отправка сообщения с Web App кнопкой
+            $this->sendMessage($chatId, $text, $webAppUrl);
+        }
+        
         // Отправка сообщения с Web App кнопкой
-        $this->sendMessage($chatId, $text, $webAppUrl);
+        // $this->sendMessage($chatId, $text, $webAppUrl);
+        
 
         // текст кнопки
         $text = "Нажмите на кнопку, чтобы посмотреть все свежие объявления";

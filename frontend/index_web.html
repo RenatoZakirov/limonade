@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 	
 	<script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
-	<!-- <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script> -->
+	<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
@@ -489,6 +489,40 @@
 
 				</div>
 
+				<div v-if="!isLoading && showAdList && (adCurrentPage == 1)" class="row mb-3">
+
+					<div class="col-11 offset-1">
+						
+						<div class="card shadow-sm card-secondary-bg custom-rounded-right">
+							<div class="row g-0">
+								<div class="col-5">
+									<div class="overflow-hidden h-100">
+										<img @click="loadAdDetail(advertisement.id)" :src="advertisement.image" class="img-fluid card-img" alt="image">
+									</div>
+								</div>
+								<div class="col-7">
+									<div class="card-body">
+										<h5 class="card-title text-truncate">{{ advertisement.title }}</h5>
+										<p class="card-text description-text lh-sm">{{ advertisement.description }}</p>
+										<p class="card-text text-center">
+											<small class="col me-2 text-body-secondary-2">
+												<i class="bi bi-send-fill"></i>
+												{{ advertisement.contact.slice(0, 8) }}
+											</small>
+											<small class="col text-body-secondary-2">
+												<i class="bi bi-calendar-date-fill"></i>
+												{{ advertisement.date }}
+											</small>
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>					
+
+					</div>
+
+				</div>
+
 				<div v-if="!isLoading && showAdList" class="d-flex justify-content-center mb-3">
 							
 					<button v-if="adCurrentPage > 1" @click="adCurrentPage = 1; loadAdsList(adCurrentPage)"
@@ -900,6 +934,16 @@
 					showAdList: false,
 					// отвечает за показ экрана только с одним объявлением
 					showAdDetail: false,
+					//
+					advertisement: {
+						id: 1658,
+						image: 'https://www.limonade.pro/backend/uploads/images/OddlZ.jpg',
+						title: 'Виртуальная карта Казахского банка',
+						description: '💳 Открытие банковской карты Казахстана (виртуальная или пластиковая)',
+						contact: 'Валерия',
+						// Передаем текущую дату
+						date: this.formatDate(new Date())
+					},
 					// отвечает за показ экрана для создания нового объявления
 					showCreateAd: false,
 					// отвечает за показ экрана со списком объявлений
@@ -2157,7 +2201,9 @@
 
 					// Добавляем параметр searchText, если он не пустой
 					if (this.searchText.length > 0) {
-						url += `&text=${this.searchText}`;
+						// Удаляем пробелы в начале и в конце
+						const cleanedSearchText = this.searchText.trim();
+						url += `&text=${cleanedSearchText}`;
 						url += `&lang=${this.currentLanguage.toLowerCase()}`;
 					}
 
