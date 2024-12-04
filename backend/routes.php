@@ -184,6 +184,13 @@ class Router {
                 'bot' => function() {
                     $controller = new TgController(TG_KEY, ADM_2_USER_ID);
                     $controller->handleWebhook();
+                },
+                // Телеграм Игра
+                'game' => function() {
+                    // Подключение контроллера игры
+                    require_once 'controllers/GameController.php';
+                    $controller = new GameController();
+                    $controller->handleWebhook();
                 }
             ],
         ];
