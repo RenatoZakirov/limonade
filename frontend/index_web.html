@@ -241,11 +241,37 @@
 		.custom-rounded-right {
 			/* Правый нижний угол острый */
 			border-radius: 20px 20px 0 20px;
+			/* position: relative; /* Для псевдоэлемента */
 		}
+		/*.custom-rounded-right::after {
+			content: '';
+			position: absolute;
+			bottom: 0px;
+			right: -7px;
+			width: 0;
+			height: 0;
+			border-style: solid;
+			border-width: 7px 0 0 7px;
+			border-color: transparent transparent transparent white;
+			box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+		}*/
 		.custom-rounded-left {
 			/* Левый нижний угол острый */
 			border-radius: 20px 20px 20px 0;
+			/* position: relative; /* Для псевдоэлемента */
 		}
+		/*.custom-rounded-left::after {
+			content: '';
+			position: absolute;
+			bottom: -0px;
+			left: -7px;
+			width: 0;
+			height: 0;
+			border-style: solid;
+			border-width: 7px 7px 0 0;
+			border-color: transparent white transparent transparent;
+			box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+		}*/
 		/* Закругляем рамку модального окна */
 		.modal-content.custom-rounded-2 {
 			width: 100%;
@@ -937,7 +963,7 @@
 					//
 					advertisement: {
 						id: 1886,
-						image: 'https://www.limonade.pro/backend/uploads/images/OddlZ.jpg',
+						image: 'https://www.limonade.pro/backend/uploads/images/aACiz.jpg',
 						title: 'Виртуальная карта Казахского банка',
 						description: '💳 Открытие банковской карты Казахстана (виртуальная или пластиковая)',
 						contact: 'Валерия',
@@ -2223,7 +2249,7 @@
 								this.showError(this.getTranslation('errors.' + 220));
 
 							} else {
-								// получаем обьявления
+								// Получаем обьявления
 								// this.adsList = response.data;
 								// Перемешиваем объявления
 								this.adsList = this.shuffleArray(response.data);

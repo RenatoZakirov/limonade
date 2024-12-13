@@ -6,7 +6,7 @@ class Router {
     private $requestUri;
     private $routes = [];
     // Мой IP для исключения
-    private $excludedIp = '113.189.101.12';
+    private $excludedIp = '113.189.101.12'; // 14.191.114.103
 
     public function __construct($basePath = '/') {
         $this->basePath = $basePath;
