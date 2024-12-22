@@ -962,8 +962,8 @@
 					showAdDetail: false,
 					//
 					advertisement: {
-						id: 1886,
-						image: 'https://www.limonade.pro/backend/uploads/images/aACiz.jpg',
+						id: 2551,
+						image: 'https://www.limonade.pro/backend/uploads/images/f7pGe.jpg',
 						title: 'Виртуальная карта Казахского банка',
 						description: '💳 Открытие банковской карты Казахстана (виртуальная или пластиковая)',
 						contact: 'Валерия',
@@ -2250,9 +2250,13 @@
 
 							} else {
 								// Получаем обьявления
-								// this.adsList = response.data;
-								// Перемешиваем объявления
-								this.adsList = this.shuffleArray(response.data);
+								if (this.searchText.length === 0 && this.categoryCode.length === 0) {
+									// Перемешиваем объявления
+									this.adsList = this.shuffleArray(response.data);
+								} else {
+									// Оставляем объявления как есть
+									this.adsList = response.data;
+								}
 							}
 							this.adCurrentPage = adCurrentPage;
 							// this.cleanCategory();
