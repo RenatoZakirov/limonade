@@ -413,6 +413,7 @@ class AdController {
         // Поля и их значения по умолчанию
         $fields = [
             'contact' => isset($inputData['contact']) ? trim($inputData['contact']) : null,
+            // 'telegram' => isset($inputData['telegram']) ? trim($inputData['telegram']) : null,
             'title' => isset($inputData['title']) ? trim($inputData['title']) : null,
             'category' => isset($inputData['category']) ? trim($inputData['category']) : null,
             'description' => isset($inputData['description']) ? trim($inputData['description']) : null,
@@ -453,6 +454,7 @@ class AdController {
         $category = $fields['category'];
         $description = $fields['description'];
         $contact = $fields['contact'];
+        $telegram = isset($inputData['telegram']) ? trim($inputData['telegram']) : null;
         $lang = $fields['lang'];
 
         //
@@ -543,6 +545,8 @@ class AdController {
 
             // Контактная информация
             $newAd->contact = $contact;
+            // Телеграм
+            $newAd->telegram = $telegram;
             // Статус объявления
             $newAd->status = 1;
             // Дата создания
@@ -593,7 +597,10 @@ class AdController {
             $ad->title_en = $title_en;
             // Описание объявления на английском
             $ad->description_en = $description_en;
-            $ad->contact = $contact; // Контактная информация
+            // Контактная информация
+            $ad->contact = $contact;
+            // Телеграм
+            // $ad->telegram = $telegram;
             R::store($ad); // Сохраняем объявление в базе данных
             // Возвращаем ответ
             header('Content-Type: application/json');

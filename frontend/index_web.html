@@ -769,11 +769,19 @@
 							<!-- {{ getTranslation('ads.adDetails.delete.deleteButton') }} -->
 						</button>
 
+						<button v-if="!isAdOwner && currentAd.telegram" @click="writeToTelegram()" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
+							<!-- Написать в Телеграм -->
+							<i class="bi bi-pencil"></i>
+							<!-- <i class="bi bi-pencil-fill"></i> -->
+							{{ getTranslation('ads.adDetails.writeTelegramButton') }}
+						</button>
+
 						<button v-if="!isLinkOpened" @click="copyLink(currentAd.id)" class="btn btn-secondary btn-transparent-bg fw-medium">
 							<!-- Скопировать ссылку -->
-							<i class="bi bi-clipboard"></i>
+							<!-- <i class="bi bi-clipboard"></i> -->
 							<!-- <i class="bi bi-clipboard-fill"></i> -->
-							{{ copyIcon ? getTranslation('ads.adDetails.copiedLinkButton') : getTranslation('ads.adDetails.copyLinkButton') }}
+							<!-- {{ copyIcon ? getTranslation('ads.adDetails.copiedLinkButton') : getTranslation('ads.adDetails.copyLinkButton') }} -->
+							<i :class="copyIcon ? 'bi bi-clipboard-check' : 'bi bi-clipboard'"></i>
 						</button>
 
 					</div>
@@ -1089,6 +1097,7 @@
 									viewedStr: 'Просмотрено:',
 									backButton: 'назад',
 									showOthersButton: 'Показать другие',
+									writeTelegramButton: 'написать',
 									copyLinkButton: 'ссылка',
 									copiedLinkButton: 'скопирована',
 									dislike: {
@@ -1214,6 +1223,9 @@
 								470: 'Жалоба на объявление принята!',
 								471: '',
 								472: '',
+								480: 'Нет ссылки на страницу этого пользователя',
+								481: '',
+								482: '',
 								// Ошибки связанные с одной новостью
 								500: 'Не удалось найти активную новость',
 								501: '',
@@ -1357,6 +1369,7 @@
 									viewedStr: 'Viewed:',
 									backButton: 'back',
 									showOthersButton: 'Show others',
+									writeTelegramButton: 'write',
 									copyLinkButton: 'link',
 									copiedLinkButton: 'copied',
 									dislike: {
@@ -1481,6 +1494,9 @@
 								470: 'Complaint about the ad accepted!',
 								471: '',
 								472: '',
+								480: 'There is no link to this user\'s page',
+								481: '',
+								482: '',
 								// Ошибки связанные с одной новостью
 								500: 'Could not find active news',
 								501: '',
@@ -2785,7 +2801,23 @@
 						[array[i], array[j]] = [array[j], array[i]];
 					}
 					return array;
-				}
+				},
+				//
+				writeToTelegram() {
+					if (this.currentAd.telegram) {
+						// Удаляем символ "@" из строки, если он есть
+						const username = this.currentAd.telegram.replace(/^@/, "");
+						// Формируем ссылку
+						const telegramUrl = `https://t.me/${username}`;
+						// Открываем ссылку
+						window.open(telegramUrl, "_blank");
+					} else {
+						// Показываем сообщение об ошибке
+						// this.showError(this.getTranslation('errors.' + error.response.data['code']));
+						// error = this.getTranslation('errors.' + 231);
+						this.showError(this.getTranslation('errors.' + 480));
+					}
+				},
 				//
 				// onKeyUp(event) {
 				// 	if (event.key === "Enter" || event.keyCode === 13) {

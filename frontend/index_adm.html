@@ -310,6 +310,15 @@
 												</div>
 
 												<div class="input-group input-group-sm mb-2 shadow-sm">
+													<span class="input-group-text" :class="{ 'text-danger': currentAd.telegram === '' }"
+														id="inputGroup-sizing-sm">Телеграм</span>
+														<span class="input-group-text" :class="getCharCountClass2(currentAd.telegram, currentAd.telegramLimit)"
+															id="basic-addon2">{{ getRemainingChars(currentAd.telegram, currentAd.telegramLimit) }}</span>
+													<input v-model="currentAd.telegram" type="text" class="form-control" aria-label="Sizing example input"
+														aria-describedby="inputGroup-sizing-sm">
+												</div>
+
+												<div class="input-group input-group-sm mb-2 shadow-sm">
 													<span class="input-group-text" :class="{ 'text-danger': currentAd.title === '' }"
 														id="inputGroup-sizing-sm">Название</span>
 														<span class="input-group-text" :class="getCharCountClass2(currentAd.title, currentAd.titleLimit)"
@@ -595,6 +604,10 @@
 						contact: '',
 						// лимит контакта
 						contactLimit: 50,
+						//
+						telegram: '',
+						//
+						telegramLimit: 30,
 						//
 						category: '',
 						//
@@ -1104,7 +1117,7 @@
 					// очищаем форму 1
 					this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: ', telegram ', contactLimit: 50, category: '' };
 					// очищаем форму 2
-					this.currentAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, category: '', created_at: '', id: '', status: '', photos: [] };
+					this.currentAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, telegram: '', telegramLimit: 30, category: '', created_at: '', id: '', status: '', photos: [] };
 					// очищаем форму 3
 					this.newNews = { title_ru: '', title_ruLimit: 50, description_ru: '', description_ruLimit: 2000, author_ru: '', author_ruLimit: 50,
 						title_en: '', description_en: '', author_en: '' };
@@ -1254,6 +1267,8 @@
 							// загрузить данные по объявлению
 							this.currentAd.contact = response.data.contact || '';
 							//
+							this.currentAd.telegram = response.data.telegram || '';
+							//
 							this.currentAd.title = response.data.title || '';
 							//
 							this.categoryCode = this.currentAd.category = response.data.category || '';
@@ -1299,6 +1314,17 @@
 
 					} else if (this.getRemainingChars(this.currentAd.contact, this.currentAd.contactLimit) < 0) {
 						// this.errorMessage = 'Контакт слишком длинный';
+						this.errorMessage = this.messages[638];
+
+					} else if (
+							this.currentAd.telegram.length < 3 ||
+							(this.searchAdId === '' && !this.currentAd.telegram.includes('@'))
+						) {
+						// this.errorMessage = 'Пожалуйста, напишите свой телеграм';???
+						this.errorMessage = this.messages[633];
+
+					} else if (this.getRemainingChars(this.currentAd.telegram, this.currentAd.telegramLimit) < 0) {
+						// this.errorMessage = 'Телеграм слишком длинный';???
 						this.errorMessage = this.messages[638];
 					
 					} else if (this.currentAd.title.length < 3) {

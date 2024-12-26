@@ -189,6 +189,7 @@ class TgController {
             $message = R::dispense('messages');
             // $message->user_id = $userId;
             $message->contact = $fullContact;
+            $message->telegram = $userContact;
             $message->description = $description;
             $message->media_group_id = $mediaGroupId;
             $message->status = 1;
