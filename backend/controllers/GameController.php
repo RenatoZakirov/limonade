@@ -30,12 +30,12 @@ class GameController {
         //
         $chatId = $message['chat']['id'];
 
-        // if (isset($message['photo'])) {
-        //     //
-        //     $this->savePhotoId($chatId, $message['photo']);
-        //     //
-        //     return;
-        // }
+        if (isset($message['photo'])) {
+            //
+            $this->savePhotoId($chatId, $message['photo']);
+            //
+            return;
+        }
 
         //
         $text = $message['text'] ?? '';

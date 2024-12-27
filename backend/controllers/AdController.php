@@ -896,6 +896,7 @@ class AdController {
             'category' => isset($_POST['category']) ? trim($_POST['category']) : null,
             'description' => isset($_POST['description']) ? trim($_POST['description']) : null,
             'contact' => isset($_POST['contact']) ? trim($_POST['contact']) : null,
+            // 'telegram' => isset($_POST['telegram']) ? trim($_POST['telegram']) : null,
             'lang' => isset($_POST['lang']) ? trim($_POST['lang']) : null
         ];
 
@@ -997,6 +998,7 @@ class AdController {
         $description = $fields['description'];
         $category = $fields['category'];
         $contact = $fields['contact'];
+        $telegram = isset($_POST['telegram']) ? trim($_POST['telegram']) : null;
         // $permanent = ($_POST['permanent'] ?? 'false') === 'true'; 
         $lang = $fields['lang'];
 
@@ -1120,6 +1122,8 @@ class AdController {
         $ad->photo_3 = isset($adPhotos[3]) ? (string) $adPhotos[3] : null;
         // Контактная информация
         $ad->contact = $contact;
+        // Телеграм
+        $ad->telegram = $telegram;
         // Статус объявления
         $ad->status = 1;
         // Дата создания

@@ -117,6 +117,18 @@
 													<input v-model="newAd.contact" type="text" class="form-control form-control-sm shadow-sm"
 														id="FormControlInput3">
 												</div>
+
+												<div class="mb-2">
+													<label for="FormControlInput4" class="form-label">
+														Телеграм
+														<span class="text text-danger">*</span>
+														<span :class="getCharCountClass(newAd.telegram, newAd.telegramLimit)">
+															({{ getRemainingChars(newAd.telegram, newAd.telegramLimit) }})
+														</span>
+													</label>
+													<input v-model="newAd.telegram" type="text" class="form-control form-control-sm shadow-sm"
+														id="FormControlInput4">
+												</div>
 												
 												<div class="mb-2">
 													<label for="formFile1" class="form-label">
@@ -573,40 +585,44 @@
 					showUser: false,
 					// содержит объект нового объявления (ещё не созданного)
 					newAd: {
-						//
+						// заголовок
 						title: '',
 						// лимит названия
 						titleLimit: 40,
-						//
+						// описание
           				description: '',
 						// лимит описания
 						descriptionLimit: 1000,
-						//
+						// контакт
 						contact: ', telegram ',
 						// лимит контакта
 						contactLimit: 50,
+						// телеграм
+						telegram: '',
+						// лимит телеграм
+						telegramLimit: 30,
 						//
 						category: '',
 						//
-						permanent: false
+						// permanent: false
 					},
 					//
 					currentAd: {
-						//
+						// заголовок
 						title: '',
 						// лимит названия
 						titleLimit: 40,
-						//
+						// описание
           				description: '',
 						// лимит описания
 						descriptionLimit: 1000,
-						//
+						// контакт
 						contact: '',
 						// лимит контакта
 						contactLimit: 50,
-						//
+						// телеграм
 						telegram: '',
-						//
+						// лимит телеграм
 						telegramLimit: 30,
 						//
 						category: '',
@@ -1115,7 +1131,7 @@
 				//
 				cleanForm() {
 					// очищаем форму 1
-					this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: ', telegram ', contactLimit: 50, category: '' };
+					this.newAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: ', telegram ', contactLimit: 50, telegram: '', telegramLimit: 30, category: '' };
 					// очищаем форму 2
 					this.currentAd = { title: '', titleLimit: 40, description: '', descriptionLimit: 1000, contact: '', contactLimit: 50, telegram: '', telegramLimit: 30, category: '', created_at: '', id: '', status: '', photos: [] };
 					// очищаем форму 3
@@ -1154,12 +1170,20 @@
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
 					// Проверяем, введены ли параметры объявления и их длина
-					if (this.newAd.contact.length < 5) {
+					if (this.newAd.contact.length < 11) {
 						// this.errorMessage = 'Пожалуйста, напишите свой контакт';
 						this.errorMessage = this.messages[633];
 
 					} else if (this.getRemainingChars(this.newAd.contact, this.newAd.contactLimit) < 0) {
 						// this.errorMessage = 'Контакт слишком длинный';
+						this.errorMessage = this.messages[638];
+
+					} else if (this.newAd.telegram.length < 5) {
+						// this.errorMessage = 'Пожалуйста, напишите свой телеграм';???
+						this.errorMessage = this.messages[633];
+
+					} else if (this.getRemainingChars(this.newAd.telegram, this.newAd.telegramLimit) < 0) {
+						// this.errorMessage = 'Телеграм слишком длинный';???
 						this.errorMessage = this.messages[638];
 
 					} else if (this.newAd.title.length < 3) {
@@ -1212,6 +1236,7 @@
 					formData.append('category', this.newAd.category);
 					formData.append('description', this.newAd.description);
 					formData.append('contact', this.newAd.contact);
+					formData.append('telegram', this.newAd.telegram);
 					// formData.append('permanent', this.newAd.permanent);
 					formData.append('password', this.authPassword);
 					formData.append('lang', this.currentLanguage.toLowerCase());
