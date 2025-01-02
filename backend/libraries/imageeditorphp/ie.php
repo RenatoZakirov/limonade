@@ -164,6 +164,89 @@ class ImageEditor
         return true;
     }
 
+    // Изменение размера изображения обложки до стандарта и вставка watermark по центру
+    public function resizeToCoverFit($text = 'Limonade') {
+        // Устанавливаем целевые размеры в зависимости от ориентации
+        $targetWidth = $this->orientation === 'h' ? 200 : 150;
+        $targetHeight = $this->orientation === 'h' ? 150 : 200;
+    
+        // Вычисляем коэффициенты масштабирования по каждой стороне
+        $scaleWidth = $targetWidth / $this->width;
+        $scaleHeight = $targetHeight / $this->height;
+    
+        // Выбираем максимальный коэффициент для масштабирования, чтобы изображение полностью заполнило целевой размер
+        $scale = max($scaleWidth, $scaleHeight);
+    
+        // Вычисляем новые размеры для масштабирования
+        $newWidth = round($this->width * $scale);
+        $newHeight = round($this->height * $scale);
+    
+        // Создаем пустое изображение с целевыми размерами
+        $newImage = imagecreatetruecolor($targetWidth, $targetHeight);
+    
+        // Заливаем фон белым цветом (или можно использовать другой цвет/ прозрачность)
+        $backgroundColor = imagecolorallocate($newImage, 255, 255, 255);
+        imagefill($newImage, 0, 0, $backgroundColor);
+    
+        // Вычисляем координаты для центрирования изображения
+        $xOffset = ($newWidth - $targetWidth) / 2;
+        $yOffset = ($newHeight - $targetHeight) / 2;
+    
+        // Создаем промежуточное изображение с новым масштабом
+        $scaledImage = imagecreatetruecolor($newWidth, $newHeight);
+        imagefill($scaledImage, 0, 0, $backgroundColor);
+        imagecopyresampled(
+            $scaledImage,
+            $this->image,
+            0, 0, 0, 0,
+            $newWidth, $newHeight,
+            $this->width, $this->height
+        );
+    
+        // Копируем и изменяем размер промежуточного изображения в новое, центрируя его
+        imagecopy(
+            $newImage,
+            $scaledImage,
+            0, 0, $xOffset, $yOffset,
+            $targetWidth, $targetHeight
+        );
+
+        // Если текст еще не был добавлен, добавляем его
+        if (!$this->watermarkAdded) {
+            // Путь к файлу шрифта
+            $fontFile = 'libraries/fonts/NerkoRegular.ttf'; // Укажите путь к вашему файлу шрифта TTF
+            $fontSize = 17; // Размер шрифта
+
+            // Устанавливаем параметры для текста
+            $textColor = imagecolorallocatealpha($newImage, 255, 255, 255, 85); // Белый цвет с прозрачностью
+
+            // Определяем размеры текста
+            $textBox = imagettfbbox($fontSize, 0, $fontFile, $text);
+            $textWidth = $textBox[2] - $textBox[0];
+            $textHeight = $textBox[7] - $textBox[1];
+
+            // Вычисляем координаты для центрирования текста
+            $textX = ($targetWidth - $textWidth) / 2;
+            $textY = ($targetHeight - $textHeight) / 2 + $textHeight;
+
+            // Добавляем текст на изображение
+            imagettftext($newImage, $fontSize, 0, $textX, $textY, $textColor, $fontFile, $text);
+
+            // Устанавливаем флаг
+            $this->watermarkAdded = true;
+        }
+  
+        // Заменяем старое изображение новым
+        $this->image = $newImage;
+        $this->width = $targetWidth;
+        $this->height = $targetHeight;
+    
+        // Освобождаем ресурсы промежуточного изображения
+        imagedestroy($scaledImage);
+
+        return true;
+    }
+
     // Создание изображения с белыми полями и центрированным исходным изображением
     public function createPaddedImage() {
         // Устанавливаем целевые размеры шаблона в зависимости от ориентации исходного изображения
@@ -209,6 +292,20 @@ class ImageEditor
 
         // Сохраняем изображение в формате JPEG по указанному пути
         if (!imagejpeg($this->image, $filePath, $quality)) {
+            return false;
+        }
+
+        //
+        return true;
+    }
+
+    // Сохранение изображения обложки
+    public function saveCoverOriginal($filePath, $quality = 90) {
+        // Убедимся, что новое имя файла заканчивается на .jpg
+        $filePath = pathinfo($filePath, PATHINFO_EXTENSION) === 'webp' ? $filePath : $filePath . '.webp';
+
+        // Сохраняем изображение в формате JPEG по указанному пути
+        if (!imagewebp($this->image, $filePath, $quality)) {
             return false;
         }
 

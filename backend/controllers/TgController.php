@@ -290,6 +290,7 @@ class TgController {
                     // $imageEditor->resizeToFit();
                     // $imageEditor->saveOriginal($tmpPath . $coverPhotoName . '.jpg');
                     // Обрабатываем cover_photo как обложку
+                    // $message->cover_photo = $this->processCoverPhoto($imageEditor, $tmpPath);
                     $message->cover_photo = $this->processPhoto($imageEditor, $tmpPath);
                     // Обрабатываем photo_1
                     $message->photo_1 = $this->processPhoto($imageEditor, $tmpPath);
@@ -449,6 +450,22 @@ class TgController {
         
         // Сохраняем оригинал горизонтального изображения
         $imageEditor->saveOriginal($filePath . $photoName . '.jpg');
+        
+        // Возвращаем имя файла
+        return (string)$photoName;
+    }
+
+    // Функция для обработки фотографии обложки
+    private function processCoverPhoto($imageEditor, $filePath) {
+        // Генерация уникального имени файла
+        $photoName = $imageEditor->generateUniqueName();
+        // Создание изображения
+        $imageEditor->createImage();
+        // Изменение размера изображения
+        $imageEditor->resizeToCoverFit();
+        
+        // Сохраняем оригинал горизонтального изображения
+        $imageEditor->saveCoverOriginal($filePath . $photoName . '.webp');
         
         // Возвращаем имя файла
         return (string)$photoName;
