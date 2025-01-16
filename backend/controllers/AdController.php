@@ -1545,7 +1545,7 @@ class AdController {
     // Функция для перевода объявления, с использованием отдельного определения языка
     private function translateAd($unknownLangTitle, $unknownLangDescription, $lang) {
         //
-        $apiKey = 'AIzaSyBSIuw-3YoYkTjoWuPl5S7xfdVepO-2Tkw';
+        $apiKey = '';
 
         // Проверка длины текста описания
         if (mb_strlen($unknownLangDescription) < 40) {
