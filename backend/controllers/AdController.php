@@ -3,10 +3,12 @@
 class AdController {
     private $adm_pass;
     private $adm_user_id;
+    private $translate_api_key;
 
-    public function __construct($adm_pass, $adm_user_id) {
+    public function __construct($adm_pass, $adm_user_id, $translate_api_key) {
         $this->adm_pass = $adm_pass;
         $this->adm_user_id = $adm_user_id;
+        $this->translate_api_key = $translate_api_key;
     }
 
     // Получить все объявления с пагинацией и фильтрацией по категории
@@ -1545,7 +1547,7 @@ class AdController {
     // Функция для перевода объявления, с использованием отдельного определения языка
     private function translateAd($unknownLangTitle, $unknownLangDescription, $lang) {
         //
-        $apiKey = '';
+        $apiKey = $this->translate_api_key;
 
         // Проверка длины текста описания
         if (mb_strlen($unknownLangDescription) < 40) {

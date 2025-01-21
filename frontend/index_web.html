@@ -770,7 +770,6 @@
 							</div>
 						</div>
 						
-
 					</div>
 
 				</div>
@@ -1006,8 +1005,8 @@
 					showAdDetail: false,
 					//
 					advertisement: {
-						id: 4194,
-						image: 'https://www.limonade.pro/backend/uploads/images/KYn8J.jpg',
+						id: 4934,
+						image: 'https://www.limonade.pro/backend/uploads/images/ypDLB.jpg',
 						title: 'FPV-багги',
 						description: '🚗Новый аттракцион на пляже! Почувствуй себя пилотом багги с эффектом полного погружения.',
 						contact: 'Ренато',
@@ -1141,7 +1140,7 @@
 									showOthersButton: 'Показать другие',
 									writeTelegramButton: 'написать',
 									copyLinkButton: 'ссылка',
-									copiedLinkButton: 'скопирована',
+									copiedLinkButton: 'Ссылка скопирована в буфер',
 									dislike: {
 										dislikeOpenButton: '',
 										dislikeDescription: 'Если вы считаете, что данное объявление содержит оскорбительные или неприемлемые материалы, пожалуйста, сообщите нам об этом.',
@@ -1419,7 +1418,7 @@
 									showOthersButton: 'Show others',
 									writeTelegramButton: 'write',
 									copyLinkButton: 'link',
-									copiedLinkButton: 'copied',
+									copiedLinkButton: 'Link copied to clipboard',
 									dislike: {
 										dislikeOpenButton: '',
 										dislikeDescription: 'If you believe this ad contains offensive or inappropriate material, please let us know.',
@@ -2735,6 +2734,9 @@
 					navigator.clipboard.writeText(url)
 						.then(() => {
 							this.copyIcon = true;
+							// Показываем сообщение об ошибке
+							// this.showSuccess(this.getTranslation('errors.' + error.response.data['code']));
+							this.showSuccess(this.getTranslation('ads.adDetails.copiedLinkButton'));
 							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
 							// setTimeout(() => { this.copyIcon = false; }, 1000);
 						})
