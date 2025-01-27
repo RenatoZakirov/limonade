@@ -510,6 +510,60 @@
 
 					</div>
 
+					<div v-if="false" class="row mb-3">						
+		
+						<div class="col d-flex justify-content-center">
+							<button @click="categoryCode = '3F1'; loadAdsList()" class="btn btn-secondary btn-transparent-bg">
+								<!-- Бьюти услуги в Нячанге -->
+								{{ getTranslation('ads.popCategories.5') }}
+							</button>
+						</div>
+
+						<div class="col d-flex justify-content-center">
+							<button @click="categoryCode = '6'; loadAdsList()" class="btn btn-secondary btn-transparent-bg me-2">
+								<!-- Полезные посты для гостей -->
+								<!-- Информация для гостей -->
+								<!-- Информация для релокантов -->
+								{{ getTranslation('ads.popCategories.6') }}
+							</button>
+						</div>
+
+					</div>
+
+
+				</div>
+
+				<div v-if="!isLoading && showAdList && (adCurrentPage == 1) && adsList.length >= 20" class="row mb-3">
+
+					<div class="col-11 offset-1">
+						
+						<div class="card shadow-sm card-secondary-bg custom-rounded-right">
+							<div class="row g-0">
+								<div class="col-5">
+									<div class="overflow-hidden h-100">
+										<img @click="loadAdDetail(weatherAd.id)" :src="weatherAd.cover_photo" class="img-fluid card-img" alt="image">
+									</div>
+								</div>
+								<div class="col-7">
+									<div class="card-body">
+										<h5 class="card-title text-truncate">{{ weatherAd['title_' + currentLanguage.toLowerCase()] }}</h5>
+										<p class="card-text description-text lh-sm">{{ weatherAd['description_' + currentLanguage.toLowerCase()] }}</p>
+										<p class="card-text text-center">
+											<small class="col me-2 text-body-secondary-2">
+												<i class="bi bi-send-fill"></i>
+												{{ weatherAd.contact.slice(0, 8) }}
+											</small>
+											<small class="col text-body-secondary-2">
+												<i class="bi bi-calendar-date-fill"></i>
+												{{ formatDate(weatherAd.created_at) }}
+											</small>
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>					
+
+					</div>
 
 				</div>
 
@@ -638,12 +692,19 @@
 							<div class="card-body">
 								<h5 class="card-title lh-sm">{{ currentAd['title_' + currentLanguage.toLowerCase()] }}</h5>
 
-								<div v-for="(categoryName, index) in getCategoryNames(currentAd.category)" 
+								<div v-if="currentAd.category != '6'"
+									v-for="(categoryName, index) in getCategoryNames(currentAd.category)" 
 									:key="categoryName" 
 									class="d-inline-block mb-2">
 									<button :class="{ 'd-none': currentAd.category.startsWith('3') && index === 1 }"
 										class="btn btn-sm btn-blue-bg mb-1 me-2">
 										{{ categoryName }}
+									</button>
+								</div>
+								<div v-else class="d-inline-block mb-2">
+									<button class="btn btn-sm btn-blue-bg mb-1 me-2">
+									  <!-- Погода -->
+									  {{ getTranslation('ads.adDetails.weatherButton') }}
 									</button>
 								</div>
 
@@ -1013,6 +1074,14 @@
 						// Передаем текущую дату
 						date: this.formatDate(new Date())
 					},
+					weatherAd: {
+						// id: 0,
+						// image: '',
+						// title: '',
+						// description: '',
+						// contact: '',
+						// date: ''
+					},
 					// отвечает за показ экрана для создания нового объявления
 					showCreateAd: false,
 					// отвечает за показ экрана со списком объявлений
@@ -1126,7 +1195,9 @@
 									1: 'Снять квартиру недорого',
 									2: 'Мероприятия на русском языке',
 									3: 'Купить мопед на ходу',
-									4: 'Товары для детей'
+									4: 'Товары для детей',
+									5: 'Бьюти услуги в Нячанге',
+									6: 'Информация для гостей'
 								},
 								adDetails: {
 									imagesNumber: 'Фото',
@@ -1152,6 +1223,7 @@
 										description: 'Внимание! После удаления объявление нельзя будет восстановить.',
 										deleteButton: 'удалить',
 									},
+									weatherButton: 'Погода',
 								},
 								adCreate: {
 									createStr: 'Создать новое объявление',
@@ -1234,8 +1306,9 @@
 								400: 'Не удалось найти активного объявления',
 								401: 'Не удалось найти активного пользователя. Возможно ошибка в пароле',
 								402: 'Этот метод находится в доработке',
-								403: '',
+								403: 'Не удалось найти данные о погоде',
 								404: '',
+								405: '',
 								410: 'Не распознан id пользователя',
 								411: 'Не найден id пользователя или он слишком длинный',
 								412: '',
@@ -1404,7 +1477,9 @@
 									1: 'Rent an apartment inexpensively',
 									2: 'Events in Russian',
 									3: 'Buy a motorbike on the move',
-									4: 'Products for children'
+									4: 'Products for children',
+									5: 'Beauty services in Nha Trang',
+									6: 'Information for guests'
 								},
 								adDetails: {
 									imagesNumber: 'Photos',
@@ -1430,6 +1505,7 @@
 										description: 'Attention! Once deleted, the ad cannot be restored.',
 										deleteButton: 'delete',
 									},
+									weatherButton: 'Weather',
 								},
 								adCreate: {
 									createStr: 'Create a new ad',
@@ -1511,8 +1587,9 @@
 								400: 'Could not find active ad',
 								401: 'Could not find active user. Possible password error',
 								402: 'This method is under development',
-								403: '',
+								403: 'Unable to find weather data',
 								404: '',
+								405: '',
 								410: 'User id not recognized',
 								411: 'User id not found or too long',
 								412: '',
@@ -2091,6 +2168,8 @@
 				this.initializeTelegram();
 				// Склеенный контакт для создания нового объявления
 				this.newAd.contact = this.userFullContact;
+				// Загрузить данные о погоде
+				this.loadAdWeather();
             },
 			created() {
 				// this.initializeTelegram();
@@ -2870,6 +2949,20 @@
 						this.showError(this.getTranslation('errors.' + 480));
 					}
 				},
+				// метод загрузки с сервера одного объявления с погодой
+                loadAdWeather() {
+					// отправляем запрос на сервер
+                    axios.get(`ad/get_weather`)
+                        .then(response => {
+							// загрузить данные по обьявлению
+                            this.weatherAd = response.data;
+							// console.log(this.weatherAd);
+                        })
+                        .catch((error) => {
+							// Показываем сообщение об ошибке
+							this.showError(this.getTranslation('errors.' + error.response.data['code']));
+                        });
+                },
 				//
 				// onKeyUp(event) {
 				// 	if (event.key === "Enter" || event.keyCode === 13) {

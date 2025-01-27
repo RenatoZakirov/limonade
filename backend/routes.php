@@ -48,6 +48,11 @@ class Router {
                     $controller = new AdController(ADM_PASS, ADM_USER_ID, TRANSLATE_API_KEY);
                     $controller->getAd($id, false);
                 },
+                'web/ad/get_weather' => function() {
+                    // 
+                    $controller = new AdController(ADM_PASS, ADM_USER_ID, TRANSLATE_API_KEY);
+                    $controller->getWeatherAd();
+                },
                 'api/ad/check/{id}/{password}' => function($params) {
                     // Используем тернарный оператор для проверки id
                     $id = ($params[0] === '0') ? 0 : self::validateId($params[0]);
