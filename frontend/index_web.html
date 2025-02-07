@@ -13,7 +13,9 @@
 	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
-	
+	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBAxoWNbe2YLfglEUwHMnEO4pGv5WKRKik"></script>
+
+
 	<style>
         /* Ваши стили можно разместить здесь */
         [v-cloak] {
@@ -454,6 +456,13 @@
 										{{ getTranslation('menu.myAds.findButton') }}
 									</div>
 								</li>
+								<li v-if="false">
+									<div @click="categoryCode = '8'; loadAdsList()" class="dropdown-item" href="">
+										<!-- тест -->
+										<i class="bi bi-screwdriver"></i>
+										тест
+									</div>
+								</li>
 							</ul>
 						</div>
 
@@ -511,12 +520,18 @@
 					</div>
 
 					<div class="row mb-3">
-						<!-- v-if="false" -->
 		
-						<div class="col d-flex justify-content-center">
+						<div v-if="false" class="col d-flex justify-content-center">
 							<button @click="categoryCode = '3F1'; loadAdsList()" class="btn btn-secondary btn-transparent-bg">
 								<!-- Бьюти услуги в Нячанге -->
 								{{ getTranslation('ads.popCategories.5') }}
+							</button>
+						</div>
+
+						<div class="col d-flex justify-content-center">
+							<button @click="categoryCode = '8'; loadAdsList()" class="btn btn-secondary btn-transparent-bg">
+								<!-- Городские автобусы -->
+								{{ getTranslation('ads.popCategories.7') }}
 							</button>
 						</div>
 
@@ -583,7 +598,9 @@
 								<div class="col-7">
 									<div class="card-body">
 										<h5 class="card-title text-truncate">{{ ad['title_' + currentLanguage.toLowerCase()] }}</h5>
-										<p class="card-text description-text lh-sm">{{ ad['description_' + currentLanguage.toLowerCase()] }}</p>
+										<p v-if="!ad['category'].startsWith('8')"
+											class="card-text description-text lh-sm">{{ ad['description_' + currentLanguage.toLowerCase()] }}</p>
+										<p v-else class="card-text description-text lh-sm">{{ localizedRoutes[ad['category']] }}</p>
 										<p class="card-text text-center">
 											<small class="col me-2" :class="(index + 1) % 3 === 0 ? 'text-body-secondary-2' : 'text-body-secondary'">
 												<i class="bi bi-send-fill"></i>
@@ -693,7 +710,7 @@
 							<div class="card-body">
 								<h5 class="card-title lh-sm">{{ currentAd['title_' + currentLanguage.toLowerCase()] }}</h5>
 
-								<div v-if="currentAd.category != '6'"
+								<div v-if="!['6', '7'].includes(currentAd.category) && !currentAd.category.startsWith('8')"
 									v-for="(categoryName, index) in getCategoryNames(currentAd.category)" 
 									:key="categoryName" 
 									class="d-inline-block mb-2">
@@ -704,11 +721,25 @@
 								</div>
 								<div v-else class="d-inline-block mb-2">
 									<button class="btn btn-sm btn-blue-bg mb-1 me-2">
-									  <!-- Погода -->
-									  {{ getTranslation('ads.adDetails.weatherButton') }}
+									  <!-- Дополнительные категории -->
+									  {{ getCategoryButtonText(currentAd.category) }}
 									</button>
 								</div>
 
+								<p v-if="currentAd.category.startsWith('8')"
+									class="card-text lh-sm" style="white-space: pre-line;">{{ localizedRoutes[currentAd.category] }}</p>
+
+								<!-- Кнопка для карты -->
+								<div v-if="currentAd.category.startsWith('8') && mapButton" @click="mapButton = false; loadMap()" 
+									class="btn btn-sm btn-blue-bg mb-3">
+									<!-- Показать карту -->
+									{{ getTranslation('ads.adDetails.mapButton') }}
+								</div>
+
+								<!-- Элемент для карты -->
+								<div v-if="currentAd.category.startsWith('8') && !mapButton"
+									id="map" style="width: 100%; height: 500px;" class="mb-3"></div>
+						
 								<p class="card-text lh-sm" style="white-space: pre-line;">{{ currentAd['description_' + currentLanguage.toLowerCase()] }}</p>
 
 								<h6 class="card-subtitle mb-2 text-body-secondary">
@@ -1067,8 +1098,8 @@
 					showAdDetail: false,
 					//
 					advertisement: {
-						id: 4934,
-						image: 'https://www.limonade.pro/backend/uploads/images/ypDLB.jpg',
+						id: 5492,
+						image: 'https://www.limonade.pro/backend/uploads/images/uQhEY.jpg',
 						title: 'FPV-багги',
 						description: '🚗Новый аттракцион на пляже! Почувствуй себя пилотом багги с эффектом полного погружения.',
 						contact: 'Ренато',
@@ -1198,7 +1229,8 @@
 									3: 'Купить мопед на ходу',
 									4: 'Товары для детей',
 									5: 'Бьюти услуги в Нячанге',
-									6: 'Полезные посты для гостей'
+									6: 'Полезные посты для гостей',
+									7: 'Городские автобусы'
 								},
 								adDetails: {
 									imagesNumber: 'Фото',
@@ -1225,6 +1257,18 @@
 										deleteButton: 'удалить',
 									},
 									weatherButton: 'Погода',
+									usefulButton: 'Полезное',
+									busButton: 'Автобусы',
+									routes: {
+										'818': 'Центр, юг, пляж Байзай, аэропорт Камрань',
+										'812': 'Центр, север, пляж Зоклет',
+										'851': 'Юго-запад, центр, север',
+										'852': 'Юг, центр, север',
+										'82': 'Юг, центр, гипермаркеты, запад',
+										'86': 'Север, центр, гипермаркеты, запад',
+										'823': 'Север, центр, юг, Винперл',
+									},
+									mapButton: 'Показать карту',
 								},
 								adCreate: {
 									createStr: 'Создать новое объявление',
@@ -1480,7 +1524,8 @@
 									3: 'Buy a motorbike on the move',
 									4: 'Products for children',
 									5: 'Beauty services in Nha Trang',
-									6: 'Useful posts for guests'
+									6: 'Useful posts for guests',
+									7: 'City bus routes'
 								},
 								adDetails: {
 									imagesNumber: 'Photos',
@@ -1507,6 +1552,18 @@
 										deleteButton: 'delete',
 									},
 									weatherButton: 'Weather',
+									usefulButton: 'Useful',
+									busButton: 'Buses',
+									routes: {
+										'818': 'Center, south, Bai Dai Beach, Cam Ranh Airport',
+										'812': 'Center, north, Dok Let beach',
+										'851': 'Southwest, center, north',
+										'852': 'South, center, north',
+										'82': 'South, center, hypermarkets, west',
+										'86': 'North, center, hypermarkets, west',
+										'823': 'North, center, south, Vinpearl',
+									},
+									mapButton: 'Show map',
 								},
 								adCreate: {
 									createStr: 'Create a new ad',
@@ -2148,6 +2205,111 @@
 					},
 					// Склеенный контакт для создания нового объявления
 					userFullContact: '',
+					// Ссылка на карту
+					map: null,
+					//
+					mapButton: true,
+					//
+            		// observer: null,
+					//
+					routesData: {
+						818: {
+							origin: { lat: 12.249534, lng: 109.192758 },
+							destination: { lat: 12.012132, lng: 109.212030 },
+							waypoints: [
+								{ location: { lat: 12.249534, lng: 109.192758 }, stopover: false }, // 12.249534, 109.192758
+								// { location: { lat: 12.2495762, lng: 109.1927843 }, stopover: false },
+								{ location: { lat: 12.2471295, lng: 109.1922527 }, stopover: false },
+								{ location: { lat: 12.2364987, lng: 109.1939689 }, stopover: false },
+								{ location: { lat: 12.233215, lng: 109.1972188 }, stopover: false },
+								{ location: { lat: 12.012132, lng: 109.212030 }, stopover: false }, // 12.012132, 109.212030
+								// { location: { lat: 11.9980782, lng: 109.2189984 }, stopover: false },
+							]
+						},
+						812: {
+							origin: { lat: 12.2288976, lng: 109.1970949 },
+							destination: { lat: 12.5497223, lng: 109.2277268 },
+							waypoints: [
+								{ location: { lat: 12.2288976, lng: 109.1970949 }, stopover: false },
+								{ location: { lat: 12.2375856, lng: 109.1954155 }, stopover: false },
+								{ location: { lat: 12.2459429, lng: 109.1916932 }, stopover: false },
+								{ location: { lat: 12.2586778, lng: 109.1898965 }, stopover: false },
+								{ location: { lat: 12.2684933, lng: 109.1971679 }, stopover: false },
+								{ location: { lat: 12.376173, lng: 109.196432 }, stopover: false },
+								{ location: { lat: 12.5497223, lng: 109.2277268 }, stopover: false },
+							]
+						},
+						851: {
+							origin: { lat: 12.202298, lng: 109.1912333 },
+							destination: { lat: 12.2980081, lng: 109.2118132 },
+							waypoints: [
+								{ location: { lat: 12.202298, lng: 109.1912333 }, stopover: false },
+								{ location: { lat: 12.2132936, lng: 109.1998772 }, stopover: false },
+								{ location: { lat: 12.2375443, lng: 109.1953102 }, stopover: false },
+								{ location: { lat: 12.2444376, lng: 109.194084 }, stopover: false },
+								{ location: { lat: 12.2505891, lng: 109.1940957 }, stopover: false },
+								{ location: { lat: 12.2540206, lng: 109.1927942 }, stopover: false },
+								{ location: { lat: 12.2544107, lng: 109.1952552 }, stopover: false },
+								{ location: { lat: 12.2533875, lng: 109.1962969 }, stopover: false },
+								{ location: { lat: 12.2944875, lng: 109.2127969 }, stopover: false },
+								{ location: { lat: 12.2980081, lng: 109.2118132 }, stopover: false },	
+							]
+						},
+						852: {
+							origin: { lat: 12.2003625, lng: 109.2135781 },
+							destination: { lat: 12.2979948, lng: 109.2118071 },
+							waypoints: [
+								{ location: { lat: 12.2003625, lng: 109.2135781 }, stopover: false },
+								{ location: { lat: 12.213557, lng: 109.1999237 }, stopover: false },
+								{ location: { lat: 12.2375856, lng: 109.1954155 }, stopover: false },
+								{ location: { lat: 12.2444376, lng: 109.194084 }, stopover: false },
+								{ location: { lat: 12.2505891, lng: 109.1940957 }, stopover: false },
+								{ location: { lat: 12.2540121, lng: 109.1927999 }, stopover: false },
+								{ location: { lat: 12.2544107, lng: 109.1952552 }, stopover: false },
+								{ location: { lat: 12.2533875, lng: 109.1962969 }, stopover: false },
+								{ location: { lat: 12.2944875, lng: 109.2127969 }, stopover: false },
+								{ location: { lat: 12.2979948, lng: 109.2118071 }, stopover: false },
+							]
+						},
+						82: {
+							origin: { lat: 12.2005625, lng: 109.1720781 },
+							destination: { lat: 12.252256, lng: 109.0945057 },
+							waypoints: [
+								{ location: { lat: 12.2005625, lng: 109.1720781 }, stopover: false },
+								{ location: { lat: 12.2132936, lng: 109.1998772 }, stopover: false },
+								{ location: { lat: 12.2145052, lng: 109.2092722 }, stopover: false },
+								{ location: { lat: 12.2375443, lng: 109.1953102 }, stopover: false },
+								{ location: { lat: 12.2503079, lng: 109.1798844 }, stopover: false },
+								{ location: { lat: 12.2516611, lng: 109.1770354 }, stopover: false },
+								{ location: { lat: 12.2564352, lng: 109.1699559 }, stopover: false },
+								{ location: { lat: 12.257545, lng: 109.1341025 }, stopover: false },
+								{ location: { lat: 12.252256, lng: 109.0945057 }, stopover: false },								
+							]
+						},
+						86: {
+							origin: { lat: 12.336878, lng: 109.1978182 },
+							destination: { lat: 12.2518948, lng: 109.0937436 },
+							waypoints: [
+								{ location: { lat: 12.336878, lng: 109.1978182 }, stopover: false },
+								{ location: { lat: 12.2789952, lng: 109.1945071 }, stopover: false },
+								{ location: { lat: 12.258977, lng: 109.1974389 }, stopover: false },
+								{ location: { lat: 12.2507243, lng: 109.1905497 }, stopover: false },
+								{ location: { lat: 12.2502013, lng: 109.1801783 }, stopover: false },
+								{ location: { lat: 12.2516611, lng: 109.1770354 }, stopover: false },
+								{ location: { lat: 12.2563963, lng: 109.1701802 }, stopover: false },
+								{ location: { lat: 12.257536, lng: 109.1341023 }, stopover: false },
+								{ location: { lat: 12.2518948, lng: 109.0937436 }, stopover: false },
+							]
+						},
+						823: {
+							origin: { lat: 12.3000517, lng: 109.2365280 },
+							destination: { lat: 12.2060579, lng: 109.2159450 },
+							waypoints: [
+								{ location: { lat: 12.240964, lng: 109.196586 }, stopover: false },
+								// { location: {  }, stopover: false },
+							]
+						},
+					}
                 };
             },
             mounted() {
@@ -2171,6 +2333,9 @@
 				this.newAd.contact = this.userFullContact;
 				// Загрузить данные о погоде
 				this.loadAdWeather();
+				//
+				// this.initMap();
+				
             },
 			created() {
 				// this.initializeTelegram();
@@ -2190,6 +2355,18 @@
 				//
 				categories() {
 					return this.currentLanguage === 'RU' ? this.categoriesRu : this.categoriesEn;
+				},
+				//
+				localizedRoutes() {
+					return {
+						'818': this.getTranslation('ads.adDetails.routes.818'),
+						'812': this.getTranslation('ads.adDetails.routes.812'),
+						'851': this.getTranslation('ads.adDetails.routes.851'),
+						'852': this.getTranslation('ads.adDetails.routes.852'),
+						'82': this.getTranslation('ads.adDetails.routes.82'),
+						'86': this.getTranslation('ads.adDetails.routes.86'),
+						'823': this.getTranslation('ads.adDetails.routes.823')
+					};
 				}
 			},
             methods: {
@@ -2425,6 +2602,8 @@
 					this.images = [];
 					//
 					this.imagesLength = 0;
+					//
+					this.mapButton = true;
 
 					// отправляем данные на сервер
                     this.isLoading = true;
@@ -2441,6 +2620,9 @@
 							this.dislikeText = '';
 							// поместить в переменную для инспектирования
 							this.inspect = this.currentAd.user_id + ':' + this.currentAd.id;
+							// Удаляем карту на всякий случай
+							this.destroyMap();
+						
                         })
                         .catch((error) => {
 							//
@@ -2467,6 +2649,8 @@
 					this.dislike = false;
 					this.dislikeText = '';
 					this.deleteButton = false;
+					this.mapButton = true;
+					this.destroyMap();
 				},
                 // метод загрузки с сервера только списка своих собственных объявлений
 				loadUserAds() {
@@ -2965,6 +3149,140 @@
                         });
                 },
 				//
+				getCategoryButtonText(category) {
+					const categoryTexts = {
+						'6': this.getTranslation('ads.adDetails.weatherButton'), // 'Погода'
+						'7': this.getTranslation('ads.adDetails.usefulButton'), // 'Полезное'
+					};
+
+					if (category.startsWith('8')) {
+						return this.getTranslation('ads.adDetails.busButton'); // 'Автобусы'
+					}
+
+					return categoryTexts[category] || 'Другое'; // Значение по умолчанию
+				},
+				// Метод загрузки карты
+				loadMap() {
+					// Удаляем старую карту, если была
+					this.destroyMap();
+
+					// Дожидаемся полной отрисовки верстки
+					Vue.nextTick(() => {
+
+						let post = this.currentAd;
+						
+						// Проверяем, есть ли категория поста в routesData
+						if (!this.routesData[post.category]) {
+							console.error("Маршрут для категории", post.category, "не найден.");
+							return;
+						}
+
+						const route = this.routesData[post.category]; // Получаем маршрут по категории
+
+						this.map = new google.maps.Map(document.getElementById("map"), {
+							center: { lat: 12.249508, lng: 109.193116 }, // Нячанг
+							zoom: 12
+						});
+
+						const directionsService = new google.maps.DirectionsService();
+						const directionsRenderer = new google.maps.DirectionsRenderer({
+							map: this.map,
+							polylineOptions: {
+								strokeColor: "#1D56F9",
+								strokeOpacity: 0.8,
+								strokeWeight: 4
+							}
+						});
+
+						const request = {
+							origin: route.origin,
+							destination: route.destination,
+							waypoints: route.waypoints,
+							travelMode: google.maps.TravelMode.DRIVING // Или TRANSIT для автобуса
+						};
+
+						directionsService.route(request, (result, status) => {
+							if (status === google.maps.DirectionsStatus.OK) {
+								directionsRenderer.setDirections(result);
+							} else {
+								console.error("Ошибка построения маршрута:", status);
+							}
+						});
+
+						new google.maps.Marker({ // new google.maps.marker.AdvancedMarkerElement({
+							position: route.origin, // Начальная точка
+							map: this.map,
+							title: "Старт"
+						});
+
+						new google.maps.Marker({ // new google.maps.marker.AdvancedMarkerElement({
+							position: route.destination, // Конечная точка
+							map: this.map,
+							title: "Финиш"
+						});
+					});
+				},
+				// Удаление карты
+				destroyMap() {
+					if (this.map) {
+						this.map = null;
+						document.getElementById("map").innerHTML = "";
+					}
+				},
+				//
+				// initMap() {
+				// 	new google.maps.Map(document.getElementById("map"), {
+				// 		center: { lat: 10.7769, lng: 106.7009 }, // Координаты (например, Хошимин)
+				// 		zoom: 12,
+				// 	});
+				// },
+				//
+				// initMap() {
+                //   	const checkGoogleMaps = setInterval(() => {
+				// 		if (typeof google !== "undefined" && google.maps) {
+				// 			const map = new google.maps.Map(document.getElementById("map"), {
+				// 				center: { lat: 12.249508, lng: 109.193116 }, // Нячанг
+				// 				zoom: 12,
+				// 			});
+
+				// 			const directionsService = new google.maps.DirectionsService();
+				// 			const directionsRenderer = new google.maps.DirectionsRenderer({
+				// 				map: map,
+				// 				polylineOptions: {
+				// 					strokeColor: "#1D56F9",
+				// 					strokeOpacity: 0.8,
+				// 					strokeWeight: 4
+				// 				}
+				// 			});
+
+				// 			const request = {
+				// 				origin: { lat: 12.2060579, lng: 109.2159450 }, // Точка старта
+				// 				destination: { lat: 12.3000517, lng: 109.2365280 }, // Точка назначения
+				// 				waypoints: [
+				// 					{ location: { lat: 12.2207573, lng: 109.2035797 }, stopover: false },
+				// 					{ location: { lat: 12.2309686, lng: 109.1984856 }, stopover: false },
+				// 					{ location: { lat: 12.2410808, lng: 109.1966356 }, stopover: false },
+				// 					{ location: { lat: 12.2581443, lng: 109.1981148 }, stopover: false },
+				// 					{ location: { lat: 12.2658821, lng: 109.2016850 }, stopover: false },
+				// 					{ location: { lat: 12.2821657, lng: 109.2030309 }, stopover: false },
+				// 					{ location: { lat: 12.2940123, lng: 109.2125962 }, stopover: false }
+				// 				],
+				// 				travelMode: google.maps.TravelMode.DRIVING // Или TRANSIT для автобуса
+				// 			};
+
+				// 			directionsService.route(request, (result, status) => {
+				// 				if (status === google.maps.DirectionsStatus.OK) {
+				// 					directionsRenderer.setDirections(result);
+				// 				} else {
+				// 					console.error("Ошибка построения маршрута: " + status);
+				// 				}
+				// 			});
+							
+                //           	clearInterval(checkGoogleMaps); // Очистить интервал, если Google Maps загружен
+				// 		}
+				// 	}, 500); // Проверка каждую сотую секунду
+                // },
+				//
 				// onKeyUp(event) {
 				// 	if (event.key === "Enter" || event.keyCode === 13) {
 				// 		this.searchByTextOrCategory();
@@ -2977,6 +3295,7 @@
 
 		app.mount('#app');
     </script>
+	<!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBSIuw-3YoYkTjoWuPl5S7xfdVepO-2Tkw"></script> -->
     
 </body>
 </html>

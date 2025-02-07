@@ -69,7 +69,7 @@ class AdController {
             }
         } else {
             // Если нет категории и текста, просто выбрать объявления с пагинацией
-            $query = 'WHERE status = 1 AND category != 6 ORDER BY created_at DESC LIMIT ? OFFSET ?';
+            $query = "WHERE status = 1 AND category != 6 AND category NOT LIKE '8%' ORDER BY created_at DESC LIMIT ? OFFSET ?";
             $params = [$perPage, $offset];
             $ads = R::findAll('ads', $query, $params);
         }
@@ -140,7 +140,7 @@ class AdController {
         // Если объявления не найдены по категории, пробуем искать только по тексту
         if ($searchText) {
             // $query = 'WHERE status = 1 AND (LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?)) ORDER BY created_at DESC LIMIT ? OFFSET ?';
-            $query = "WHERE status = 1 AND category != 6 AND (LOWER($titleColumn) LIKE LOWER(?) OR LOWER($descriptionColumn) LIKE LOWER(?)) ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            $query = "WHERE status = 1 AND category != 6 AND category NOT LIKE '8%' AND (LOWER($titleColumn) LIKE LOWER(?) OR LOWER($descriptionColumn) LIKE LOWER(?)) ORDER BY created_at DESC LIMIT ? OFFSET ?";
             // Поддержка частичного совпадения
             $searchTextParam = '%' . trim($searchText) . '%';
             $ads = R::findAll('ads', $query, [$searchTextParam, $searchTextParam, $perPage, $offset]);
