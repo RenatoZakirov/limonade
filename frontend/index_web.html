@@ -519,14 +519,25 @@
 
 					</div>
 
-					<div class="row mb-3">
+					<div class="row mb-2">
 		
-						<div v-if="false" class="col d-flex justify-content-center">
+						<div class="col d-flex justify-content-center">
 							<button @click="categoryCode = '3F1'; loadAdsList()" class="btn btn-secondary btn-transparent-bg">
 								<!-- Бьюти услуги в Нячанге -->
 								{{ getTranslation('ads.popCategories.5') }}
 							</button>
 						</div>
+
+						<div class="col d-flex justify-content-center">
+							<button @click="categoryCode = '7'; loadAdsList()" class="btn btn-secondary btn-transparent-bg me-2">
+								<!-- Полезные посты для гостей -->
+								{{ getTranslation('ads.popCategories.6') }}
+							</button>
+						</div>
+
+					</div>
+
+					<div class="row mb-3">
 
 						<div class="col d-flex justify-content-center">
 							<button @click="categoryCode = '8'; loadAdsList()" class="btn btn-secondary btn-transparent-bg">
@@ -536,11 +547,9 @@
 						</div>
 
 						<div class="col d-flex justify-content-center">
-							<button @click="categoryCode = '7'; loadAdsList()" class="btn btn-secondary btn-transparent-bg me-2">
-								<!-- Полезные посты для гостей -->
-								<!-- Информация для гостей -->
-								<!-- Информация для релокантов -->
-								{{ getTranslation('ads.popCategories.6') }}
+							<button @click="categoryCode = '9'; loadAdsList()" class="btn btn-secondary btn-transparent-bg me-2">
+								<!-- Новости нашего города -->
+								{{ getTranslation('ads.popCategories.9') }}
 							</button>
 						</div>
 
@@ -1098,8 +1107,8 @@
 					showAdDetail: false,
 					//
 					advertisement: {
-						id: 5492,
-						image: 'https://www.limonade.pro/backend/uploads/images/uQhEY.jpg',
+						id: 6030,
+						image: 'https://www.limonade.pro/backend/uploads/images/AxgS3.jpg',
 						title: 'FPV-багги',
 						description: '🚗Новый аттракцион на пляже! Почувствуй себя пилотом багги с эффектом полного погружения.',
 						contact: 'Ренато',
@@ -1230,7 +1239,8 @@
 									4: 'Товары для детей',
 									5: 'Бьюти услуги в Нячанге',
 									6: 'Полезные посты для гостей',
-									7: 'Городские автобусы'
+									7: 'Городские автобусы',
+									9: 'Новости нашего города'
 								},
 								adDetails: {
 									imagesNumber: 'Фото',
@@ -1526,7 +1536,8 @@
 									4: 'Products for children',
 									5: 'Beauty services in Nha Trang',
 									6: 'Useful posts for guests',
-									7: 'City bus routes'
+									7: 'City bus routes',
+									9: 'News of our city'
 								},
 								adDetails: {
 									imagesNumber: 'Photos',
