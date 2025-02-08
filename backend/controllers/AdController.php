@@ -1465,7 +1465,12 @@ class AdController {
         $dateLimit = date('Y-m-d H:i:s', strtotime('-10 days'));
 
         // Поиск всех объявлений, созданных более 10 дней назад и не удаленных
-        $oldAds = R::find('ads', 'created_at < ? AND status IN (1, 2)', [$dateLimit]);
+        $oldAds = R::find('ads', "
+            created_at < ?
+            AND status IN (1, 2)
+            AND category NOT IN ('7', '9')
+            AND category NOT LIKE '8%'
+            ", [$dateLimit]);
 
         // Проверка, есть ли объявления для закрытия
         if (empty($oldAds)) {

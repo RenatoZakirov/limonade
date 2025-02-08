@@ -710,7 +710,7 @@
 							<div class="card-body">
 								<h5 class="card-title lh-sm">{{ currentAd['title_' + currentLanguage.toLowerCase()] }}</h5>
 
-								<div v-if="!['6', '7'].includes(currentAd.category) && !currentAd.category.startsWith('8')"
+								<div v-if="!['6', '7', '9'].includes(currentAd.category) && !currentAd.category.startsWith('8')"
 									v-for="(categoryName, index) in getCategoryNames(currentAd.category)" 
 									:key="categoryName" 
 									class="d-inline-block mb-2">
@@ -1259,6 +1259,7 @@
 									weatherButton: 'Погода',
 									usefulButton: 'Полезное',
 									busButton: 'Автобусы',
+									newsButton: 'Новости',
 									routes: {
 										'818': 'Центр, юг, пляж Байзай, аэропорт Камрань',
 										'812': 'Центр, север, пляж Зоклет',
@@ -1554,6 +1555,7 @@
 									weatherButton: 'Weather',
 									usefulButton: 'Useful',
 									busButton: 'Buses',
+									newsButton: 'News',
 									routes: {
 										'818': 'Center, south, Bai Dai Beach, Cam Ranh Airport',
 										'812': 'Center, north, Dok Let beach',
@@ -3153,6 +3155,7 @@
 					const categoryTexts = {
 						'6': this.getTranslation('ads.adDetails.weatherButton'), // 'Погода'
 						'7': this.getTranslation('ads.adDetails.usefulButton'), // 'Полезное'
+						'9': this.getTranslation('ads.adDetails.newsButton'), // 'Новости'
 					};
 
 					if (category.startsWith('8')) {
