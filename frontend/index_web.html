@@ -607,9 +607,17 @@
 								<div class="col-7">
 									<div class="card-body">
 										<h5 class="card-title text-truncate">{{ ad['title_' + currentLanguage.toLowerCase()] }}</h5>
-										<p v-if="!ad['category'].startsWith('8')"
-											class="card-text description-text lh-sm">{{ ad['description_' + currentLanguage.toLowerCase()] }}</p>
-										<p v-else class="card-text description-text lh-sm">{{ localizedRoutes[ad['category']] }}</p>
+										<p v-if="ad['category'].startsWith('8')"
+											class="card-text description-text lh-sm">
+											<i class="bi bi-sign-turn-right"></i>
+											{{ localizedRoutes[ad['category']] }}</p>
+											
+										<p v-if="ad['category'].startsWith('8')"
+											class="card-text description-text lh-sm" :class="(index + 1) % 3 === 0 ? 'text-body-secondary-2' : 'text-body-secondary'">
+											<i class="bi bi-bus-front"></i>
+											{{ localizedPrices[ad['category']] }}</p>
+											
+										<p v-else class="card-text description-text lh-sm">{{ ad['description_' + currentLanguage.toLowerCase()] }}</p>
 										<p class="card-text text-center">
 											<small class="col me-2" :class="(index + 1) % 3 === 0 ? 'text-body-secondary-2' : 'text-body-secondary'">
 												<i class="bi bi-send-fill"></i>
@@ -906,7 +914,11 @@
 							<!-- {{ getTranslation('ads.adDetails.delete.deleteButton') }} -->
 						</button>
 
-						<button v-if="!isAdOwner && currentAd.telegram" @click="writeToTelegram()" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
+						<button v-if="!isAdOwner
+							&& currentAd.telegram
+							&& !['6', '7', '9'].includes(currentAd.category)
+							&& !currentAd.category.startsWith('8')"
+							@click="writeToTelegram()" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
 							<!-- Написать в Телеграм -->
 							<i class="bi bi-pencil"></i>
 							<!-- <i class="bi bi-pencil-fill"></i> -->
@@ -1279,6 +1291,15 @@
 										'86': 'Север, центр, гипермаркеты, запад',
 										'823': 'Север, центр, юг, Винперл',
 									},
+									prices: {
+										'818': '65.000 д',
+										'812': '32.000 д',
+										'851': '8.000 д',
+										'852': '8.000 д',
+										'82': '8.000 д',
+										'86': '8.000 д',
+										'823': '15.000 д',
+									},
 									mapButton: 'Показать карту',
 								},
 								adCreate: {
@@ -1575,6 +1596,15 @@
 										'82': 'South, center, hypermarkets, west',
 										'86': 'North, center, hypermarkets, west',
 										'823': 'North, center, south, Vinpearl',
+									},
+									prices: {
+										'818': '65.000 d',
+										'812': '32.000 d',
+										'851': '8.000 d',
+										'852': '8.000 d',
+										'82': '8.000 d',
+										'86': '8.000 d',
+										'823': '15.000 d',
 									},
 									mapButton: 'Show map',
 								},
@@ -2379,6 +2409,18 @@
 						'82': this.getTranslation('ads.adDetails.routes.82'),
 						'86': this.getTranslation('ads.adDetails.routes.86'),
 						'823': this.getTranslation('ads.adDetails.routes.823')
+					};
+				},
+				//
+				localizedPrices() {
+					return {
+						'818': this.getTranslation('ads.adDetails.prices.818'),
+						'812': this.getTranslation('ads.adDetails.prices.812'),
+						'851': this.getTranslation('ads.adDetails.prices.851'),
+						'852': this.getTranslation('ads.adDetails.prices.852'),
+						'82': this.getTranslation('ads.adDetails.prices.82'),
+						'86': this.getTranslation('ads.adDetails.prices.86'),
+						'823': this.getTranslation('ads.adDetails.prices.823')
 					};
 				}
 			},
@@ -3243,59 +3285,6 @@
 						document.getElementById("map").innerHTML = "";
 					}
 				},
-				//
-				// initMap() {
-				// 	new google.maps.Map(document.getElementById("map"), {
-				// 		center: { lat: 10.7769, lng: 106.7009 }, // Координаты (например, Хошимин)
-				// 		zoom: 12,
-				// 	});
-				// },
-				//
-				// initMap() {
-                //   	const checkGoogleMaps = setInterval(() => {
-				// 		if (typeof google !== "undefined" && google.maps) {
-				// 			const map = new google.maps.Map(document.getElementById("map"), {
-				// 				center: { lat: 12.249508, lng: 109.193116 }, // Нячанг
-				// 				zoom: 12,
-				// 			});
-
-				// 			const directionsService = new google.maps.DirectionsService();
-				// 			const directionsRenderer = new google.maps.DirectionsRenderer({
-				// 				map: map,
-				// 				polylineOptions: {
-				// 					strokeColor: "#1D56F9",
-				// 					strokeOpacity: 0.8,
-				// 					strokeWeight: 4
-				// 				}
-				// 			});
-
-				// 			const request = {
-				// 				origin: { lat: 12.2060579, lng: 109.2159450 }, // Точка старта
-				// 				destination: { lat: 12.3000517, lng: 109.2365280 }, // Точка назначения
-				// 				waypoints: [
-				// 					{ location: { lat: 12.2207573, lng: 109.2035797 }, stopover: false },
-				// 					{ location: { lat: 12.2309686, lng: 109.1984856 }, stopover: false },
-				// 					{ location: { lat: 12.2410808, lng: 109.1966356 }, stopover: false },
-				// 					{ location: { lat: 12.2581443, lng: 109.1981148 }, stopover: false },
-				// 					{ location: { lat: 12.2658821, lng: 109.2016850 }, stopover: false },
-				// 					{ location: { lat: 12.2821657, lng: 109.2030309 }, stopover: false },
-				// 					{ location: { lat: 12.2940123, lng: 109.2125962 }, stopover: false }
-				// 				],
-				// 				travelMode: google.maps.TravelMode.DRIVING // Или TRANSIT для автобуса
-				// 			};
-
-				// 			directionsService.route(request, (result, status) => {
-				// 				if (status === google.maps.DirectionsStatus.OK) {
-				// 					directionsRenderer.setDirections(result);
-				// 				} else {
-				// 					console.error("Ошибка построения маршрута: " + status);
-				// 				}
-				// 			});
-							
-                //           	clearInterval(checkGoogleMaps); // Очистить интервал, если Google Maps загружен
-				// 		}
-				// 	}, 500); // Проверка каждую сотую секунду
-                // },
 				//
 				// onKeyUp(event) {
 				// 	if (event.key === "Enter" || event.keyCode === 13) {
