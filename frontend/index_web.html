@@ -487,7 +487,7 @@
 
 						<div class="col d-flex justify-content-center">
 							<button @click="categoryCode = '1A3'; loadAdsList()" class="btn btn-secondary btn-transparent-bg">
-								<!-- Снять квартиру недорого -->
+								<!-- Снять квартиру -->
 								{{ getTranslation('ads.popCategories.1') }}
 							</button>
 						</div>
@@ -501,11 +501,11 @@
 
 					</div>
 
-					<div class="row mb-2">						
+					<div class="row mb-2">
 		
 						<div class="col d-flex justify-content-center">
 							<button @click="categoryCode = '2B2'; loadAdsList()" class="btn btn-secondary btn-transparent-bg">
-								<!-- Купить мопед на ходу -->
+								<!-- Купить мопед -->
 								{{ getTranslation('ads.popCategories.3') }}
 							</button>
 						</div>
@@ -523,7 +523,7 @@
 		
 						<div class="col d-flex justify-content-center">
 							<button @click="categoryCode = '3F1'; loadAdsList()" class="btn btn-secondary btn-transparent-bg">
-								<!-- Бьюти услуги в Нячанге -->
+								<!-- Бьюти услуги -->
 								{{ getTranslation('ads.popCategories.5') }}
 							</button>
 						</div>
@@ -581,6 +581,40 @@
 											<small class="col text-body-secondary-2">
 												<i class="bi bi-calendar-date-fill"></i>
 												{{ formatDate(weatherAd.created_at) }}
+											</small>
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>					
+
+					</div>
+
+				</div>
+
+				<div v-if="!isLoading && showAdList && (adCurrentPage == 1) && adsList.length >= 20" class="row mb-3">
+
+					<div class="col-11">
+						
+						<div class="card shadow-sm custom-rounded-left">
+							<div class="row g-0">
+								<div class="col-5">
+									<div class="overflow-hidden h-100">
+										<img @click="loadAdDetail(dollarAd.id)" :src="dollarAd.cover_photo" class="img-fluid card-img-2" alt="image">
+									</div>
+								</div>
+								<div class="col-7">
+									<div class="card-body">
+										<h5 class="card-title text-truncate">{{ dollarAd['title_' + currentLanguage.toLowerCase()] }}</h5>
+										<p class="card-text description-text lh-sm">{{ dollarAd['description_' + currentLanguage.toLowerCase()] }}</p>
+										<p class="card-text text-center">
+											<small class="col me-2 text-body-secondary">
+												<i class="bi bi-send-fill"></i>
+												{{ dollarAd.contact.slice(0, 8) }}
+											</small>
+											<small class="col text-body-secondary">
+												<i class="bi bi-calendar-date-fill"></i>
+												{{ formatDate(dollarAd.created_at) }}
 											</small>
 										</p>
 									</div>
@@ -727,7 +761,7 @@
 							<div class="card-body">
 								<h5 class="card-title lh-sm">{{ currentAd['title_' + currentLanguage.toLowerCase()] }}</h5>
 
-								<div v-if="!['6', '7', '9'].includes(currentAd.category) && !currentAd.category.startsWith('8')"
+								<div v-if="!['6', '7', '9', '10'].includes(currentAd.category) && !currentAd.category.startsWith('8')"
 									v-for="(categoryName, index) in getCategoryNames(currentAd.category)" 
 									:key="categoryName" 
 									class="d-inline-block mb-2">
@@ -916,7 +950,7 @@
 
 						<button v-if="!isAdOwner
 							&& currentAd.telegram
-							&& !['6', '7', '9'].includes(currentAd.category)
+							&& !['6', '7', '9', '10'].includes(currentAd.category)
 							&& !currentAd.category.startsWith('8')"
 							@click="writeToTelegram()" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
 							<!-- Написать в Телеграм -->
@@ -1135,6 +1169,14 @@
 						// contact: '',
 						// date: ''
 					},
+					dollarAd: {
+						// id: 0,
+						// image: '',
+						// title: '',
+						// description: '',
+						// contact: '',
+						// date: ''
+					},
 					// отвечает за показ экрана для создания нового объявления
 					showCreateAd: false,
 					// отвечает за показ экрана со списком объявлений
@@ -1245,14 +1287,14 @@
 								showMoreButton: 'вперед',
 								backToTopButton: 'В начало',
 								popCategories: {
-									1: 'Снять квартиру недорого',
+									1: 'Снять квартиру',
 									2: 'Мероприятия на русском языке',
-									3: 'Купить мопед на ходу',
+									3: 'Купить мопед',
 									4: 'Товары для детей',
-									5: 'Бьюти услуги в Нячанге',
+									5: 'Бьюти услуги',
 									6: 'Полезные посты для гостей',
 									7: 'Городские автобусы',
-									9: 'Новости нашего города'
+									9: 'Городские новости'
 								},
 								adDetails: {
 									imagesNumber: 'Фото',
@@ -1282,6 +1324,7 @@
 									usefulButton: 'Полезное',
 									busButton: 'Автобусы',
 									newsButton: 'Новости',
+									dollarButton: 'Обмен',
 									routes: {
 										'818': 'Центр, юг, пляж Байзай, аэропорт Камрань',
 										'812': 'Центр, север, пляж Зоклет',
@@ -1551,14 +1594,14 @@
 								showMoreButton: 'forward',
 								backToTopButton: 'Back to top',
 								popCategories: {
-									1: 'Rent an apartment inexpensively',
+									1: 'Rent an apartment',
 									2: 'Events in Russian',
-									3: 'Buy a motorbike on the move',
+									3: 'Buy a motorbike',
 									4: 'Products for children',
-									5: 'Beauty services in Nha Trang',
+									5: 'Beauty services',
 									6: 'Useful posts for guests',
 									7: 'City bus routes',
-									9: 'News of our city'
+									9: 'City news'
 								},
 								adDetails: {
 									imagesNumber: 'Photos',
@@ -1588,6 +1631,7 @@
 									usefulButton: 'Useful',
 									busButton: 'Buses',
 									newsButton: 'News',
+									dollarButton: 'Exchange',
 									routes: {
 										'818': 'Center, south, Bai Dai Beach, Cam Ranh Airport',
 										'812': 'Center, north, Dok Let beach',
@@ -2381,6 +2425,8 @@
 				this.newAd.contact = this.userFullContact;
 				// Загрузить данные о погоде
 				this.loadAdWeather();
+				// Загрузить данные о валюте
+				this.loadAdDollar();
 				//
 				// this.initMap();
 				
@@ -3208,12 +3254,27 @@
 							this.showError(this.getTranslation('errors.' + error.response.data['code']));
                         });
                 },
+				// метод загрузки с сервера одного объявления с погодой
+                loadAdDollar() {
+					// отправляем запрос на сервер
+                    axios.get(`ad/get_dollar`)
+                        .then(response => {
+							// загрузить данные по обьявлению
+                            this.dollarAd = response.data;
+							// console.log(this.dollarAd);
+                        })
+                        .catch((error) => {
+							// Показываем сообщение об ошибке
+							this.showError(this.getTranslation('errors.' + error.response.data['code']));
+                        });
+                },
 				//
 				getCategoryButtonText(category) {
 					const categoryTexts = {
 						'6': this.getTranslation('ads.adDetails.weatherButton'), // 'Погода'
 						'7': this.getTranslation('ads.adDetails.usefulButton'), // 'Полезное'
 						'9': this.getTranslation('ads.adDetails.newsButton'), // 'Новости'
+						'10': this.getTranslation('ads.adDetails.dollarButton'), // 'Обмен'
 					};
 
 					if (category.startsWith('8')) {
