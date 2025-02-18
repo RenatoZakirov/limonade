@@ -69,7 +69,7 @@ class AdController {
             }
         } else {
             // Если нет категории и текста, просто выбрать объявления с пагинацией
-            $query = "WHERE status = 1 AND category != 6 AND category != 10 AND category NOT LIKE '8%' ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            $query = "WHERE status = 1 AND category != 6 AND category != 10 AND category != 11 AND category NOT LIKE '8%' ORDER BY created_at DESC LIMIT ? OFFSET ?";
             $params = [$perPage, $offset];
             $ads = R::findAll('ads', $query, $params);
         }
@@ -102,7 +102,7 @@ class AdController {
         // Пытаемся найти объявления по категории, постепенно сокращая её
         while ($category && mb_strlen($category, 'UTF-8') > 0) {
             $params = [];
-            $query = 'WHERE status = 1 AND category != 6 AND category != 10';
+            $query = 'WHERE status = 1 AND category != 6 AND category != 10 AND category != 11';
     
             // Добавляем условие по категории
             $categoryParam = $category . '%';
@@ -140,7 +140,7 @@ class AdController {
         // Если объявления не найдены по категории, пробуем искать только по тексту
         if ($searchText) {
             // $query = 'WHERE status = 1 AND (LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?)) ORDER BY created_at DESC LIMIT ? OFFSET ?';
-            $query = "WHERE status = 1 AND category != 6 AND category != 10 AND category NOT LIKE '8%' AND (LOWER($titleColumn) LIKE LOWER(?) OR LOWER($descriptionColumn) LIKE LOWER(?)) ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            $query = "WHERE status = 1 AND category != 6 AND category != 10 AND category != 11 AND category NOT LIKE '8%' AND (LOWER($titleColumn) LIKE LOWER(?) OR LOWER($descriptionColumn) LIKE LOWER(?)) ORDER BY created_at DESC LIMIT ? OFFSET ?";
             // Поддержка частичного совпадения
             $searchTextParam = '%' . trim($searchText) . '%';
             $ads = R::findAll('ads', $query, [$searchTextParam, $searchTextParam, $perPage, $offset]);
@@ -1495,7 +1495,7 @@ class AdController {
         $oldAds = R::find('ads', "
             created_at < ?
             AND status IN (1, 2)
-            AND category NOT IN ('7', '9')
+            AND category NOT IN ('7', '9', '11')
             AND category NOT LIKE '8%'
             ", [$dateLimit]);
 
