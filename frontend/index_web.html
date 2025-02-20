@@ -777,6 +777,32 @@
 									</button>
 								</div>
 
+								<h6 v-if="currentAd.category == '6' && currentAd.video_1" class="card-subtitle mb-2 text-body-secondary">
+									<!-- Пляж около военного аэродрома -->
+									{{ getTranslation('ads.adDetails.beachVideo') }}
+								</h6>
+
+								<div v-if="currentAd.category == '6' && currentAd.video_1" class="ratio ratio-16x9 mb-3">
+									<iframe 
+										:src="currentAd.video_1" 
+										title="Пляж" 
+										allowfullscreen>
+									</iframe>
+								</div>
+
+								<h6 v-if="currentAd.category == '6' && currentAd.video_2" class="card-subtitle mb-2 text-body-secondary">
+									<!-- Улица около военного аэродрома -->
+									{{ getTranslation('ads.adDetails.streetVideo') }}
+								</h6>
+
+								<div v-if="currentAd.category == '6' && currentAd.video_2" class="ratio ratio-16x9 mb-3">
+									<iframe 
+										:src="currentAd.video_2" 
+										title="Улица" 
+										allowfullscreen>
+									</iframe>
+								</div>
+
 								<p v-if="currentAd.category.startsWith('8')"
 									class="card-text lh-sm" style="white-space: pre-line;">{{ localizedRoutes[currentAd.category] }}</p>
 
@@ -1344,6 +1370,8 @@
 										'823': '15.000 д',
 									},
 									mapButton: 'Показать карту',
+									beachVideo: 'Пляж около военного аэродрома',
+									streetVideo: 'Улица около военного аэродрома',
 								},
 								adCreate: {
 									createStr: 'Создать новое объявление',
@@ -1651,6 +1679,8 @@
 										'823': '15.000 d',
 									},
 									mapButton: 'Show map',
+									beachVideo: 'Beach near the military airfield',
+									streetVideo: 'Street near the military airfield',
 								},
 								adCreate: {
 									createStr: 'Create a new ad',
@@ -2401,7 +2431,11 @@
 								// { location: {  }, stopover: false },
 							]
 						},
-					}
+					},
+					//
+					// beachUrl: 'https://www.youtube.com/embed/dy82VQSh5Wg',
+					//
+					// streetUrl: 'https://www.youtube.com/embed/VBmUFd82gHA',
                 };
             },
             mounted() {

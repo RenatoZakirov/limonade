@@ -214,14 +214,28 @@
 													<textarea v-model="newAd.description" class="form-control form-select-sm shadow-sm"
 														id="FormControlTextarea1" rows="3"></textarea>
 												</div>
-			
-												<!-- <div class="form-check form-switch mb-3">
-													<input v-model="newAd.permanent" class="form-check-input" type="checkbox" role="switch"
-														id="flexSwitchCheckDefault">
-													<label class="form-check-label" for="flexSwitchCheckDefault">
-														Сделать объявление вечным
-													</label>
-												</div> -->
+
+												<div class="row mb-3">
+													<div class="col-6">
+														<div class="form-check form-switch">
+															<input v-model="weatherTemplate" class="form-check-input" type="checkbox" role="switch"
+																id="flexSwitchCheckDefault1" @change="fillWeatherForm()">
+															<label class="form-check-label" for="flexSwitchCheckDefault1">
+																Погода сегодня
+															</label>
+														</div>
+													</div>
+
+													<div class="col-6">
+														<div class="form-check form-switch">
+															<input v-model="changeTemplate" class="form-check-input" type="checkbox" role="switch"
+																id="flexSwitchCheckDefault2" @change="fillChangeForm()">
+															<label class="form-check-label" for="flexSwitchCheckDefault2">
+																Обмен валюты
+															</label>
+														</div>
+													</div>
+												</div>
 												
 												<div class="row mb-3">
 													<div class="col-6">
@@ -1101,6 +1115,10 @@
 					searchAdId: '',
 					//
 					currentLanguage: 'ru',
+					//
+					weatherTemplate: false,
+					//
+					changeTemplate: false,
                 };
             },
 			// mounted() {
@@ -1115,7 +1133,9 @@
 				// Наблюдаем за изменением второго уровня подкатегорий (третий выпадающий список)
 				selectedSubcategory2() {
 					this.updateCategoryCode();
-				}
+				},
+				//
+				
 			},
             methods: {
 				// метод выбора, какой экран показать в данный момент
@@ -1159,6 +1179,10 @@
 					this.searchAdId = '';
 					// очищаем массив фото
 					this.photos = [];
+					//
+					this.weatherTemplate = false;
+					//
+					this.changeTemplate = false;
 					//
 					this.cleanCategory();
 				},
@@ -1800,6 +1824,30 @@
 				// 	event.preventDefault();
 				// 	event.returnValue = '';  // Обязательное условие для отображения сообщения
 				// },
+				//
+				fillWeatherForm() {
+					//
+					this.cleanForm();
+					//
+					this.changeTemplate = false;
+					//
+					this.weatherTemplate = true;
+					// заполняем форму 1
+					this.newAd = { title: 'Погода сегодня', titleLimit: 40, description: '', descriptionLimit: 1000, contact: 'Monica, telegram @limonade_monica', contactLimit: 50, telegram: '@limonade_monica', telegramLimit: 30, category: '' };
+				},
+				//
+				fillChangeForm() {
+					//
+					this.cleanForm();
+					//
+					this.weatherTemplate = false;
+					//
+					this.changeTemplate = true;
+					// заполняем форму 1
+					this.newAd = { title: 'Курс на сегодня', titleLimit: 40,
+					description: 'Здесь каждый день мы публикуем свежее фото курса валют из магазина "Сапфир". Фото сделано в 15:52 после полудня на набережной в 10 минутах ходьбы от центра города (Лотоса).',
+					descriptionLimit: 1000, contact: 'Monica, telegram @limonade_monica', contactLimit: 50, telegram: '@limonade_monica', telegramLimit: 30, category: '' };
+				},
             }
         });
 		// Устанавливаем глобальный базовый URL для всех запросов axios
