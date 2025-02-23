@@ -6,6 +6,7 @@
     <title>Объявления</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+	<link rel="stylesheet" href="https://unpkg.com/@vuepic/vue-datepicker@latest/dist/main.css" />
 	
 	<script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script> -->
@@ -14,6 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBAxoWNbe2YLfglEUwHMnEO4pGv5WKRKik"></script>
+	<script src="https://unpkg.com/@vuepic/vue-datepicker@latest"></script>
 
 
 	<style>
@@ -285,13 +287,32 @@
 			background-color: transparent; /* Убираем белый фон */
 			overflow: hidden; /* Скрываем содержимое за границами */
 		}
-		
 		#imageModal .modal-content {
 			border-radius: 0; /* Убираем закругление */
 		}
 		/* Черный цвет с большей непрозрачностью */
 		.modal-backdrop {
 			background-color: rgba(0, 0, 0, 0.9) !important;
+		}
+		.datepicker .dp__menu {
+			background-color: #ffffff !important; /* Белый фон календаря */
+			border: 1px solid #ccc !important; /* Светло-серая граница */
+		}
+		.datepicker .dp__today {
+			background-color: rgba(108, 117, 125, 0.7) !important;
+			color: #fff !important;
+			font-weight: bold;
+			border: 2px solid rgba(108, 117, 125, 0.0) !important;
+		}
+		.datepicker .dp__active {
+			background-color: #007bff !important; /* Синий фон выбранной даты */
+			color: #fff !important;
+			font-weight: bold;
+			border-radius: 50%; /* Круглый выделенный элемент */
+		}
+		.datepicker .dp__cell_inner:hover {
+			background-color: #e9ecef !important; /* Светло-серый фон при наведении */
+			color: #000 !important;
 		}
 		
     </style>
@@ -457,7 +478,7 @@
 									</div>
 								</li>
 								<li v-if="false">
-									<div @click="categoryCode = '8'; loadAdsList()" class="dropdown-item" href="">
+									<div @click="showScreen('sleepBus')" class="dropdown-item" href="">
 										<!-- тест -->
 										<i class="bi bi-screwdriver"></i>
 										тест
@@ -1138,6 +1159,312 @@
 
 				</div>
 
+				<div v-if="!isLoading && showSleepBus">
+
+					<div class="row mb-2 d-flex justify-content-center">
+
+						<div class="col-5">
+							<button class="btn btn-secondary btn-blue-bg">
+								Дата: {{ formatDate(busSelectedDate) }}
+							</button>
+						</div>
+
+						<div class="col-6">
+							<!-- <button class="btn btn-secondary btn-transparent-bg">Calendar</button> -->
+							<Datepicker v-model="busSelectedDate" auto-apply class="datepicker" :enable-time-picker="false" :placeholder="'Выберите дату'"/>
+						</div>
+
+					</div><br>
+
+					<div class="container" v-if="busSelectedDate">
+
+						<!-- Шестой ряд -->
+						<div class="row mb-2">
+
+							<div class="col-6 d-flex justify-content-center">
+								<button class="btn btn-secondary btn-transparent-bg">
+									<i class="bi bi-badge-wc"></i>
+									Биотуалет
+								</button>
+							</div>
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('A11')" class="btn btn-secondary" :class="seats['A11'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									A11
+								</button>
+							</div>
+
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('A12')" class="btn btn-secondary" :class="seats['A12'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									A12
+								</button>
+							</div>
+	
+						</div>
+
+						<!-- Пятый ряд -->
+						<div class="row mb-2">
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('B10')" class="btn btn-secondary" :class="seats['B10'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									B10
+								</button>
+							</div>
+
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('B9')" class="btn btn-secondary" :class="seats['B9'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									B9
+								</button>
+							</div>
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('A9')" class="btn btn-secondary" :class="seats['A9'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									A9
+								</button>
+							</div>
+
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('A10')" class="btn btn-secondary" :class="seats['A10'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									A10
+								</button>
+							</div>
+	
+						</div>
+
+						<!-- Четвертый ряд -->
+						<div class="row mb-2">
+
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('B8')" class="btn btn-secondary" :class="seats['B8'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									B8
+								</button>
+							</div>
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('B7')" class="btn btn-secondary" :class="seats['B7'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									B7
+								</button>
+							</div>
+
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('A7')" class="btn btn-secondary" :class="seats['A7'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									A7
+								</button>
+							</div>
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('A8')" class="btn btn-secondary" :class="seats['A8'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									A8
+								</button>
+							</div>
+	
+						</div>
+
+						<!-- Третий ряд -->
+						<div class="row mb-2">
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('B6')" class="btn btn-secondary" :class="seats['B6'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									B6
+								</button>
+							</div>
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('B5')" class="btn btn-secondary" :class="seats['B5'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									B5
+								</button>
+							</div>
+
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('A5')" class="btn btn-secondary" :class="seats['A5'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									A5
+								</button>
+							</div>
+
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('A6')" class="btn btn-secondary" :class="seats['A6'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									A6
+								</button>
+							</div>
+	
+						</div>
+
+						<!-- Второй ряд -->
+						<div class="row mb-2">
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('B4')" class="btn btn-secondary" :class="seats['B4'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									B4
+								</button>
+							</div>
+
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('B3')" class="btn btn-secondary" :class="seats['B3'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									B3
+								</button>
+							</div>
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('A3')" class="btn btn-secondary" :class="seats['A3'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									A3
+								</button>
+							</div>
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('A4')" class="btn btn-secondary" :class="seats['A4'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									A4
+								</button>
+							</div>
+	
+						</div>
+
+						<!-- Первый ряд -->
+						<div class="row mb-2">
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('B2')" class="btn btn-secondary" :class="seats['B2'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									B2
+								</button>
+							</div>
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('B1')" class="btn btn-secondary" :class="seats['B1'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									B1
+								</button>
+							</div>
+
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('A1')" class="btn btn-secondary" :class="seats['A1'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									A1
+								</button>
+							</div>
+	
+							<div class="col d-flex justify-content-center">
+								<button @click="toggleSeat('A2')" class="btn btn-secondary" :class="seats['A2'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+									A2
+								</button>
+							</div>
+	
+						</div>
+
+						<!-- Указатели -->
+						<div class="row mb-2">
+	
+							<div class="col d-flex justify-content-center">
+								<button class="btn btn-secondary btn-transparent-bg">
+									<i class="bi bi-arrow-up-left"></i>
+									Верх
+								</button>
+							</div>
+	
+							<div class="col d-flex justify-content-center">
+								<button class="btn btn-secondary btn-transparent-bg">
+									<i class="bi bi-arrow-down-left"></i>
+									Низ
+								</button>
+							</div>
+	
+							<div class="col d-flex justify-content-center">
+								<button class="btn btn-secondary btn-transparent-bg">
+									<i class="bi bi-arrow-down-right"></i>
+									Низ
+								</button>
+							</div>
+	
+							<div class="col d-flex justify-content-center">
+								<button class="btn btn-secondary btn-transparent-bg">
+									<i class="bi bi-arrow-up-right"></i>
+									Верх
+								</button>
+							</div>
+	
+						</div>
+
+						<!-- Вход -->
+						<div class="row mb-2">
+
+							<div class="col-6 d-flex justify-content-center">
+								<button class="btn btn-secondary btn-transparent-bg">
+									<i class="bi bi-box-arrow-in-right"></i>
+									Вход
+								</button>
+							</div>
+
+							<div class="col-6 d-flex justify-content-center">
+								<button class="btn btn-secondary btn-transparent-bg">
+									<i class="bi bi-person-vcard"></i>
+									Водитель
+								</button>
+							</div>
+	
+						</div><br>
+	
+						<div v-if="Object.keys(selectedSeats).length > 0" class="row mb-2 d-flex justify-content-center">
+	
+							<div class="col-4">
+								<button class="btn btn-secondary btn-transparent-bg">
+									Места:
+								</button>
+							</div>
+	
+							<div v-for="seat in Object.keys(selectedSeats)" :key="seat"
+								class="col-2">
+								<button class="btn btn-secondary btn-blue-bg">
+									{{ seat }}
+								</button>
+							</div>
+	
+						</div>
+	
+						<div v-if="Object.keys(selectedSeats).length > 0" class="row mb-3 d-flex justify-content-center">
+	
+							<div class="col-4">
+								<button class="btn btn-secondary btn-transparent-bg">
+									Стоимость:
+								</button>
+							</div>
+	
+							<div class="col-6">
+								<button class="btn btn-secondary btn-blue-bg">
+									{{ totalPrice }} донгов
+								</button>
+							</div>
+	
+						</div>
+
+						<div v-if="Object.keys(selectedSeats).length > 0" class="row mb-3">
+	
+							<div class="col-6">
+								<div class="dropdown">
+									<button class="btn btn-secondary dropdown-toggle btn-transparent-bg fw-medium" data-bs-toggle="dropdown" aria-expanded="false">
+	
+										{{ paymentMethods[selectedPaymentMethod] }}
+									</button>
+									<ul class="dropdown-menu shadow-sm">
+										<li v-for="(label, key) in paymentMethods" :key="key">
+											<div 
+												class="dropdown-item" 
+												:class="{ 'active': selectedPaymentMethod == key }"
+												@click="selectPaymentMethod(key)">
+												{{ label }}
+											</div>
+										</li>
+									</ul>
+								</div>
+							</div>
+	
+							<div class="col-6">
+								<button @click="sendBookingToTelegram()" class="btn btn-secondary btn-transparent-bg">
+									Забронировать
+								</button>
+							</div>
+	
+						</div>
+
+					</div>
+
+				</div>
+
 				<nav v-if="!isLoading && showCreateAd" class="navbar bg-transparent fixed-bottom">
 
 					<div class="container-fluid d-flex justify-content-end">
@@ -1187,6 +1514,7 @@
 						// Передаем текущую дату
 						date: this.formatDate(new Date())
 					},
+					//
 					weatherAd: {
 						// id: 0,
 						// image: '',
@@ -1195,6 +1523,7 @@
 						// contact: '',
 						// date: ''
 					},
+					//
 					dollarAd: {
 						// id: 0,
 						// image: '',
@@ -1205,10 +1534,32 @@
 					},
 					// отвечает за показ экрана для создания нового объявления
 					showCreateAd: false,
-					// отвечает за показ экрана со списком объявлений
-					showNewsList: false,
-					// отвечает за показ экрана только с одним объявлением
-					showNewsDetail: false,
+					//
+					showSleepBus: false,
+					//
+					seats: {
+						A1: false, B1: false, A2: false, B2: false,
+						A3: false, B3: false, A4: false, B4: false,
+						A5: false, B5: false, A6: false, B6: false,
+						A7: false, B7: false, A8: false, B8: false,
+						A9: false, B9: false, A10: false, B10: false,
+						A11: false, A12: false
+					},
+					// Выбранные места
+					selectedSeats: {},
+					// Выбранная дата
+					busSelectedDate: null,
+					// Стоимость билетов
+					totalPrice: 0,
+					// Виды оплаты
+					paymentMethods: {
+						1: 'Перевод по QR',
+						2: 'Наличная оплата'
+					},
+					// Значение по умолчанию
+					selectedPaymentMethod: 1,
+					//
+					busDirector: '@limonade_monica',
                     // содержит массив объявлений
                     adsList: [],
                     // содержит объект одного объявления
@@ -1362,7 +1713,7 @@
 									},
 									prices: {
 										'818': '65.000 д',
-										'812': '32.000 д',
+										'812': '34.000 д',
 										'851': '8.000 д',
 										'852': '8.000 д',
 										'82': '8.000 д',
@@ -1671,7 +2022,7 @@
 									},
 									prices: {
 										'818': '65.000 d',
-										'812': '32.000 d',
+										'812': '34.000 d',
 										'851': '8.000 d',
 										'852': '8.000 d',
 										'82': '8.000 d',
@@ -2344,16 +2695,16 @@
 							]
 						},
 						812: {
-							origin: { lat: 12.2288976, lng: 109.1970949 },
-							destination: { lat: 12.5497223, lng: 109.2277268 },
+							origin: { lat: 12.209805, lng: 109.187137 },
+							destination: { lat: 12.549722, lng: 109.227726 },
 							waypoints: [
-								{ location: { lat: 12.2288976, lng: 109.1970949 }, stopover: false },
-								{ location: { lat: 12.2375856, lng: 109.1954155 }, stopover: false },
-								{ location: { lat: 12.2459429, lng: 109.1916932 }, stopover: false },
-								{ location: { lat: 12.2586778, lng: 109.1898965 }, stopover: false },
-								{ location: { lat: 12.2684933, lng: 109.1971679 }, stopover: false },
+								{ location: { lat: 12.209805, lng: 109.187137 }, stopover: false },
+								{ location: { lat: 12.237663, lng: 109.195295 }, stopover: false },
+								{ location: { lat: 12.245942, lng: 109.191693 }, stopover: false },
+								{ location: { lat: 12.261271, lng: 109.191356 }, stopover: false },
+								{ location: { lat: 12.268493, lng: 109.197167 }, stopover: false },
 								{ location: { lat: 12.376173, lng: 109.196432 }, stopover: false },
-								{ location: { lat: 12.5497223, lng: 109.2277268 }, stopover: false },
+								{ location: { lat: 12.549722, lng: 109.227726 }, stopover: false },
 							]
 						},
 						851: {
@@ -2509,6 +2860,9 @@
 					};
 				}
 			},
+			components: {
+				Datepicker: VueDatePicker
+			},
             methods: {
 				//
 				applyTheme() {
@@ -2639,6 +2993,7 @@
 					this.showAdList = screen === 'adList';
 					this.showAdDetail = screen === 'adDetail';
 					this.showCreateAd = screen === 'create';
+					this.showSleepBus = screen === 'sleepBus';
 					// 
 				},
                 // искать по тексту/ по категории
@@ -3274,6 +3629,30 @@
 						this.showError(this.getTranslation('errors.' + 480));
 					}
 				},
+				//
+				sendBookingToTelegram() {
+					// Проверяем, есть ли вообще выбранные даты и места
+					if (!this.busSelectedDate || Object.keys(this.selectedSeats).length === 0) {
+						this.showError("Выберите дату и хотя бы одно место");
+						return;
+					}
+					// Форматируем дату
+					const formattedDate = this.formatDate(this.busSelectedDate);
+					// Формируем список мест
+					const seatsList = Object.keys(this.selectedSeats).join(", ");
+					
+					// Формируем сообщение
+					const message = `🚍 Бронирование мест в автобусе\n📅 Дата поездки: ${formattedDate}\n📍 Места: ${seatsList}\n💰 Итоговая стоимость: ${this.totalPrice} VND\n💳 Метод оплаты: ${this.paymentMethods[this.selectedPaymentMethod]}`;
+
+					// Удаляем "@" из имени пользователя
+					const username = this.busDirector.replace(/^@/, "");
+
+					// Формируем ссылку для Telegram с автоматическим заполнением сообщения
+					const telegramUrl = `https://t.me/${username}?text=${encodeURIComponent(message)}`;
+
+					// Открываем Telegram с подготовленным сообщением
+					window.open(telegramUrl, "_blank");
+				},
 				// метод загрузки с сервера одного объявления с погодой
                 loadAdWeather() {
 					// отправляем запрос на сервер
@@ -3386,6 +3765,31 @@
 					}
 				},
 				//
+				toggleSeat(seat) {
+					// Цена билета
+					const ticketPrice = 1250000;
+
+					if (this.seats[seat]) {
+						// Если место уже выбрано, убираем его
+						delete this.selectedSeats[seat];
+        				this.seats[seat] = false;
+					} else {
+						// Если максимум не достигнут, добавляем
+						if (Object.keys(this.selectedSeats).length < 4) {
+							this.selectedSeats[seat] = true;
+							this.seats[seat] = true;
+						} else {
+							this.showError("Максимум 4 места");
+							return;
+						}
+					}
+					// Пересчитываем стоимость билетов
+					this.totalPrice = Object.keys(this.selectedSeats).length * ticketPrice;
+				},
+				//
+				selectPaymentMethod(key) {
+					this.selectedPaymentMethod = key;
+				},
 				// onKeyUp(event) {
 				// 	if (event.key === "Enter" || event.keyCode === 13) {
 				// 		this.searchByTextOrCategory();
