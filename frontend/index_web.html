@@ -1165,18 +1165,17 @@
 
 						<div class="col-5">
 							<button class="btn btn-secondary btn-blue-bg">
-								Дата: {{ formatDate(busSelectedDate) }}
+								Выезд: {{ formatDate(busSelectedDate) }}
 							</button>
 						</div>
 
 						<div class="col-6">
-							<!-- <button class="btn btn-secondary btn-transparent-bg">Calendar</button> -->
-							<Datepicker v-model="busSelectedDate" auto-apply class="datepicker" :enable-time-picker="false" :placeholder="'Выберите дату'"/>
+							<Datepicker v-model="busSelectedDate" auto-apply class="datepicker" :enable-time-picker="false" :placeholder="'Выберите дату'" />
 						</div>
 
 					</div><br>
 
-					<div class="container" v-if="busSelectedDate">
+					<div class="container" v-if="busSelectedDate && !showAboutSleepBus">
 
 						<!-- Шестой ряд -->
 						<div class="row mb-2">
@@ -1334,13 +1333,13 @@
 							</div>
 
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A1')" class="btn btn-secondary" :class="seats['A1'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<button @click="toggleSeat('A1')" class="btn btn-secondary" :class="seats['A1'] ? 'btn-blue-bg' : 'btn-transparent-bg'" :disabled="true">
 									A1
 								</button>
 							</div>
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A2')" class="btn btn-secondary" :class="seats['A2'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<button @click="toggleSeat('A2')" class="btn btn-secondary" :class="seats['A2'] ? 'btn-blue-bg' : 'btn-transparent-bg'" :disabled="true">
 									A2
 								</button>
 							</div>
@@ -1463,6 +1462,110 @@
 
 					</div>
 
+					<div class="row mb-2 d-flex justify-content-end">
+
+						<div class="col-5">
+							<button @click="showAboutSleepBus = !showAboutSleepBus" class="btn btn-secondary btn-transparent-bg">
+								<i :class="showAboutSleepBus ? 'bi bi-box-arrow-in-up' : 'bi bi-box-arrow-down'"></i>
+								{{ showAboutSleepBus ? 'Свернуть' : 'Подробнее' }}
+							</button>
+						</div>
+
+					</div>
+
+					<div v-if="showAboutSleepBus" class="row mb-2">
+
+						<div class="col-11">
+
+							<div class="card shadow-sm custom-rounded-left">
+	
+								<div class="card-img-container">
+									<img 
+										:src="sleepBusImages[0]"
+										class="d-block w-100 img-fluid card-img-3"
+										alt="image 1"
+										@click="openModal()"
+									>
+									<div class="badge bg-dark text-white position-absolute top-0 end-0 m-2" style="opacity: 0.6;">
+										3 Фото
+									</div>
+								</div>
+	
+								<div class="card-body">
+									<h5 class="card-title lh-sm">Визаран в Лаос</h5>
+	
+									<div class="d-inline-block mb-2">
+										<button class="btn btn-sm btn-blue-bg mb-1 me-2">
+											Визараны
+										</button>
+										<button class="btn btn-sm btn-blue-bg mb-1 me-2">
+											Бордерраны
+										</button>
+									</div>
+							
+									<p class="card-text lh-sm" style="white-space: pre-line;">
+										Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis libero hic officiis dolor nostrum magnam cum expedita qui repudiandae blanditiis placeat, vero, nesciunt aperiam! Illo nulla dolore quod cum accusamus ea, accusantium dolorum incidunt totam. Error explicabo architecto id excepturi.
+									</p>
+	
+									<h6 class="card-subtitle mb-2 text-body-secondary">
+										<!-- Контакт  -->
+										<i class="bi bi-send-fill"></i>
+										Алексей, telegram @alex_visarun
+									</h6>
+	
+									<div class="row">
+										<div class="col">
+											<p class="card-text"><small class="text-body-secondary">
+												<!-- Создано  -->
+												<i class="bi bi-calendar-date-fill"></i>
+												Создано: 12 Jan
+										</div>
+									</div>
+								</div>
+	
+							</div>
+	
+							<!-- Модальное окно -->
+							<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+								<div class="modal-dialog modal-dialog-centered modal-lg">
+									<div class="modal-content custom-rounded-2">
+										<div class="modal-body p-0 position-relative">
+											<!-- Управление каруселью -->
+											<div id="carouselModal" class="carousel slide carousel-fade">
+							
+												<div class="carousel-inner">
+													<div 
+														v-for="(image, index) in sleepBusImages" 
+														:key="index" 
+														:class="['carousel-item', { active: index === 0 }]">
+														<img :src="image" class="d-block w-100 img-fluid" :alt="'Image ' + (index + 1)">
+													</div>
+												</div>
+							
+												<!-- Кнопка "Предыдущая" -->
+												<button v-if="sleepBusImages.length > 1" class="carousel-control-prev" type="button" 
+													data-bs-target="#carouselModal" data-bs-slide="prev">
+													<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+													<span class="visually-hidden">Previous</span>
+												</button>
+	
+												<!-- Кнопка "Следующая" -->
+												<button v-if="sleepBusImages.length > 1" class="carousel-control-next" type="button" 
+													data-bs-target="#carouselModal" data-bs-slide="next">
+													<span class="carousel-control-next-icon" aria-hidden="true"></span>
+													<span class="visually-hidden">Next</span>
+												</button>
+
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							
+						</div>
+
+					</div>
+
 				</div>
 
 				<nav v-if="!isLoading && showCreateAd" class="navbar bg-transparent fixed-bottom">
@@ -1560,6 +1663,14 @@
 					selectedPaymentMethod: 1,
 					//
 					busDirector: '@limonade_monica',
+					//
+					showAboutSleepBus: false,
+					//
+					sleepBusImages: [
+						'https://www.limonade.pro/backend/uploads/images/GAniF.jpg',
+						'https://www.limonade.pro/backend/uploads/images/ZuRWI.jpg',
+						'https://www.limonade.pro/backend/uploads/images/Wu6j9.jpg',
+					],
                     // содержит массив объявлений
                     adsList: [],
                     // содержит объект одного объявления
@@ -2823,6 +2934,25 @@
                 // Наблюдаем за изменением второго уровня подкатегорий (третий выпадающий список)
 				selectedSubcategory2() {
 					this.updateCategoryCode();
+				},
+				busSelectedDate(newValue) {
+					if (newValue) {
+						this.showAboutSleepBus = false;
+
+						// Обнуляем значения
+						this.seats = {
+							A1: false, B1: false, A2: false, B2: false,
+							A3: false, B3: false, A4: false, B4: false,
+							A5: false, B5: false, A6: false, B6: false,
+							A7: false, B7: false, A8: false, B8: false,
+							A9: false, B9: false, A10: false, B10: false,
+							A11: false, A12: false
+						};
+						this.totalPrice = 0;
+						this.selectedSeats = {};
+						this.selectedPaymentMethod = 1;
+					}
+					// console.log("Дата выбрана:", newValue);
 				}
             },
             computed: {
@@ -3790,6 +3920,8 @@
 				selectPaymentMethod(key) {
 					this.selectedPaymentMethod = key;
 				},
+				//
+				
 				// onKeyUp(event) {
 				// 	if (event.key === "Enter" || event.keyCode === 13) {
 				// 		this.searchByTextOrCategory();
