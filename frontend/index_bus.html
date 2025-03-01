@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Объявления</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+	<link rel="icon" type="image/png" href="https://www.limonade.pro/backend/uploads/images/templates/icon.png">
+    <link rel="stylesheet" href="https://unpkg.com/@vuepic/vue-datepicker@latest/dist/main.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script> -->
+	<!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/@vuepic/vue-datepicker@latest"></script>
+
+	<style>
+		[v-cloak] {
+			display: none;
+		}
+		body {
+			background-color: #FCF2CF;
+		}
+        .big-top-margin {
+			margin-top: 10px;
+		}
+		.input-group-text a {
+			text-decoration: none;
+			color: inherit;
+		}
+	</style>
+</head>
+<body>
+	<div id="app" v-cloak>
+		
+		<div class="container p-2 big-top-margin">
+
+			<div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+			<div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
+			<div v-if="isLoading" class="d-flex justify-content-center p-5">
+				<div class="spinner-grow text-warning" role="status">
+					<span class="visually-hidden">
+						Загружается...
+					</span>
+				</div>
+			</div>
+
+            <div v-if="!isLoading" class="row mb-3 d-flex justify-content-center">
+                <div class="col-5">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text" id="inputGroup-sizing-sm">Пароль</span>
+                        <input v-model="authPassword" type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline">
+                    </div>
+                </div>
+				<div class="col-7">
+                    <Datepicker v-model="routeDate" auto-apply class="w-100 border-0" :enable-time-picker="false" :placeholder="'Выберите дату'" />
+                </div>
+            </div>
+
+            <div v-if="!isLoading" class="row mb-3 d-flex justify-content-center">
+				<div class="col-auto">
+					<button type="button" class="btn btn-sm btn-secondary">Выезд: {{ formatDate(routeDate) }}</button>
+				</div>
+                <div class="col-auto">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Basic mixed styles example">
+                        <button @click="createNewRoute()" type="button" class="btn"
+							:class="showCreate ? 'btn-primary' : 'btn-outline-primary'">Создать</button>
+                        <button @click="getRoutesByDate()" type="button" class="btn"
+							:class="(showUpdate || showCheckUpdate) ? 'btn-warning' : 'btn-outline-warning'">Посмотреть</button>
+                    </div>
+                </div>
+            </div>
+			
+			<br>
+
+			<div v-if="!isLoading && (showCheckUpdate || showUpdate)" class="row mb-3 d-flex justify-content-center">
+				<div v-for="route in routes" :key="route" class="col-auto">
+				  <button @click="getRouteById(route)" type="button" class="btn btn-sm"
+					:class="selectedRouteId === route ? 'btn-primary' : 'btn-outline-primary'">
+					Рейс {{ route }}
+				  </button>
+				</div>
+			</div>
+
+			<div v-if="!isLoading && showUpdate" class="row mb-3 d-flex justify-content-center">
+                <div class="col-auto">
+					<div class="btn-group btn-group-sm" role="group">
+						<input v-model="busRoute.status" type="radio" class="btn-check" name="busStatus" id="status1" :value="1" autocomplete="off">
+						<label class="btn" :class="busRoute.status === 1 ? 'btn-warning' : 'btn-outline-warning'" for="status1">Есть места</label>
+
+						<input v-model="busRoute.status" type="radio" class="btn-check" name="busStatus" id="status2" :value="2" autocomplete="off">
+						<label class="btn" :class="busRoute.status === 2 ? 'btn-primary' : 'btn-outline-primary'" for="status2">Полный</label>
+					
+						<input v-model="busRoute.status" type="radio" class="btn-check" name="busStatus" id="status3" :value="3" autocomplete="off">
+						<label class="btn" :class="busRoute.status === 3 ? 'btn-success' : 'btn-outline-success'" for="status3">Уехал</label>
+					
+						<input v-model="busRoute.status" type="radio" class="btn-check" name="busStatus" id="status4" :value="4" autocomplete="off">
+						<label class="btn" :class="busRoute.status === 4 ? 'btn-danger' : 'btn-outline-danger'" for="status4">Удален</label>
+					</div>
+                </div>
+            </div>
+
+            <div v-if="!isLoading && (showCreate || showUpdate)" class="container m-1">
+
+				<div class="row mb-2 d-flex justify-content-around">
+					<div class="col-12">
+						<div class="input-group input-group-sm">
+							<span class="input-group-text" @click="copyToClipboard('location')">Локация</span>
+							<input type="text" v-model="busRoute.location" class="form-control">
+						</div>
+					</div>
+				</div>
+
+				<div class="row mb-2 d-flex justify-content-around">
+                    <div class="col-7">
+                        <div class="input-group input-group-sm">
+							<span class="input-group-text" @click="copyToClipboard('busNumber')">Госномер</span>
+							<input type="text" v-model="busRoute.busNumber" class="form-control">
+						</div>
+                    </div>
+					<div class="col-5">
+                        <div class="input-group input-group-sm">
+							<span class="input-group-text" @click="copyToClipboard('basePrice')">Цена</span>
+							<input type="text" v-model="busRoute.basePrice" class="form-control">
+						</div>
+                    </div>
+                </div>
+
+				<div class="row mb-2 d-flex justify-content-around">
+                    <div class="col-5">
+                        <div class="input-group input-group-sm">
+							<span class="input-group-text" @click="copyToClipboard('departureTime')">Время</span>
+							<input type="text" v-model="busRoute.departureTime" class="form-control">
+						</div>
+                    </div>
+					<div class="col-7">
+                        <div class="input-group input-group-sm">
+							<span class="input-group-text" @click="copyToClipboard('discountPrice')">Места A11, A12</span>
+							<input type="text" v-model="busRoute.discountPrice" class="form-control">
+						</div>
+                    </div>
+                </div>
+
+				<div class="row mb-3 d-flex justify-content-around">
+                    <div class="col-7">
+                        <div class="input-group input-group-sm">
+							<span class="input-group-text"><a :href="'https://t.me/' + busRoute.telegramGroup" target="_blank">Группа ТГ</a></span>
+							<!-- <li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A11.contact" target="_blank">Написать</a></li> -->
+							<input type="text" v-model="busRoute.telegramGroup" class="form-control">
+						</div>
+                    </div>
+					<div class="col-5">
+                        <div class="input-group input-group-sm">
+							<span class="input-group-text" @click="copyToClipboard('wifiPassword')">WIFI</span>
+							<input type="text" v-model="busRoute.wifiPassword" class="form-control">
+						</div>
+                    </div>
+                </div>
+
+
+                <!-- Шестой ряд -->
+                <div class="row mb-2">
+
+					<!-- Туалет -->
+                    <div class="col d-flex justify-content-center">
+                        <button class="btn btn-secondary">
+                            <i class="bi bi-badge-wc"></i>
+                            Биотуалет
+                        </button>
+                    </div>
+
+                    <div class="col-3 d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.A11.status === 1,
+									'btn-warning': busRoute.seats.A11.status === 2,
+									'btn-success': busRoute.seats.A11.status === 3,
+									'btn-danger': busRoute.seats.A11.status === 4
+								}">A11
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('A11', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('A11', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('A11', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('A11', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A11.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.A11.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col-3 d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.A12.status === 1,
+									'btn-warning': busRoute.seats.A12.status === 2,
+									'btn-success': busRoute.seats.A12.status === 3,
+									'btn-danger': busRoute.seats.A12.status === 4
+								}">A12
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('A12', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('A12', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('A12', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('A12', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A12.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.A12.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                </div>
+
+                <!-- Пятый ряд -->
+                <div class="row mb-2">
+
+                    <div class="col d-flex justify-content-center">
+                        <div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.B10.status === 1,
+									'btn-warning': busRoute.seats.B10.status === 2,
+									'btn-success': busRoute.seats.B10.status === 3,
+									'btn-danger': busRoute.seats.B10.status === 4
+								}">B10
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('B10', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('B10', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('B10', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('B10', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.B10.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.B10.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.B9.status === 1,
+									'btn-warning': busRoute.seats.B9.status === 2,
+									'btn-success': busRoute.seats.B9.status === 3,
+									'btn-danger': busRoute.seats.B9.status === 4
+								}">B9
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('B9', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('B9', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('B9', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('B9', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.B9.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.B9.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.A9.status === 1,
+									'btn-warning': busRoute.seats.A9.status === 2,
+									'btn-success': busRoute.seats.A9.status === 3,
+									'btn-danger': busRoute.seats.A9.status === 4
+								}">A9
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('A9', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('A9', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('A9', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('A9', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A9.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.A9.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.A10.status === 1,
+									'btn-warning': busRoute.seats.A10.status === 2,
+									'btn-success': busRoute.seats.A10.status === 3,
+									'btn-danger': busRoute.seats.A10.status === 4
+								}">A10
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('A10', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('A10', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('A10', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('A10', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A10.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.A10.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                </div>
+
+                <!-- Четвертый ряд -->
+                <div class="row mb-2">
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.B8.status === 1,
+									'btn-warning': busRoute.seats.B8.status === 2,
+									'btn-success': busRoute.seats.B8.status === 3,
+									'btn-danger': busRoute.seats.B8.status === 4
+								}">B8
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('B8', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('B8', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('B8', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('B8', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.B8.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.B8.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.B7.status === 1,
+									'btn-warning': busRoute.seats.B7.status === 2,
+									'btn-success': busRoute.seats.B7.status === 3,
+									'btn-danger': busRoute.seats.B7.status === 4
+								}">B7
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('B7', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('B7', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('B7', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('B7', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.B7.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.B7.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.A7.status === 1,
+									'btn-warning': busRoute.seats.A7.status === 2,
+									'btn-success': busRoute.seats.A7.status === 3,
+									'btn-danger': busRoute.seats.A7.status === 4
+								}">A7
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('A7', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('A7', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('A7', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('A7', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A7.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.A7.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.A8.status === 1,
+									'btn-warning': busRoute.seats.A8.status === 2,
+									'btn-success': busRoute.seats.A8.status === 3,
+									'btn-danger': busRoute.seats.A8.status === 4
+								}">A8
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('A8', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('A8', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('A8', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('A8', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A8.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.A8.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                </div>
+
+                <!-- Третий ряд -->
+                <div class="row mb-2">
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.B6.status === 1,
+									'btn-warning': busRoute.seats.B6.status === 2,
+									'btn-success': busRoute.seats.B6.status === 3,
+									'btn-danger': busRoute.seats.B6.status === 4
+								}">B6
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('B6', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('B6', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('B6', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('B6', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.B6.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.B6.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.B5.status === 1,
+									'btn-warning': busRoute.seats.B5.status === 2,
+									'btn-success': busRoute.seats.B5.status === 3,
+									'btn-danger': busRoute.seats.B5.status === 4
+								}">B5
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('B5', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('B5', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('B5', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('B5', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.B5.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.B5.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.A5.status === 1,
+									'btn-warning': busRoute.seats.A5.status === 2,
+									'btn-success': busRoute.seats.A5.status === 3,
+									'btn-danger': busRoute.seats.A5.status === 4
+								}">A5
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('A5', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('A5', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('A5', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('A5', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A5.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.A5.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.A6.status === 1,
+									'btn-warning': busRoute.seats.A6.status === 2,
+									'btn-success': busRoute.seats.A6.status === 3,
+									'btn-danger': busRoute.seats.A6.status === 4
+								}">A6
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('A6', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('A6', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('A6', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('A6', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A6.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.A6.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                </div>
+
+                <!-- Второй ряд -->
+                <div class="row mb-2">
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.B4.status === 1,
+									'btn-warning': busRoute.seats.B4.status === 2,
+									'btn-success': busRoute.seats.B4.status === 3,
+									'btn-danger': busRoute.seats.B4.status === 4
+								}">B4
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('B4', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('B4', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('B4', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('B4', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.B4.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.B4.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.B3.status === 1,
+									'btn-warning': busRoute.seats.B3.status === 2,
+									'btn-success': busRoute.seats.B3.status === 3,
+									'btn-danger': busRoute.seats.B3.status === 4
+								}">B3
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('B3', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('B3', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('B3', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('B3', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.B3.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.B3.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.A3.status === 1,
+									'btn-warning': busRoute.seats.A3.status === 2,
+									'btn-success': busRoute.seats.A3.status === 3,
+									'btn-danger': busRoute.seats.A3.status === 4
+								}">A3
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('A3', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('A3', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('A3', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('A3', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A3.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.A3.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.A4.status === 1,
+									'btn-warning': busRoute.seats.A4.status === 2,
+									'btn-success': busRoute.seats.A4.status === 3,
+									'btn-danger': busRoute.seats.A4.status === 4
+								}">A4
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('A4', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('A4', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('A4', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('A4', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A4.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.A4.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                </div>
+
+                <!-- Первый ряд -->
+                <div class="row mb-2">
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.B2.status === 1,
+									'btn-warning': busRoute.seats.B2.status === 2,
+									'btn-success': busRoute.seats.B2.status === 3,
+									'btn-danger': busRoute.seats.B2.status === 4
+								}">B2
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('B2', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('B2', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('B2', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('B2', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.B2.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.B2.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.B1.status === 1,
+									'btn-warning': busRoute.seats.B1.status === 2,
+									'btn-success': busRoute.seats.B1.status === 3,
+									'btn-danger': busRoute.seats.B1.status === 4
+								}">B1
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('B1', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('B1', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('B1', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('B1', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.B1.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.B1.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.A1.status === 1,
+									'btn-warning': busRoute.seats.A1.status === 2,
+									'btn-success': busRoute.seats.A1.status === 3,
+									'btn-danger': busRoute.seats.A1.status === 4
+								}">A1
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('A1', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('A1', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('A1', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('A1', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A1.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.A1.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+						<div class="dropdown">
+							<button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+								:class="{
+									'btn-secondary': busRoute.seats.A2.status === 1,
+									'btn-warning': busRoute.seats.A2.status === 2,
+									'btn-success': busRoute.seats.A2.status === 3,
+									'btn-danger': busRoute.seats.A2.status === 4
+								}">A2
+							</button>
+							<ul class="dropdown-menu">
+								<li><button @click="changeStatus('A2', 1, $event)" class="dropdown-item" type="button">Свободно</button></li>
+								<li><button @click="changeStatus('A2', 2, $event)" class="dropdown-item" type="button">Бронь</button></li>
+								<li><button @click="changeStatus('A2', 3, $event)" class="dropdown-item" type="button">Оплачено</button></li>
+								<li><button @click="changeStatus('A2', 4, $event)" class="dropdown-item" type="button">Недоступно</button></li>
+								<li><a class="btn btn-sm btn-primary ms-3 m-1" :href="'https://t.me/' + busRoute.seats.A2.contact" target="_blank">Написать</a></li>
+								<li class="px-2">
+									<input v-model.trim="busRoute.seats.A2.contact" class="form-control form-control-sm" type="text" placeholder="контакт">
+								</li>
+							</ul>
+						</div>
+                    </div>
+
+                </div>
+
+                <!-- Указатели -->
+                <div v-if="showArrows" class="row mb-2">
+
+                    <div class="col d-flex justify-content-center">
+                        <button @click="showArrows = false" class="btn btn-secondary">
+                            <i class="bi bi-arrow-up-left"></i>
+                            Верх
+                        </button>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+                        <button class="btn btn-secondary">
+                            <i class="bi bi-arrow-down-left"></i>
+                            Низ
+                        </button>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+                        <button class="btn btn-secondary">
+                            <i class="bi bi-arrow-down-right"></i>
+                            Низ
+                        </button>
+                    </div>
+
+                    <div class="col d-flex justify-content-center">
+                        <button class="btn btn-secondary">
+                            <i class="bi bi-arrow-up-right"></i>
+                            Верх
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Вход -->
+                <div class="row mb-2">
+
+                    <div class="col-6 d-flex justify-content-center">
+                        <button class="btn btn-secondary">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            Вход
+                        </button>
+                    </div>
+
+                    <div class="col-6 d-flex justify-content-center">
+                        <button class="btn btn-secondary">
+                            <i class="bi bi-person-vcard"></i>
+                            Водитель
+                        </button>
+                    </div>
+
+                </div>
+				
+				<br>
+
+                <div v-if="showCreate" class="row mb-2 d-flex justify-content-around">
+                    <div class="col-auto">
+                        <button @click="resetBusRoute()" type="button" class="btn btn-sm btn-danger">Очистить</button>
+                    </div>
+                    <div class="col-auto">
+                        <button @click="saveNewRoute()" type="button" class="btn btn-sm btn-success">Сохранить</button>
+                    </div>
+                </div>
+
+				<div v-if="showUpdate" class="row mb-2 d-flex justify-content-around">
+                    <div class="col-auto">
+						<button @click="copyAllToClipboard()" type="button" class="btn btn-sm btn-primary">Явки, пароли</button>
+                    </div>
+                    <div class="col-auto">
+                        <button @click="changeRouteById(selectedRouteId)" type="button" class="btn btn-sm btn-success">Обновить</button>
+                    </div>
+                </div>
+
+            </div>
+
+		</div>
+		
+	</div>
+
+	
+
+	<script>
+        const app = Vue.createApp({
+            data() {
+                return {
+					// Стартовый экран
+					showStart: true,
+					// Экран создания нового рейса
+					showCreate: false,
+					// Экран поиска существующих рейсов
+					showCheckUpdate: false,
+					// Экран редактирования существующего рейса
+					showUpdate: false,
+					// Строка с указателями
+					showArrows: true,
+					// Выбранная дата рейса
+					routeDate: null,
+					// Создатель рейса
+					routeCreator: '@limonade_monica',
+					// Пароль для авторизации
+					authPassword: '',
+					// Массив рейсов
+					routes: [],
+					// ID выбранного рейса
+					selectedRouteId: null,
+					// Объект нового рейса
+					defaultBusRoute: {
+						// Дата поездки
+						date: null,
+						// Создатель рейса
+						createdBy: '',
+						// Пароль
+						password: '',
+						// Статус рейса (1 - есть места, 2 - полный, 3 - уехал, 4 - удален)
+						status: 1,
+						// Точка отправления
+						location: '',
+						// Время отправления
+						departureTime: '',
+						// Номер автобуса
+						busNumber: '',
+						// Стоимость обычного билета
+						basePrice: 1250000,
+						// Стоимость билета на задние места
+						discountPrice: 1000000,
+						// Ссылка на группу в ТГ
+						telegramGroup: '',
+						// Пароль вайфай
+						wifiPassword: '',
+						
+						// Места
+						seats: {
+							// Статус места (1 - свободно, 2 - бронь, 3 - оплачено, 4 - недоступно)
+							A1: { status: 1, contact: '' },
+							B1: { status: 1, contact: '' },
+							A2: { status: 1, contact: '' },
+							B2: { status: 1, contact: '' },
+							A3: { status: 1, contact: '' },
+							B3: { status: 1, contact: '' },
+							A4: { status: 1, contact: '' },
+							B4: { status: 1, contact: '' },
+							A5: { status: 1, contact: '' },
+							B5: { status: 1, contact: '' },
+							A6: { status: 1, contact: '' },
+							B6: { status: 1, contact: '' },
+							A7: { status: 1, contact: '' },
+							B7: { status: 1, contact: '' },
+							A8: { status: 1, contact: '' },
+							B8: { status: 1, contact: '' },
+							A9: { status: 1, contact: '' },
+							B9: { status: 1, contact: '' },
+							A10: { status: 1, contact: '' },
+							B10: { status: 1, contact: '' },
+							A11: { status: 1, contact: '' },
+							A12: { status: 1, contact: '' }
+						}
+					},
+					//
+					busRoute: {},
+					// Показывает, что данные в процессе загрузки с сервера
+                    isLoading: false,
+					// Текст всплывающей подсказки в случае успеха
+					successMessage: null,
+					// Текст всплывающей подсказки в случае ошибки
+                    errorMessage: null,
+					//
+					
+                };
+            },
+			created() {
+				// При загрузке страницы копируем данные в busRoute
+    			this.resetBusRoute();
+			},
+			watch: {
+                //
+				routeDate(newValue) {
+					if (newValue) {
+						//
+						this.routes = [];
+						//
+						this.selectedRouteId = null;
+						//
+						this.showScreen('showStart');
+					}
+				}
+            },
+            components: {
+				// Компонент календаря
+				Datepicker: VueDatePicker
+			},
+            methods: {
+				// Выбрать, какой экран показать
+				showScreen(screen) {
+					this.showStart == 'showStart';
+					this.showCreate = screen === 'showCreate';
+					this.showCheckUpdate = screen === 'showCheckUpdate';
+					this.showUpdate = screen === 'showUpdate';
+				},
+				// Очистить текущий объект рейса
+				resetBusRoute() {
+					this.busRoute = JSON.parse(JSON.stringify(this.defaultBusRoute));
+				},
+				// Создать новый рейс
+				createNewRoute() {
+					//
+					if (!this.routeDate) {
+						// this.errorMessage = 'Выберите дату рейса!';
+						this.errorMessage = 'Выберите дату рейса!';
+					}
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+
+					// Обнулить обьект рейса
+					this.resetBusRoute();
+					// Показать экран создания нового рейса
+					this.showScreen('showCreate');
+					// Обнулить выбранный id рейса
+					selectedRouteId = null;
+				},
+				// Сохранить новый рейс
+				saveNewRoute() {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+
+					// Проверяем, введены ли параметры рейса и их длина
+					if (this.authPassword.length < 3) {
+						// this.errorMessage = 'Введите пароль!';
+						this.errorMessage = 'Введите пароль!';
+
+					} else if (this.authPassword.length > 10) {
+						// this.errorMessage = 'Пароль слишком длинный!';
+						this.errorMessage = 'Пароль слишком длинный!';
+						
+					} else if (!this.routeDate) {
+						// this.errorMessage = 'Выберите дату рейса!';
+						this.errorMessage = 'Выберите дату рейса!';
+					}
+
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+
+					// Преобразуем в YYYY-MM-DD
+					const formattedDate = new Intl.DateTimeFormat('fr-CA', {
+						timeZone: 'Asia/Ho_Chi_Minh' // Укажи свой часовой пояс
+					}).format(new Date(this.routeDate));
+					// Дата рейса
+					this.busRoute.date = formattedDate;
+					// Создатель рейса
+					this.busRoute.createdBy = this.routeCreator;
+					// Пароль
+					this.busRoute.password = this.authPassword;
+					
+					// отправляем данные на сервер
+					this.isLoading = true;
+
+					axios.post('web/bus/create', this.busRoute, { headers: { 'Content-Type': 'application/json' } })
+						.then(response => {
+							// Обработка успешного ответа
+							console.log('Рейс создан:', response.data);
+							// Можно вывести сообщение об успехе
+							this.successMessage = 'Новый рейс создан успешно!';
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.successMessage = ''; }, 3000);
+						})
+						.catch(error => {
+							// Обработка ошибки
+							if (error.response && error.response.data && error.response.data.error) {
+								this.errorMessage = error.response.data.error; 
+							} else {
+								this.errorMessage = 'Ошибка создания нового рейса';
+							}
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.errorMessage = ''; }, 3000);
+						})
+						.finally(() => {
+							this.isLoading = false;
+						});
+				},
+				// Искать доступные рейсы
+				getRoutesByDate() {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+
+					// Проверяем наличие даты
+					if (!this.routeDate) {
+						// this.errorMessage = 'Выберите дату рейса!';
+						this.errorMessage = 'Выберите дату рейса!';
+					}
+
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+
+					// Преобразуем в YYYY-MM-DD
+					const formattedDate = new Intl.DateTimeFormat('fr-CA', {
+						timeZone: 'Asia/Ho_Chi_Minh' // Укажи свой часовой пояс
+					}).format(new Date(this.routeDate));
+
+					// Показать экран проверки новых рейсов
+					this.showScreen('showCheckUpdate');
+					// Обнулить обьект рейса
+					this.resetBusRoute();
+					// Обнулить выбранный id рейса
+					selectedRouteId = null;
+
+					// отправляем данные на сервер
+                    this.isLoading = true;
+
+					axios.get(`web/bus/check/${formattedDate}/${this.routeCreator}/0`)
+                        .then(response => {
+							// Загрузить данные по рейсам
+							// console.log(response.data);
+							this.routes = response.data;
+                        })
+                        .catch((error) => {
+							// Обработка ошибки
+							if (error.response && error.response.data && error.response.data.error) {
+								this.errorMessage = error.response.data.error; 
+							} else {
+								this.errorMessage = 'Ошибка поиска доступных рейсов';
+							}
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.errorMessage = ''; }, 3000);
+                        })
+                        .finally(() => {
+                            this.isLoading = false;
+                        });
+                },
+				// Искать конкретный рейс
+				getRouteById(routeId) {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+
+					// Запоминаем выбранный рейс
+					this.selectedRouteId = routeId;
+
+					// отправляем данные на сервер
+                    this.isLoading = true;
+
+                    axios.get(`web/bus/get/${this.selectedRouteId}`)
+                        .then(response => {
+							// Загрузить данные по рейсу
+							// console.log(response.data); // return;
+
+							// Заполняем объект, учитывая возможные undefined и null
+							this.busRoute = {
+								// Дата поездки
+								date: response.data.route_date ?? '',
+								// Создатель рейса
+								createdBy: response.data.created_by ?? '',
+								// Статус рейса (1 - есть места, 2 - полный, 3 - уехал, 4 - удален)
+								status: Number(response.data.status) || 1,
+								// Точка отправления
+								location: response.data.location ?? '',
+								// Время отправления
+								departureTime: response.data.departure_time ?? '',
+								// Номер автобуса
+								busNumber: response.data.bus_number ?? '',
+								// Стоимость обычного билета
+								basePrice: Number(response.data.base_price) || 0,
+								// Стоимость билета на задние места
+								discountPrice: Number(response.data.discount_price) || 0,
+								// Ссылка на группу в ТГ
+								telegramGroup: response.data.telegram_group ?? '',
+								// Пароль вайфай
+								wifiPassword: response.data.wifi_password ?? '',
+								// Места
+								seats: response.data.seats ? JSON.parse(response.data.seats) : {}
+							};
+
+							// Показать экран обновления рейса
+							this.showScreen('showUpdate');
+												
+                        })
+                        .catch((error) => {
+							// Обработка ошибки
+							if (error.response && error.response.data && error.response.data.error) {
+								this.errorMessage = error.response.data.error; 
+							} else {
+								this.errorMessage = 'Ошибка поиска рейса по id';
+							}
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.errorMessage = ''; }, 3000);
+                        })
+                        .finally(() => {
+                            this.isLoading = false;
+                        });
+				},
+				// Обновить конкретный рейс
+				changeRouteById(routeId) {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+
+					// Проверяем, введены ли параметры рейса и их длина
+					if (this.authPassword.length < 3) {
+						// this.errorMessage = 'Введите пароль!';
+						this.errorMessage = 'Введите пароль!';
+
+					} else if (this.authPassword.length > 10) {
+						// this.errorMessage = 'Пароль слишком длинный!';
+						this.errorMessage = 'Пароль слишком длинный!';
+						
+					} else if (!this.selectedRouteId) {
+						// this.errorMessage = 'Выберите id рейса!';
+						this.errorMessage = 'Выберите id рейса!';
+					}
+
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+
+					// Создатель рейса
+					this.busRoute.createdBy = this.routeCreator;
+					// Пароль
+					this.busRoute.password = this.authPassword;
+
+					// отправляем данные на сервер
+					this.isLoading = true;
+
+					axios.post(`web/bus/update/${this.selectedRouteId}`, this.busRoute, { headers: { 'Content-Type': 'application/json' } })
+						.then(response => {
+							// Выводим сообщение об успехе
+							this.successMessage = 'Текущий рейс обновлен успешно!';
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.successMessage = ''; }, 3000);
+						})
+						.catch((error) => {
+							// Обработка ошибки
+							if (error.response && error.response.data && error.response.data.error) {
+								this.errorMessage = error.response.data.error; 
+							} else {
+								this.errorMessage = 'Ошибка обновления текущего рейса';
+							}
+							// Через 3 секунды (3000 миллисекунд) очищаем сообщение
+							setTimeout(() => { this.errorMessage = ''; }, 3000);
+						})
+						.finally(() => {
+							this.isLoading = false;
+						});
+				},
+                // Изменить формат даты на сокращенный
+				formatDate(dateString) {
+					// Преобразуем строку в объект даты
+					const date = new Date(dateString);
+					// Определяем нужные параметры для форматирования
+					const day = date.getDate();
+					// Получаем месяц в коротком формате, например, "Oct"
+					const month = date.toLocaleString('en', { month: 'short' });
+					// Возвращаем в формате "день месяц"
+					return `${day} ${month}`;
+				},
+                // Изменить формат даты на длинный
+				formatDateLong(dateString) {
+					// Преобразуем строку в объект даты
+					const date = new Date(dateString);
+					// Определяем нужные параметры для форматирования
+					const day = date.getDate();
+					// Получаем месяц в полном формате, например, "October"
+					const month = date.toLocaleString('en', { month: 'long' });
+					// Возвращаем в формате "день месяц"
+					return `${day} ${month}`;
+				},
+				// Изменить статус места и закрыть выпадающий список
+				changeStatus(seat, newStatus, event) {
+					this.busRoute.seats[seat].status = newStatus;
+
+					// Найдем родительский dropdown
+					const dropdownElement = event.target.closest('.dropdown');
+					if (dropdownElement) {
+						// Принудительно скрываем меню
+						dropdownElement.querySelector('.dropdown-toggle').click();
+					}
+				},
+				// не работает пока...
+				mapLink(plusCode) {
+					// Проверка, если код пустой
+					if (!plusCode) return "";
+					// Не меняем `+`, просто добавляем название города
+					let formattedCode = `${plusCode} Nha Trang, Khánh Hòa`;
+					// Кодируем всю строку сразу
+					let encodedQuery = encodeURIComponent(formattedCode);
+					//
+					return `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
+				},
+				// Копировать одно поле в буфер обмена
+				copyToClipboard(field) {
+					const messages = {
+						// location: `Место отправления: ${this.mapLink(this.busRoute.location)}`,
+						location: `Место отправления: ${this.busRoute.location}`,
+						departureTime: `Дата отправления: ${this.formatDateLong(this.routeDate)}, время: ${this.busRoute.departureTime}`,
+						busNumber: `Госномер автобуса: ${this.busRoute.busNumber}`,
+						basePrice: `Базовая стоимость билета: ${this.busRoute.basePrice} VND`,
+						discountPrice: `Стоимость билета на укороченные места A11, A12: ${this.busRoute.discountPrice} VND`,
+						wifiPassword: `Пароль Wi-Fi в автобусе: ${this.busRoute.wifiPassword}`,
+					};
+
+					const textToCopy = messages[field] || "Нет данных";
+
+					navigator.clipboard.writeText(textToCopy)
+						.then(() => {
+							alert(textToCopy);
+						})
+						.catch(err => {
+							console.error("Ошибка копирования: ", err);
+						});
+				},
+				// Копировать все поля в буфер обмена
+				copyAllToClipboard() {
+					const message = `Важная информация по вашему рейсу:\n` +
+						`Дата отправления: ${this.formatDateLong(this.routeDate)}.\n` +
+						`Время отправления: ${this.busRoute.departureTime}.\n` +
+						`Место отправления: ${this.busRoute.location}.\n` +
+						`Госномер автобуса: ${this.busRoute.busNumber}.\n` +
+						`Пароль Wi-Fi в автобусе: ${this.busRoute.wifiPassword}.\n` +
+						`Желаем вам удачной поездки!`;
+
+					navigator.clipboard.writeText(message)
+						.then(() => {
+							alert(message);
+						})
+						.catch(err => {
+							console.error("Ошибка копирования: ", err);
+						});
+				},
+				//
+
+            }
+        });
+		// Устанавливаем глобальный базовый URL для всех запросов axios
+        axios.defaults.baseURL = 'https://www.limonade.pro/';
+
+        app.mount('#app');
+    </script>
+
+</body>
+</html>

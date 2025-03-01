@@ -36,6 +36,16 @@ class Router {
                     $controller = new AdController(ADM_PASS, ADM_USER_ID, TRANSLATE_API_KEY);
                     $controller->getAllAds();
                 },
+                'web/bus/check/{date}/{creator}/{flag}' => function($params) {
+                    // Дата рейса
+                    $date = $params[0];
+                    // Создатель рейса
+                    $creator = $params[1];
+                    // Флаг
+                    $flag = $params[2];
+                    $controller = new BusController(ADM_PASS, CREATOR_PASS);
+                    $controller->findRoutesByDate($date, $creator, $flag);
+                },
                 'api/ad/get_one/{id}' => function($params) {
                     // Проверяем и приводим к целому числу
                     $id = self::validateId($params[0]);
@@ -47,6 +57,18 @@ class Router {
                     $id = self::validateId($params[0]);
                     $controller = new AdController(ADM_PASS, ADM_USER_ID, TRANSLATE_API_KEY);
                     $controller->getAd($id, false);
+                },
+                'web/bus/get/{id}' => function($params) {
+                    // Проверяем
+                    $id = $params[0];
+                    $controller = new BusController(ADM_PASS, CREATOR_PASS);
+                    $controller->findRouteById($id);
+                },
+                'web/bus/get_cropped/{id}' => function($params) {
+                    // Проверяем
+                    $id = $params[0];
+                    $controller = new BusController(ADM_PASS, CREATOR_PASS);
+                    $controller->findCroppedRouteById($id);
                 },
                 'web/ad/get_weather' => function() {
                     // 
@@ -149,6 +171,10 @@ class Router {
                     header('Content-Type: text/html');
                     readfile(__DIR__ . '/../frontend/index_adm.html');
                 },
+                'html/bus' => function() {
+                    header('Content-Type: text/html');
+                    readfile(__DIR__ . '/../frontend/index_bus.html');
+                },
             ],
             'POST' => [
                 // Объявления
@@ -161,12 +187,23 @@ class Router {
                     $controller = new AdController(ADM_PASS, ADM_USER_ID, TRANSLATE_API_KEY);
                     $controller->createAdByTgId();
                 },
+                'web/bus/create' => function() {
+                    //
+                    $controller = new BusController(ADM_PASS, CREATOR_PASS);
+                    $controller->createNewRoute();
+                },
                 'api/ad/update/{id}/{password}' => function($params) {
                     // Используем тернарный оператор для проверки id
                     $id = ($params[0] === '0') ? 0 : self::validateId($params[0]);
                     $password = trim((string)$params[1]);
                     $controller = new AdController(ADM_PASS, ADM_USER_ID, TRANSLATE_API_KEY);
                     $controller->updateAd($id, $password);
+                },
+                'web/bus/update/{id}' => function($params) {
+                    // Проверяем и приводим к целому числу
+                    $id = self::validateId($params[0]);
+                    $controller = new BusController(ADM_PASS, CREATOR_PASS);
+                    $controller->updateRouteById($id);
                 },
                 'api/ad/dislike/{id}' => function($params) {
                     // Проверяем и приводим к целому числу

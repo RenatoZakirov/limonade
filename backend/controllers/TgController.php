@@ -245,7 +245,7 @@ class TgController {
             // Разрешенные типы изображений
             $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
             // Максимальный размер файла (5 MB)
-            $maxSize = 5 * 1024 * 1024;
+            $maxSize = 10 * 1024 * 1024;
             // Минимальные допустимые размеры изображения
             $minResolution = [600, 450];
  

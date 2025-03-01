@@ -44,5 +44,8 @@ require_once 'controllers/NewsController.php';
 // Подключение контроллера ботов
 require_once 'controllers/TgController.php';
 
+// Подключение контроллера слипбасов
+require_once 'controllers/BusController.php';
+
 // Подключение маршрутизатора
 require_once 'routes.php';

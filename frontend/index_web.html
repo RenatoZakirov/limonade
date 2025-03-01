@@ -477,7 +477,7 @@
 										{{ getTranslation('menu.myAds.findButton') }}
 									</div>
 								</li>
-								<li v-if="false">
+								<li v-if="true">
 									<div @click="showScreen('sleepBus')" class="dropdown-item" href="">
 										<!-- тест -->
 										<i class="bi bi-screwdriver"></i>
@@ -1043,7 +1043,7 @@
 										<!-- Заглавное фото -->
 										{{ getTranslation('ads.adCreate.photoTitleStr1') }}
 									</label>
-									<span class="form-text"> // jpeg, png, gif, < 6MB</span>
+									<span class="form-text"> // jpeg, png, gif, < 10MB</span>
 									<input @change="handleFileChange($event, 0)" class="form-control form-control-sm"
 										id="formFile1" type="file">
 								</div>
@@ -1161,21 +1161,28 @@
 
 				<div v-if="!isLoading && showSleepBus">
 
-					<div class="row mb-2 d-flex justify-content-center">
-
+					<div class="row mb-3 d-flex justify-content-center">
 						<div class="col-5">
 							<button class="btn btn-secondary btn-blue-bg">
-								Выезд: {{ formatDate(busSelectedDate) }}
+								Выезд: {{ formatDate(routeDate) }}
 							</button>
 						</div>
-
-						<div class="col-6">
-							<Datepicker v-model="busSelectedDate" auto-apply class="datepicker" :enable-time-picker="false" :placeholder="'Выберите дату'" />
+						<div class="col-7">
+							<Datepicker v-model="routeDate" auto-apply class="datepicker" :enable-time-picker="false" :placeholder="'Выберите дату'" />
 						</div>
+					</div>
 
+					<div v-if="showRoutes && !showAboutSleepBus" class="row mb-2 d-flex justify-content-center">
+						<div v-for="route in routes" :key="route" class="col-auto">
+						  <button @click="getRouteById(route)" type="button" class="btn btn-secondary"
+							:class="selectedRouteId === route ? 'btn-blue-bg' : 'btn-transparent-bg'">
+							Рейс {{ route }}
+						  </button>
+						</div>
 					</div><br>
 
-					<div class="container" v-if="busSelectedDate && !showAboutSleepBus">
+
+					<div class="container" v-if="showSeats && !showAboutSleepBus">
 
 						<!-- Шестой ряд -->
 						<div class="row mb-2">
@@ -1188,14 +1195,32 @@
 							</div>
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A11')" class="btn btn-secondary" :class="seats['A11'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('A11')" class="btn btn-secondary" :class="busRoute.seats['A11'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									A11
+								</button> -->
+								<button @click="toggleSeat('A11')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['A11'] == 1, 
+										'btn-blue-bg': busRoute.seats['A11'] == 2
+									}"
+									:disabled="busRoute.seats['A11'] == 3">
+									<span v-if="busRoute.seats['A11'] != 3">A11</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A12')" class="btn btn-secondary" :class="seats['A12'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('A12')" class="btn btn-secondary" :class="busRoute.seats['A12'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									A12
+								</button> -->
+								<button @click="toggleSeat('A12')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['A12'] == 1, 
+										'btn-blue-bg': busRoute.seats['A12'] == 2
+									}"
+									:disabled="busRoute.seats['A12'] == 3">
+									<span v-if="busRoute.seats['A12'] != 3">A12</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
@@ -1205,26 +1230,62 @@
 						<div class="row mb-2">
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('B10')" class="btn btn-secondary" :class="seats['B10'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('B10')" class="btn btn-secondary" :class="busRoute.seats['B10'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									B10
+								</button> -->
+								<button @click="toggleSeat('B10')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['B10'] == 1, 
+										'btn-blue-bg': busRoute.seats['B10'] == 2
+									}"
+									:disabled="busRoute.seats['B10'] == 3">
+									<span v-if="busRoute.seats['B10'] != 3">B10</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('B9')" class="btn btn-secondary" :class="seats['B9'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('B9')" class="btn btn-secondary" :class="busRoute.seats['B9'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									B9
+								</button> -->
+								<button @click="toggleSeat('B9')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['B9'] == 1, 
+										'btn-blue-bg': busRoute.seats['B9'] == 2
+									}"
+									:disabled="busRoute.seats['B9'] == 3">
+									<span v-if="busRoute.seats['B9'] != 3">B9</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A9')" class="btn btn-secondary" :class="seats['A9'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('A9')" class="btn btn-secondary" :class="busRoute.seats['A9'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									A9
+								</button> -->
+								<button @click="toggleSeat('A9')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['A9'] == 1, 
+										'btn-blue-bg': busRoute.seats['A9'] == 2
+									}"
+									:disabled="busRoute.seats['A9'] == 3">
+									<span v-if="busRoute.seats['A9'] != 3">A9</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A10')" class="btn btn-secondary" :class="seats['A10'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('A10')" class="btn btn-secondary" :class="busRoute.seats['A10'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									A10
+								</button> -->
+								<button @click="toggleSeat('A10')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['A10'] == 1, 
+										'btn-blue-bg': busRoute.seats['A10'] == 2
+									}"
+									:disabled="busRoute.seats['A10'] == 3">
+									<span v-if="busRoute.seats['A10'] != 3">A10</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
@@ -1234,26 +1295,62 @@
 						<div class="row mb-2">
 
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('B8')" class="btn btn-secondary" :class="seats['B8'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('B8')" class="btn btn-secondary" :class="busRoute.seats['B8'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									B8
+								</button> -->
+								<button @click="toggleSeat('B8')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['B8'] == 1, 
+										'btn-blue-bg': busRoute.seats['B8'] == 2
+									}"
+									:disabled="busRoute.seats['B8'] == 3">
+									<span v-if="busRoute.seats['B8'] != 3">B8</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('B7')" class="btn btn-secondary" :class="seats['B7'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('B7')" class="btn btn-secondary" :class="busRoute.seats['B7'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									B7
+								</button> -->
+								<button @click="toggleSeat('B7')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['B7'] == 1, 
+										'btn-blue-bg': busRoute.seats['B7'] == 2
+									}"
+									:disabled="busRoute.seats['B7'] == 3">
+									<span v-if="busRoute.seats['B7'] != 3">B7</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A7')" class="btn btn-secondary" :class="seats['A7'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('A7')" class="btn btn-secondary" :class="busRoute.seats['A7'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									A7
+								</button> -->
+								<button @click="toggleSeat('A7')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['A7'] == 1, 
+										'btn-blue-bg': busRoute.seats['A7'] == 2
+									}"
+									:disabled="busRoute.seats['A7'] == 3">
+									<span v-if="busRoute.seats['A7'] != 3">A7</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A8')" class="btn btn-secondary" :class="seats['A8'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('A8')" class="btn btn-secondary" :class="busRoute.seats['A8'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									A8
+								</button> -->
+								<button @click="toggleSeat('A8')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['A8'] == 1, 
+										'btn-blue-bg': busRoute.seats['A8'] == 2
+									}"
+									:disabled="busRoute.seats['A8'] == 3">
+									<span v-if="busRoute.seats['A8'] != 3">A8</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
@@ -1263,26 +1360,62 @@
 						<div class="row mb-2">
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('B6')" class="btn btn-secondary" :class="seats['B6'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('B6')" class="btn btn-secondary" :class="busRoute.seats['B6'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									B6
+								</button> -->
+								<button @click="toggleSeat('B6')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['B6'] == 1, 
+										'btn-blue-bg': busRoute.seats['B6'] == 2
+									}"
+									:disabled="busRoute.seats['B6'] == 3">
+									<span v-if="busRoute.seats['B6'] != 3">B6</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('B5')" class="btn btn-secondary" :class="seats['B5'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('B5')" class="btn btn-secondary" :class="busRoute.seats['B5'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									B5
+								</button> -->
+								<button @click="toggleSeat('B5')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['B5'] == 1, 
+										'btn-blue-bg': busRoute.seats['B5'] == 2
+									}"
+									:disabled="busRoute.seats['B5'] == 3">
+									<span v-if="busRoute.seats['B5'] != 3">B5</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A5')" class="btn btn-secondary" :class="seats['A5'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('A5')" class="btn btn-secondary" :class="busRoute.seats['A5'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									A5
+								</button> -->
+								<button @click="toggleSeat('A5')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['A5'] == 1, 
+										'btn-blue-bg': busRoute.seats['A5'] == 2
+									}"
+									:disabled="busRoute.seats['A5'] == 3">
+									<span v-if="busRoute.seats['A5'] != 3">A5</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A6')" class="btn btn-secondary" :class="seats['A6'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('A6')" class="btn btn-secondary" :class="busRoute.seats['A6'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									A6
+								</button> -->
+								<button @click="toggleSeat('A6')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['A6'] == 1, 
+										'btn-blue-bg': busRoute.seats['A6'] == 2
+									}"
+									:disabled="busRoute.seats['A6'] == 3">
+									<span v-if="busRoute.seats['A6'] != 3">A6</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
@@ -1292,26 +1425,62 @@
 						<div class="row mb-2">
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('B4')" class="btn btn-secondary" :class="seats['B4'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('B4')" class="btn btn-secondary" :class="busRoute.seats['B4'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									B4
+								</button> -->
+								<button @click="toggleSeat('B4')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['B4'] == 1, 
+										'btn-blue-bg': busRoute.seats['B4'] == 2
+									}"
+									:disabled="busRoute.seats['B4'] == 3">
+									<span v-if="busRoute.seats['B4'] != 3">B4</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('B3')" class="btn btn-secondary" :class="seats['B3'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('B3')" class="btn btn-secondary" :class="busRoute.seats['B3'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									B3
+								</button> -->
+								<button @click="toggleSeat('B3')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['B3'] == 1, 
+										'btn-blue-bg': busRoute.seats['B3'] == 2
+									}"
+									:disabled="busRoute.seats['B3'] == 3">
+									<span v-if="busRoute.seats['B3'] != 3">B3</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A3')" class="btn btn-secondary" :class="seats['A3'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('A3')" class="btn btn-secondary" :class="busRoute.seats['A3'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									A3
+								</button> -->
+								<button @click="toggleSeat('A3')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['A3'] == 1, 
+										'btn-blue-bg': busRoute.seats['A3'] == 2
+									}"
+									:disabled="busRoute.seats['A3'] == 3">
+									<span v-if="busRoute.seats['A3'] != 3">A3</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A4')" class="btn btn-secondary" :class="seats['A4'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
+								<!-- <button @click="toggleSeat('A4')" class="btn btn-secondary" :class="busRoute.seats['A4'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
 									A4
+								</button> -->
+								<button @click="toggleSeat('A4')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['A4'] == 1, 
+										'btn-blue-bg': busRoute.seats['A4'] == 2
+									}"
+									:disabled="busRoute.seats['A4'] == 3">
+									<span v-if="busRoute.seats['A4'] != 3">A4</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
@@ -1321,33 +1490,57 @@
 						<div class="row mb-2">
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('B2')" class="btn btn-secondary" :class="seats['B2'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
-									B2
+								<button @click="toggleSeat('B2')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['B2'] == 1, 
+										'btn-blue-bg': busRoute.seats['B2'] == 2
+									}"
+									:disabled="busRoute.seats['B2'] == 3">
+									<span v-if="busRoute.seats['B2'] != 3">B2</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('B1')" class="btn btn-secondary" :class="seats['B1'] ? 'btn-blue-bg' : 'btn-transparent-bg'">
-									B1
+								<button @click="toggleSeat('B1')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['B1'] == 1, 
+										'btn-blue-bg': busRoute.seats['B1'] == 2
+									}"
+									:disabled="busRoute.seats['B1'] == 3">
+									<span v-if="busRoute.seats['B1'] != 3">B1</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A1')" class="btn btn-secondary" :class="seats['A1'] ? 'btn-blue-bg' : 'btn-transparent-bg'" :disabled="true">
-									A1
+								<button @click="toggleSeat('A1')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['A1'] == 1, 
+										'btn-blue-bg': busRoute.seats['A1'] == 2
+									}"
+									:disabled="busRoute.seats['A1'] == 3">
+									<span v-if="busRoute.seats['A1'] != 3">A1</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
 							<div class="col d-flex justify-content-center">
-								<button @click="toggleSeat('A2')" class="btn btn-secondary" :class="seats['A2'] ? 'btn-blue-bg' : 'btn-transparent-bg'" :disabled="true">
-									A2
+								<button @click="toggleSeat('A2')" class="btn btn-secondary"
+									:class="{
+										'btn-transparent-bg': busRoute.seats['A2'] == 1, 
+										'btn-blue-bg': busRoute.seats['A2'] == 2
+									}"
+									:disabled="busRoute.seats['A2'] == 3">
+									<span v-if="busRoute.seats['A2'] != 3">A2</span>
+									<i v-else class="bi bi-x"></i>
 								</button>
 							</div>
 	
 						</div>
 
 						<!-- Указатели -->
-						<div class="row mb-2">
+						<div v-if="showArrows" class="row mb-2">
 	
 							<div class="col d-flex justify-content-center">
 								<button class="btn btn-secondary btn-transparent-bg">
@@ -1381,38 +1574,32 @@
 
 						<!-- Вход -->
 						<div class="row mb-2">
-
 							<div class="col-6 d-flex justify-content-center">
-								<button class="btn btn-secondary btn-transparent-bg">
+								<button @click="showArrows = !showArrows" class="btn btn-secondary btn-transparent-bg">
 									<i class="bi bi-box-arrow-in-right"></i>
 									Вход
 								</button>
 							</div>
-
 							<div class="col-6 d-flex justify-content-center">
 								<button class="btn btn-secondary btn-transparent-bg">
 									<i class="bi bi-person-vcard"></i>
 									Водитель
 								</button>
 							</div>
-	
 						</div><br>
 	
 						<div v-if="Object.keys(selectedSeats).length > 0" class="row mb-2 d-flex justify-content-center">
-	
 							<div class="col-4">
 								<button class="btn btn-secondary btn-transparent-bg">
 									Места:
 								</button>
 							</div>
-	
 							<div v-for="seat in Object.keys(selectedSeats)" :key="seat"
 								class="col-2">
 								<button class="btn btn-secondary btn-blue-bg">
 									{{ seat }}
 								</button>
 							</div>
-	
 						</div>
 	
 						<div v-if="Object.keys(selectedSeats).length > 0" class="row mb-3 d-flex justify-content-center">
@@ -1463,22 +1650,17 @@
 					</div>
 
 					<div class="row mb-2 d-flex justify-content-end">
-
 						<div class="col-5">
 							<button @click="showAboutSleepBus = !showAboutSleepBus" class="btn btn-secondary btn-transparent-bg">
 								<i :class="showAboutSleepBus ? 'bi bi-box-arrow-in-up' : 'bi bi-box-arrow-down'"></i>
 								{{ showAboutSleepBus ? 'Свернуть' : 'Подробнее' }}
 							</button>
 						</div>
-
 					</div>
 
-					<div v-if="showAboutSleepBus" class="row mb-2">
-
+					<div v-if="showAboutSleepBus" class="row mb-5">
 						<div class="col-11">
-
 							<div class="card shadow-sm custom-rounded-left">
-	
 								<div class="card-img-container">
 									<img 
 										:src="sleepBusImages[0]"
@@ -1490,7 +1672,7 @@
 										3 Фото
 									</div>
 								</div>
-	
+
 								<div class="card-body">
 									<h5 class="card-title lh-sm">Визаран в Лаос</h5>
 	
@@ -1502,17 +1684,14 @@
 											Бордерраны
 										</button>
 									</div>
-							
 									<p class="card-text lh-sm" style="white-space: pre-line;">
 										Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis libero hic officiis dolor nostrum magnam cum expedita qui repudiandae blanditiis placeat, vero, nesciunt aperiam! Illo nulla dolore quod cum accusamus ea, accusantium dolorum incidunt totam. Error explicabo architecto id excepturi.
 									</p>
-	
 									<h6 class="card-subtitle mb-2 text-body-secondary">
 										<!-- Контакт  -->
 										<i class="bi bi-send-fill"></i>
-										Алексей, telegram @alex_visarun
+										Monica, telegram @limonade_monica
 									</h6>
-	
 									<div class="row">
 										<div class="col">
 											<p class="card-text"><small class="text-body-secondary">
@@ -1522,7 +1701,6 @@
 										</div>
 									</div>
 								</div>
-	
 							</div>
 	
 							<!-- Модальное окно -->
@@ -1561,10 +1739,19 @@
 									</div>
 								</div>
 							</div>
-							
 						</div>
-
 					</div>
+
+					<nav v-if="!isLoading && showAboutSleepBus" class="navbar bg-transparent fixed-bottom">
+						<div class="container-fluid d-flex justify-content-start">
+							<button @click="askRouteCreator()" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
+								<!-- Написать в Телеграм -->
+								<i class="bi bi-pencil"></i>
+								<!-- <i class="bi bi-pencil-fill"></i> -->
+								Задать вопрос
+							</button>
+						</div>
+					</nav>
 
 				</div>
 
@@ -1637,8 +1824,78 @@
 					},
 					// отвечает за показ экрана для создания нового объявления
 					showCreateAd: false,
-					//
+					// Раздел для слипбасов
 					showSleepBus: false,
+					// Раздел с рейсами
+					showRoutes: false,
+					// Раздел с сидениями
+					showSeats: false,
+					// Раздел с инфой о слипбасе
+					showAboutSleepBus: false,
+					// Строка с указателями
+					showArrows: true,
+					// Выбранная дата рейса
+					routeDate: null,
+					// Создатель рейса
+					routeCreator: '@limonade_monica',
+					// Массив рейсов
+					routes: [],
+					// ID выбранного рейса
+					selectedRouteId: null,
+					// Объект нового рейса
+					defaultBusRoute: {
+						// Дата поездки
+						date: null,
+						// Создатель рейса
+						createdBy: '',
+						// Пароль
+						password: '',
+						// Статус рейса (1 - есть места, 2 - полный, 3 - уехал, 4 - удален)
+						status: 1,
+						// Точка отправления
+						location: '',
+						// Время отправления
+						departureTime: '',
+						// Номер автобуса
+						busNumber: '',
+						// Стоимость обычного билета
+						basePrice: 1250000,
+						// Стоимость билета на задние места
+						discountPrice: 1000000,
+						// Ссылка на группу в ТГ
+						telegramGroup: '',
+						// Пароль вайфай
+						wifiPassword: '',
+						
+						// Места
+						seats: {
+							// Статус места (1 - свободно, 2 - бронь, 3 - оплачено, 4 - недоступно)
+							A1: { status: 1, contact: '' },
+							B1: { status: 1, contact: '' },
+							A2: { status: 1, contact: '' },
+							B2: { status: 1, contact: '' },
+							A3: { status: 1, contact: '' },
+							B3: { status: 1, contact: '' },
+							A4: { status: 1, contact: '' },
+							B4: { status: 1, contact: '' },
+							A5: { status: 1, contact: '' },
+							B5: { status: 1, contact: '' },
+							A6: { status: 1, contact: '' },
+							B6: { status: 1, contact: '' },
+							A7: { status: 1, contact: '' },
+							B7: { status: 1, contact: '' },
+							A8: { status: 1, contact: '' },
+							B8: { status: 1, contact: '' },
+							A9: { status: 1, contact: '' },
+							B9: { status: 1, contact: '' },
+							A10: { status: 1, contact: '' },
+							B10: { status: 1, contact: '' },
+							A11: { status: 1, contact: '' },
+							A12: { status: 1, contact: '' }
+						}
+					},
+					//
+					busRoute: {},
 					//
 					seats: {
 						A1: false, B1: false, A2: false, B2: false,
@@ -1650,9 +1907,7 @@
 					},
 					// Выбранные места
 					selectedSeats: {},
-					// Выбранная дата
-					busSelectedDate: null,
-					// Стоимость билетов
+					// Общая стоимость билетов
 					totalPrice: 0,
 					// Виды оплаты
 					paymentMethods: {
@@ -1661,10 +1916,6 @@
 					},
 					// Значение по умолчанию
 					selectedPaymentMethod: 1,
-					//
-					busDirector: '@limonade_monica',
-					//
-					showAboutSleepBus: false,
 					//
 					sleepBusImages: [
 						'https://www.limonade.pro/backend/uploads/images/GAniF.jpg',
@@ -2823,7 +3074,7 @@
 							destination: { lat: 12.2980081, lng: 109.2118132 },
 							waypoints: [
 								{ location: { lat: 12.202298, lng: 109.1912333 }, stopover: false },
-								{ location: { lat: 12.2132936, lng: 109.1998772 }, stopover: false },
+								{ location: { lat: 12.215636, lng: 109.199744 }, stopover: false },
 								{ location: { lat: 12.2375443, lng: 109.1953102 }, stopover: false },
 								{ location: { lat: 12.2444376, lng: 109.194084 }, stopover: false },
 								{ location: { lat: 12.2505891, lng: 109.1940957 }, stopover: false },
@@ -2895,9 +3146,6 @@
 						},
 					},
 					//
-					// beachUrl: 'https://www.youtube.com/embed/dy82VQSh5Wg',
-					//
-					// streetUrl: 'https://www.youtube.com/embed/VBmUFd82gHA',
                 };
             },
             mounted() {
@@ -2935,22 +3183,27 @@
 				selectedSubcategory2() {
 					this.updateCategoryCode();
 				},
-				busSelectedDate(newValue) {
+				//
+				routeDate(newValue) {
 					if (newValue) {
 						this.showAboutSleepBus = false;
+						// Показать экран с рейсами
+						this.showRoutes = false;
+						// Показать экран с сидениями
+						this.showSeats = false;
 
 						// Обнуляем значения
-						this.seats = {
-							A1: false, B1: false, A2: false, B2: false,
-							A3: false, B3: false, A4: false, B4: false,
-							A5: false, B5: false, A6: false, B6: false,
-							A7: false, B7: false, A8: false, B8: false,
-							A9: false, B9: false, A10: false, B10: false,
-							A11: false, A12: false
-						};
+						this.resetBusRoute();
+						//
+						this.routes = [];
+						//
+						this.selectedRouteId = null;
+						//
 						this.totalPrice = 0;
 						this.selectedSeats = {};
 						this.selectedPaymentMethod = 1;
+						// Запустить метод поиска рейсов
+						this.getRoutesByDate();
 					}
 					// console.log("Дата выбрана:", newValue);
 				}
@@ -2991,6 +3244,7 @@
 				}
 			},
 			components: {
+				// Компонент календаря
 				Datepicker: VueDatePicker
 			},
             methods: {
@@ -3711,7 +3965,7 @@
 						'text-success': remainingChars >= 0 // если символов достаточно
 					};
 				},
-				// изменить формат даты на сокращенный
+				// Изменить формат даты на сокращенный
 				formatDate(dateString) {
 					// Преобразуем строку в объект даты
 					const date = new Date(dateString);
@@ -3722,7 +3976,7 @@
 					// Возвращаем в формате "день месяц"
 					return `${day} ${month}`;
 				},
-				//
+				// Изменить формат даты на более длинный
 				formatDateLong(dateString) {
 					// Преобразуем строку в объект даты
 					const date = new Date(dateString);
@@ -3733,7 +3987,7 @@
 					// Возвращаем в формате "день месяц"
 					return `${day} ${month}`;
 				},
-				// рандомное перемешивание объявлений в массиве
+				// Рандомное перемешивание объявлений в массиве
 				shuffleArray(array) {
 					for (let i = array.length - 1; i > 0; i--) {
 						// Случайный индекс от 0 до i
@@ -3743,7 +3997,7 @@
 					}
 					return array;
 				},
-				//
+				// Написать в телеграм
 				writeToTelegram() {
 					if (this.currentAd.telegram) {
 						// Удаляем символ "@" из строки, если он есть
@@ -3762,12 +4016,12 @@
 				//
 				sendBookingToTelegram() {
 					// Проверяем, есть ли вообще выбранные даты и места
-					if (!this.busSelectedDate || Object.keys(this.selectedSeats).length === 0) {
+					if (!this.routeDate || Object.keys(this.selectedSeats).length === 0) {
 						this.showError("Выберите дату и хотя бы одно место");
 						return;
 					}
 					// Форматируем дату
-					const formattedDate = this.formatDate(this.busSelectedDate);
+					const formattedDate = this.formatDate(this.routeDate);
 					// Формируем список мест
 					const seatsList = Object.keys(this.selectedSeats).join(", ");
 					
@@ -3775,7 +4029,7 @@
 					const message = `🚍 Бронирование мест в автобусе\n📅 Дата поездки: ${formattedDate}\n📍 Места: ${seatsList}\n💰 Итоговая стоимость: ${this.totalPrice} VND\n💳 Метод оплаты: ${this.paymentMethods[this.selectedPaymentMethod]}`;
 
 					// Удаляем "@" из имени пользователя
-					const username = this.busDirector.replace(/^@/, "");
+					const username = this.busRoute.createdBy.replace(/^@/, "");
 
 					// Формируем ссылку для Telegram с автоматическим заполнением сообщения
 					const telegramUrl = `https://t.me/${username}?text=${encodeURIComponent(message)}`;
@@ -3896,32 +4150,156 @@
 				},
 				//
 				toggleSeat(seat) {
-					// Цена билета
-					const ticketPrice = 1250000;
+					// Определяем цену билета: если место A11 или A12, берем discountPrice, иначе basePrice
+					const ticketPrice = ['A11', 'A12'].includes(seat) ? this.busRoute.discountPrice : this.busRoute.basePrice;
 
-					if (this.seats[seat]) {
+					if (this.busRoute.seats[seat] === 2) {
 						// Если место уже выбрано, убираем его
 						delete this.selectedSeats[seat];
-        				this.seats[seat] = false;
-					} else {
-						// Если максимум не достигнут, добавляем
+						this.busRoute.seats[seat] = 1;
+					} else if (this.busRoute.seats[seat] === 1) {
+						// Проверяем лимит в 4 места
 						if (Object.keys(this.selectedSeats).length < 4) {
-							this.selectedSeats[seat] = true;
-							this.seats[seat] = true;
+							// Сохраняем цену вместо `true`
+							this.selectedSeats[seat] = ticketPrice;
+							this.busRoute.seats[seat] = 2;
 						} else {
-							this.showError("Максимум 4 места");
+							this.showError('Максимум 4 места!');
 							return;
 						}
 					}
+
 					// Пересчитываем стоимость билетов
-					this.totalPrice = Object.keys(this.selectedSeats).length * ticketPrice;
+					this.totalPrice = Object.values(this.selectedSeats).reduce((sum, price) => sum + price, 0);
 				},
 				//
 				selectPaymentMethod(key) {
 					this.selectedPaymentMethod = key;
 				},
-				//
-				
+				// Очистить текущий объект рейса
+				resetBusRoute() {
+					this.busRoute = JSON.parse(JSON.stringify(this.defaultBusRoute));
+				},
+				// Искать доступные рейсы
+				getRoutesByDate() {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+
+					// Проверяем наличие даты
+					if (!this.routeDate) {
+						// this.errorMessage = 'Выберите дату рейса!';
+						this.showError('Выберите дату рейса!');
+						return;
+					}
+
+					// Преобразуем в YYYY-MM-DD
+					const formattedDate = new Intl.DateTimeFormat('fr-CA', {
+						timeZone: 'Asia/Ho_Chi_Minh' // Укажи свой часовой пояс
+					}).format(new Date(this.routeDate));
+
+					// Показать экран с сидениями
+					this.showSeats = false;
+					// Обнулить обьект рейса
+					this.resetBusRoute();
+					// Обнулить выбранный id рейса
+					selectedRouteId = null;
+
+					// отправляем данные на сервер
+                    this.isLoading = true;
+
+					axios.get(`bus/check/${formattedDate}/${this.routeCreator}/1`)
+                        .then(response => {
+							// Загрузить данные по рейсам
+							// console.log(response.data);
+							this.routes = response.data;
+							// Показать экран с рейсами
+							this.showRoutes = true;
+                        })
+                        .catch((error) => {
+							// Обработка ошибки
+							if (error.response && error.response.data && error.response.data.error) {
+								// this.errorMessage = error.response.data.error;
+								this.showError(error.response.data.error);
+							} else {
+								// this.errorMessage = 'Ошибка поиска доступных рейсов';
+								this.showError('Ошибка поиска доступных рейсов');
+							}
+                        })
+                        .finally(() => {
+                            this.isLoading = false;
+                        });
+                },
+				// Искать конкретный рейс
+				getRouteById(routeId) {
+					// Плавная прокрутка страницы вверх
+					window.scrollTo({top: 0, behavior: 'smooth'});
+
+					//
+					this.selectedSeats = {};
+					// Запоминаем выбранный рейс
+					this.selectedRouteId = routeId;
+
+					// отправляем данные на сервер
+                    this.isLoading = true;
+
+                    axios.get(`bus/get_cropped/${this.selectedRouteId}`)
+                        .then(response => {
+							// Загрузить данные по рейсу
+							// console.log(response.data); return;
+
+							// Заполняем объект, учитывая возможные undefined и null
+							this.busRoute = {
+								// Дата поездки
+								date: response.data.route_date ?? '',
+								// Создатель рейса
+								createdBy: response.data.created_by ?? '',
+								// Статус рейса (1 - есть места, 2 - полный, 3 - уехал, 4 - удален)
+								status: Number(response.data.status) || 0,
+								// Точка отправления
+								location: response.data.location ?? '',
+								// Время отправления
+								departureTime: response.data.departure_time ?? '',
+								// Номер автобуса
+								busNumber: response.data.bus_number ?? '',
+								// Стоимость обычного билета
+								basePrice: Number(response.data.base_price) || 0,
+								// Стоимость билета на задние места
+								discountPrice: Number(response.data.discount_price) || 0,
+								// Ссылка на группу в ТГ
+								telegramGroup: response.data.telegram_group ?? '',
+								// Пароль вайфай
+								wifiPassword: response.data.wifi_password ?? '',
+								// Места
+								seats: response.data.seats ?? {} // Теперь seats уже обработан на сервере
+							};
+
+							// Показать экран с сидениями
+							this.showSeats = true;
+                        })
+                        .catch((error) => {
+							// Обработка ошибки
+							if (error.response && error.response.data && error.response.data.error) {
+								// this.errorMessage = error.response.data.error;
+								this.showError(error.response.data.error);
+							} else {
+								// this.errorMessage = 'Ошибка поиска рейса по id';
+								this.showError('Ошибка поиска рейса по id');
+							}
+                        })
+                        .finally(() => {
+                            this.isLoading = false;
+                        });
+				},
+				// Задать вопрос создателю рейса
+				askRouteCreator() {
+					// Удаляем символ "@" из строки, если он есть
+					const creator = this.routeCreator.replace(/^@/, "");
+					// Формируем ссылку
+					const telegramUrl = `https://t.me/${creator}`;
+					// Открываем ссылку
+					window.open(telegramUrl, "_blank");
+					
+				},
 				// onKeyUp(event) {
 				// 	if (event.key === "Enter" || event.keyCode === 13) {
 				// 		this.searchByTextOrCategory();
