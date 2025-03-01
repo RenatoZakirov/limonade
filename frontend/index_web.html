@@ -477,7 +477,7 @@
 										{{ getTranslation('menu.myAds.findButton') }}
 									</div>
 								</li>
-								<li v-if="true">
+								<li v-if="false">
 									<div @click="showScreen('sleepBus')" class="dropdown-item" href="">
 										<!-- тест -->
 										<i class="bi bi-screwdriver"></i>
@@ -1159,6 +1159,26 @@
 
 				</div>
 
+				<nav v-if="!isLoading && showCreateAd" class="navbar bg-transparent fixed-bottom">
+
+					<div class="container-fluid d-flex justify-content-end">
+						
+						<button @click="returnToAdList()" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
+							<!-- Назад -->
+							<i class="bi bi-caret-left-fill"></i>
+							{{ getTranslation('ads.adDetails.backButton') }}
+						</button>
+						<button @click="createAd()" class="btn btn-secondary btn-transparent-bg fw-medium">
+							<!-- Опубликовать объявление -->
+							<i class="bi bi-envelope-open"></i>
+							<!-- <i class="bi bi-envelope-open-fill"></i> -->
+							{{ getTranslation('ads.adCreate.createButton') }}
+						</button>
+
+					</div>
+
+				</nav>
+
 				<div v-if="!isLoading && showSleepBus">
 
 					<div class="row mb-3 d-flex justify-content-center">
@@ -1674,8 +1694,7 @@
 								</div>
 
 								<div class="card-body">
-									<h5 class="card-title lh-sm">Визаран в Лаос</h5>
-	
+									<h5 class="card-title lh-sm">Бордерран в Лаос</h5>
 									<div class="d-inline-block mb-2">
 										<button class="btn btn-sm btn-blue-bg mb-1 me-2">
 											Визараны
@@ -1685,8 +1704,29 @@
 										</button>
 									</div>
 									<p class="card-text lh-sm" style="white-space: pre-line;">
-										Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis libero hic officiis dolor nostrum magnam cum expedita qui repudiandae blanditiis placeat, vero, nesciunt aperiam! Illo nulla dolore quod cum accusamus ea, accusantium dolorum incidunt totam. Error explicabo architecto id excepturi.
+										🚌 Здесь вы можете забронировать себе место в слипбасе на бордерран в Лаос.
 									</p>
+									<p class="card-text lh-sm" style="white-space: pre-line;">
+										📅 Начните с выбора даты поездки. Учтите что дата на визе или в печати в вашем паспорте, это последний день вашего легального пребывания в стране. В этот день вы уже обязаны пересечь границу. Поэтому крайний день выезда из Нячанга в сторону границы с Лаосом, это один день до даты указанной в вашем паспорте. Можно раньше, но не позже.
+									</p>
+									<p class="card-text lh-sm" style="white-space: pre-line;">
+										⏰ Выезд из города осуществляется вечером около 22:00. Примерно в 06:00 утра вы будете на границе. Сама граница открывается в 07:00 утра. Далее вы проходите паспортный контроль и возвращаетесь в свой автобус. Примерно в 11:00 автобус поедет обратно в Нячанг. В сам город вы вернетесь около 19:00 вечера.
+									</p>
+									<p class="card-text lh-sm" style="white-space: pre-line;">
+										❄️ В автобусе есть одеяло, кондиционер, питьевая вода, ночная подсветка, USB разъемы для зарядки, биотуалет.
+									</p>
+									<p class="card-text lh-sm" style="white-space: pre-line;">
+										🎒 Советуем взять с собой подушку, средства гигиены, шариковую ручку, снеки и напитки. Утром на самом КПП обычно прохладно, около 17'С, поэтому кофта тоже не помешает.
+									</p>
+									<p class="card-text lh-sm" style="white-space: pre-line;">
+										☕ На границе есть несколько кафе, можно попить горячего кофе, покушать, сходить в туалет.
+									</p>
+									<p class="card-text lh-sm" style="white-space: pre-line;">
+										📢 Номер автобуса, место посадки, точное время отправления и остальные детали мы сообщим вам после подтверждения вашей брони.
+									</p>
+									<p class="card-text lh-sm" style="white-space: pre-line;">
+										🌍 Желаем вам удачной поездки!
+									</p>									
 									<h6 class="card-subtitle mb-2 text-body-secondary">
 										<!-- Контакт  -->
 										<i class="bi bi-send-fill"></i>
@@ -1755,25 +1795,7 @@
 
 				</div>
 
-				<nav v-if="!isLoading && showCreateAd" class="navbar bg-transparent fixed-bottom">
-
-					<div class="container-fluid d-flex justify-content-end">
-						
-						<button @click="returnToAdList()" class="btn btn-secondary btn-transparent-bg fw-medium me-2">
-							<!-- Назад -->
-							<i class="bi bi-caret-left-fill"></i>
-							{{ getTranslation('ads.adDetails.backButton') }}
-						</button>
-						<button @click="createAd()" class="btn btn-secondary btn-transparent-bg fw-medium">
-							<!-- Опубликовать объявление -->
-							<i class="bi bi-envelope-open"></i>
-							<!-- <i class="bi bi-envelope-open-fill"></i> -->
-							{{ getTranslation('ads.adCreate.createButton') }}
-						</button>
-
-					</div>
-
-				</nav>
+				
 
 			</div>
 
@@ -3090,7 +3112,7 @@
 							destination: { lat: 12.2979948, lng: 109.2118071 },
 							waypoints: [
 								{ location: { lat: 12.2003625, lng: 109.2135781 }, stopover: false },
-								{ location: { lat: 12.213557, lng: 109.1999237 }, stopover: false },
+								// { location: { lat: 12.213557, lng: 109.1999237 }, stopover: false },
 								{ location: { lat: 12.2375856, lng: 109.1954155 }, stopover: false },
 								{ location: { lat: 12.2444376, lng: 109.194084 }, stopover: false },
 								{ location: { lat: 12.2505891, lng: 109.1940957 }, stopover: false },

@@ -711,7 +711,7 @@
                 <div v-if="showArrows" class="row mb-2">
 
                     <div class="col d-flex justify-content-center">
-                        <button @click="showArrows = false" class="btn btn-secondary">
+                        <button class="btn btn-secondary">
                             <i class="bi bi-arrow-up-left"></i>
                             Верх
                         </button>
@@ -744,7 +744,7 @@
                 <div class="row mb-2">
 
                     <div class="col-6 d-flex justify-content-center">
-                        <button class="btn btn-secondary">
+                        <button @click="showArrows = !showArrows" class="btn btn-secondary">
                             <i class="bi bi-box-arrow-in-right"></i>
                             Вход
                         </button>
@@ -800,7 +800,7 @@
 					// Экран редактирования существующего рейса
 					showUpdate: false,
 					// Строка с указателями
-					showArrows: true,
+					showArrows: false,
 					// Выбранная дата рейса
 					routeDate: null,
 					// Создатель рейса
@@ -1047,13 +1047,30 @@
 					// Плавная прокрутка страницы вверх
 					window.scrollTo({top: 0, behavior: 'smooth'});
 
+					// Проверяем, введены ли параметры рейса и их длина
+					if (this.authPassword.length < 3) {
+						// this.errorMessage = 'Введите пароль!';
+						this.errorMessage = 'Введите пароль!';
+
+					} else if (this.authPassword.length > 10) {
+						// this.errorMessage = 'Пароль слишком длинный!';
+						this.errorMessage = 'Пароль слишком длинный!';
+						
+					}
+
+					// Если есть сообщение об ошибке, показываем его и выходим из метода
+					if (this.errorMessage) {
+						setTimeout(() => { this.errorMessage = ''; }, 3000);
+						return;
+					}
+
 					// Запоминаем выбранный рейс
 					this.selectedRouteId = routeId;
 
 					// отправляем данные на сервер
                     this.isLoading = true;
 
-                    axios.get(`web/bus/get/${this.selectedRouteId}`)
+                    axios.get(`web/bus/get/${this.selectedRouteId}/${this.routeCreator}/${this.authPassword}`)
                         .then(response => {
 							// Загрузить данные по рейсу
 							// console.log(response.data); // return;

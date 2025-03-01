@@ -58,11 +58,15 @@ class Router {
                     $controller = new AdController(ADM_PASS, ADM_USER_ID, TRANSLATE_API_KEY);
                     $controller->getAd($id, false);
                 },
-                'web/bus/get/{id}' => function($params) {
+                'web/bus/get/{id}/{creator}/{password}' => function($params) {
                     // Проверяем
                     $id = $params[0];
+                    //
+                    $creator = $params[1];
+                    // Пароль
+                    $password = trim((string)$params[2]);
                     $controller = new BusController(ADM_PASS, CREATOR_PASS);
-                    $controller->findRouteById($id);
+                    $controller->findRouteById($id, $creator, $password);
                 },
                 'web/bus/get_cropped/{id}' => function($params) {
                     // Проверяем
@@ -155,7 +159,7 @@ class Router {
                 'api/user/block/{id}/{password}' => function($params) {
                     // Проверяем и приводим к целому числу
                     $id = self::validateId($params[0]);
-                    $password = trim((string)$params[1]); // 
+                    $password = trim((string)$params[1]);
                     $controller = new UserController(ADM_PASS, ADM_USER_ID);
                     $controller->blockUser($id, $password);
                 },

@@ -46,7 +46,7 @@ class BusController {
     }
 
     // Искать конкретный рейс
-    public function findRouteById($routeId) {
+    public function findRouteById($routeId, $routeCreator, $password) {
         // Проверяем, что передан корректный ID
         if (empty($routeId) || !is_numeric($routeId) || $routeId <= 0) {
             http_response_code(400);
@@ -54,13 +54,41 @@ class BusController {
             return;
         }
 
+        // Проверяем, передан ли создатель рейса
+        if (empty($routeCreator)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Отсутствует создатель рейса!']);
+            return;
+        }
+
+        // Проверяем, передан ли пароль
+        if (empty($password)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Отсутствует пароль!']);
+            return;
+        }
+
         // Ищем рейс по ID
         $route = R::load('routes', $routeId);
 
         // Проверяем, найден ли рейс (R::load всегда возвращает объект, но с ID 0, если запись не найдена)
-        if ($route->id == 0) {
+        if (!$route->id) {
             http_response_code(404);
             echo json_encode(['error' => 'Рейс с таким ID не найден!']);
+            return;
+        }
+
+        // Проверяем, что пользователь является создателем рейса
+        if ($route->created_by !== $routeCreator) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Вы не являетесь создателем рейса!']);
+            return;
+        }
+
+        // Проверяем пароль
+        if ($this->creator_pass !== $password) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Неверный пароль!']);
             return;
         }
 
@@ -148,7 +176,7 @@ class BusController {
         }
 
         // Проверяем пароль
-        if ($inputData['password'] !== $this->creator_pass) {
+        if ($this->creator_pass !== $inputData['password']) {
             http_response_code(403);
             echo json_encode(['error' => 'Неверный пароль!']);
             return;
