@@ -1647,4 +1647,15 @@ class AdController {
         }
     }
 
+    // private function translateAd($unknownLangTitle, $unknownLangDescription, $lang) {
+    //     //
+    //     return [
+    //         'title_ru' => $unknownLangTitle,
+    //         'description_ru' => $unknownLangDescription,
+    //         'title_en' => $unknownLangTitle,
+    //         'description_en' => $unknownLangDescription
+    //     ];
+        
+    // }
+
 }
