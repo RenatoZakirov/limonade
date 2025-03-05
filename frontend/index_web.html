@@ -477,9 +477,9 @@
 										{{ getTranslation('menu.myAds.findButton') }}
 									</div>
 								</li>
-								<li v-if="false">
-									<!-- <div @click="showScreen('sleepBus')" class="dropdown-item" href=""> -->
-									<div @click="showScreen('signUpForShift')" class="dropdown-item" href="">
+								<li v-if="true">
+									<div @click="showScreen('sleepBus')" class="dropdown-item" href="">
+									<!-- <div @click="showScreen('signUpForShift')" class="dropdown-item" href=""> -->
 										<!-- тест -->
 										<i class="bi bi-screwdriver"></i>
 										тест
@@ -580,7 +580,7 @@
 
 				</div>
 
-				<div v-if="!isLoading && showAdList && (adCurrentPage == 1) && adsList.length >= 20" class="row mb-3">
+				<div v-if="!isLoading && showAdList && (adCurrentPage == 1) && adsList.length >= 20 && categoryCode == '' && searchText == ''" class="row mb-3">
 
 					<div class="col-11 offset-1">
 						
@@ -614,7 +614,7 @@
 
 				</div>
 
-				<div v-if="!isLoading && showAdList && (adCurrentPage == 1) && adsList.length >= 20" class="row mb-3">
+				<div v-if="!isLoading && showAdList && (adCurrentPage == 1) && adsList.length >= 20 && categoryCode == '' && searchText == ''" class="row mb-3">
 
 					<div class="col-11">
 						
@@ -2866,16 +2866,12 @@
 					},
                     // содержит весь список категорий с кодами на русском
 					categoriesRu: {
-						'Жильё': { code: '1', subcategories: {
-								'Аренда': { code: 'A', subcategories: {
+						'Жильё, аренда': { code: '1A', subcategories: {
 									'Кровать': { code: '1' },
 									'Комната': { code: '2' },
 									'Квартира': { code: '3' },
 									'Дом': { code: '4' },
 									'Другое': { code: '5' }
-							}},
-								'Продажа': { code: 'B'
-							}
 						}},
 						'Транспорт': { code: '2', subcategories: {
 								'Аренда': { code: 'A', subcategories: {
@@ -3068,16 +3064,12 @@
 					},
 					// содержит весь список категорий с кодами на русском
 					categoriesEn: {
-						'Housing': { code: '1', subcategories: {
-								'Rent': { code: 'A', subcategories: {
+						'Housing, rent': { code: '1A', subcategories: {
 									'Bed': { code: '1' },
 									'Room': { code: '2' },
 									'Apartment': { code: '3' },
 									'House': { code: '4' },
 									'Other': { code: '5' }
-							}},
-								'Sale': { code: 'B'
-							}
 						}},
 						'Transport': { code: '2', subcategories: {
 								'Rent': { code: 'A', subcategories: {
